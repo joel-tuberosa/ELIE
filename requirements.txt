@@ -3,3 +3,5 @@ dateparser
 sklearn
 regex
 leven
+pygeo
+sphinx
