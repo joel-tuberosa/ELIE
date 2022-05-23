@@ -15,8 +15,7 @@ setup(
           'dateparser',
           'sklearn',
           'regex',
-          'leven',
-          'pygeo'
+          'leven'
       ],
     packages=["mfnb"],
     scripts=['scripts/make_collecting_events.py', 
