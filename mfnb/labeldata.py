@@ -447,20 +447,6 @@ def load_collecting_events(f):
     '''
 
     return CollectingEventDB([ CollectingEvent(**x) for x in json.load(f) ])
-    
-def read_GoogleVision_transcript(f):
-    '''
-    Extract the raw text of a Google Vision output in JSON format.
-    
-    Parameters
-    ----------
-        f : file
-            A readable file object.
-    '''
-    
-    data = json.load(f)
-    return data["responses"][0]["fullTextAnnotation"]["text"]
-
 
 def read_googlevision_output(f):
     '''
