@@ -33,16 +33,21 @@ OPTIONS
     
     -t, --text=COL
         Indicate which column contain the label text. Default = 2
+
+    --dir=DIR
+        Read all files in DIR and concatenate the information in a 
+        single output. Works with --googlevision
     
     --googlevision
         If this option is set, extract label text from  Google Vision 
         output. With this option, the default ID is written 
         label<5-digit code>.
     
-    --dir=DIR
-        Read all files in DIR and concatenate the information in a 
-        single output. Works with --googlevision
-    
+    --table=FILE
+        Take input file names from a two-column table. The first column 
+        contains file names and the second column contains IDs. Works
+        with --googlevision. Overrides -f, -i and --dir.
+       
     --help
         Display this message
 
@@ -67,7 +72,7 @@ class Options(dict):
                                        ['id=', 'header',
                                         'separator=', 'text=',
                                         'id-format=', 'googlevision',
-                                        'dir=', 'help'])
+                                        'table=', 'dir=', 'help'])
         except getopt.GetoptError as e:
             sys.stderr.write(str(e) + '\n' + __doc__)
             sys.exit(1)
@@ -90,11 +95,17 @@ class Options(dict):
                 self["googlevision"] = True
             elif o == '--dir':
                 self["dir"] = a
+            elif o == '--table':
+                self["table"] = a
         
         if self["googlevision"] and self["id_formatter"] is None:
             self["id_formatter"] = get_id_formatter("label:5")
         if self["id_formatter"] is not None:
             self["id"] = None
+        if self["table"]:
+            self["id"] = 0
+            self["id_formatter"] = None
+            self["dir"] = None
         
         self.args = args
     
@@ -108,7 +119,8 @@ class Options(dict):
         self["id_formatter"] = None
         self["googlevision"] = False
         self["dir"] = None
-
+        self["table"] = None
+        
 def main(argv=sys.argv):
     
     # read options and remove options strings from argv (avoid option 
@@ -120,9 +132,32 @@ def main(argv=sys.argv):
     # organize the main job...
     if options["googlevision"]:
         data_list = []
-        if options["dir"] is None:
+        
+        # In this mode, individual label OCR output is stored in single files.
+        # Therefore, it is assumed that the function data_from_googlevision 
+        # will only read one label per file, attributing the ID provided by the
+        # table.
+        if options["table"] is not None:
+            with open(options["table"]) as f:
+                for line in f:
+                    fname, identifier = line.split("\t")
+                    fname = fname.strip()
+                    identifier = identifier.strip()
+                    with open(fname) as f:
+                    
+                        # the identifier parameter of data_from_googlevision is
+                        # is provided with a lambda function that take as argument
+                        # the index, ignore it, and attribute the associated 
+                        # identifier provided by the table.
+                        data_list += data_from_googlevision(f, 
+                                                       lambda x: identifier)
+        
+        # In this mode, a single OCR output is provided in the standard input.
+        elif options["dir"] is None:
             f = StringIO("".join( line for line in fileinput.input() ))
             data_list += data_from_googlevision(f, options["id_formatter"])
+            
+        # In this mode, all files in "dir" will be read as OCR output files.
         else:
             for fname in os.listdir(options["dir"]):
                 path = os.path.join(options["dir"], fname)
