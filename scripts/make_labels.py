@@ -50,7 +50,7 @@ OPTIONS
 
 import getopt, sys, fileinput, json, os
 from mfnb.utils import table_to_dicts, range_reader, get_id_formatter
-from mfnb.labeldata import data_from_googlvision
+from mfnb.labeldata import data_from_googlevision
 from io import StringIO
 
 class Options(dict):
@@ -122,12 +122,12 @@ def main(argv=sys.argv):
         data_list = []
         if options["dir"] is None:
             f = StringIO("".join( line for line in fileinput.input() ))
-            data_list += data_from_googlvision(f, options["id_formatter"])
+            data_list += data_from_googlevision(f, options["id_formatter"])
         else:
             for fname in os.listdir(options["dir"]):
                 path = os.path.join(options["dir"], fname)
                 with open(path) as f:
-                    data_list += data_from_googlvision(f, 
+                    data_list += data_from_googlevision(f, 
                                                        options["id_formatter"], 
                                                        start=len(data_list)+1)
                     

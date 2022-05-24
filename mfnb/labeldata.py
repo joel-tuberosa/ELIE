@@ -473,7 +473,7 @@ def read_googlevision_output(f):
     for response in json.load(f)["responses"]:
         yield response["fullTextAnnotation"]["text"]
 
-def data_from_googlvision(f, identifier, start=1):
+def data_from_googlevision(f, identifier, start=1):
     data_list = []
     for text in read_googlevision_output(f):
         data_list.append({
