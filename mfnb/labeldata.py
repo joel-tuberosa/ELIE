@@ -89,6 +89,36 @@ class CollectingEvent(Label):
                 f' Date: {self.date}, Collector: {self.collector},'
                 f' text: {repr(self.text)}')
 
+class Mask(object):
+    '''
+    Store a serie of regular expressions attached to attribute names. 
+    Mask objects are used to remove matching character strings in the
+    corresponding attributes of a given object (i.e. Label or 
+    CollectingEvent), prior to build a database.
+    '''
+    
+    def __init__(self, **kwargs):
+    
+        # compile regular expression and build property
+        self._data = dict()
+        for key in kwargs:
+            expr = kwargs[key]
+            if type(expr) is str:
+                expr = regex.compile(expr)
+            self._data[key] = expr
+    
+    def get_masked_str(self, target, attr):
+        try:
+            return self._data[attr].sub("", getattr(target, attr))
+        except KeyError:
+            return getattr(target, attr)
+    
+    def mask(self, key, value):
+        try:
+            return self._data[key].sub("", value)
+        except KeyError:
+            return value
+
 class DB(object):
     '''
     Store a searchable collection of elements of the same type.
@@ -133,7 +163,7 @@ class DB(object):
     def is_indexed(self):
         return hasattr(self, "_index")
     
-    def make_index(self, method=1, min_len=1, keys=None, ignore_ids=True):
+    def make_index(self, method=1, min_len=1, keys=None, masks=None, ignore_ids=True):
         '''
         Make a database search index out of the tokens collected from
         all elements of the collection.
@@ -170,7 +200,6 @@ class DB(object):
         
         # tokenize pattern
         token_pattern = get_word_tokenize_pattern(min_len)
-        corpus = ( "\n".join(x.get_tuple(keys)) for x in self )
         
         # index and stored parameters
         self._index = dict()
@@ -195,6 +224,7 @@ class DB(object):
         # Store the matrix containing scores for each unique token in each
         # element of the database, then build the index linking tokens with
         # items and scores.
+        corpus = self.get_corpus(keys=keys, masks=masks)
         self._score_matrix = vectorizer.fit_transform(corpus)
         j = 0
         for token in vectorizer.get_feature_names_out().tolist():
@@ -328,7 +358,31 @@ class DB(object):
                         if i==0 or result[i-1][0] != result[i][0] ]
 
         return result    
-
+    
+    def get_corpus(self, keys=None, masks=None, join="\n"):
+    
+        # make a list of keys
+        if keys is None:
+            keys = self.element_type.keys
+        elif type(keys) is str:
+            keys = [keys]
+            
+        # make a list of masks
+        if masks is None:
+            masks = []
+        elif type(masks) is Mask:
+            masks = [masks]
+        
+        # generate the corpus
+        for x in self:
+            fulltext = []
+            for key in keys:
+                s = getattr(x, key)
+                for mask in masks:
+                    s = mask.mask(key, s)
+                fulltext.append(s)
+            yield join.join(fulltext)
+    
     def __len__(self):
         '''
         Returns the number of elements in the database.
@@ -466,3 +520,4 @@ def data_from_googlevision(f, identifier, start=1):
             "ID": identifier(len(data_list)+start),
             "text": text})
     return data_list
+    

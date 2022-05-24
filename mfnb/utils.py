@@ -11,7 +11,16 @@ from leven import levenshtein
 from nltk import regexp_tokenize, word_tokenize
 import unicodedata
 
-### test function, to develop in order to make it parametrable
+# =============================================================================
+# CONSTANTS
+# -----------------------------------------------------------------------------
+### allow 2-3 items in the URL
+NURI_pattern = regex.compile(r"(?:http://(?:[\w\s.-]+/)+\s?[\w]+){s<=3}",
+                             flags=regex.MULTILINE | regex.V1)
+
+# =============================================================================
+# FUNCTIONS
+# -----------------------------------------------------------------------------
 def mismatch_rule(s):
     '''
     Returns the regular expression part parametring a fuzzy match 
@@ -22,10 +31,7 @@ def mismatch_rule(s):
     e = int(log(len(s), 2)) - 1
     if e < 1: return ""
     return "{e<=" + str(e) + "}"
-    
-# =============================================================================
-# FUNCTIONS
-# -----------------------------------------------------------------------------
+
 def range_reader(s):
     '''
     Extract a list of 0-based index from a 1-based range expression. 
