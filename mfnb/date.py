@@ -693,7 +693,10 @@ class Date(object):
         elif self.precision == "day":
             res += f', Month: {self.month}, Day: {self.day}'
         return res
-        
+    
+    def __repr__(self):
+        return f"Date({self})"
+    
     def __eq__(self, other):
         if type(other) is not Date:
             raise TypeError("Date object can only be compared with other Date"
