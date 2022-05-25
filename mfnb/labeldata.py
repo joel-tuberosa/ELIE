@@ -484,6 +484,29 @@ class CollectingEventDB(DB):
                 daterange = date
             self._date_index.append([daterange, x.ID])
     
+    def dump_date_index(self, fout):
+        '''
+        Store the date index in a JSON formatted file.
+        '''
+        
+        data = [ (daterange.get_isoformat().split(" - "), ID) 
+                  for daterange, ID in self._date_index ]
+        json.dump(data, fout, ensure_ascii=False, indent=4)
+
+    def load_date_index(self, f):
+        '''
+        Load the date index from a JSON formatted file.
+        '''
+        
+        self._date_index = []
+        for dates, ID in json.load(f):
+            daterange = []
+            for date in dates:
+                date = date.split("-")
+                if len(date[0]) == 2: date[0] = f"'{date[0]}"
+                daterange.append(mfnb.date.Date(*date))
+            self._date_index.append([mfnb.date.DateRange(*daterange), ID])
+        
     def search_by_date(self, query, assume_same_century=False, **allow_tags):
         '''
         Find collecting events that overlap with the given date or
