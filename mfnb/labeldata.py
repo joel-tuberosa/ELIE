@@ -238,7 +238,7 @@ class DB(object):
                         self._index[token] = [(x, score)]
                 i += 1
             j += 1
-        
+    
     def search(self, query, mismatch_rule=mismatch_rule, 
                filtering=lambda ID: True):
         '''

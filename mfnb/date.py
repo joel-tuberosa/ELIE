@@ -551,7 +551,17 @@ class Date(object):
     
     @property
     def precision_level(self):
-        if self.precision is None: return None
+        if self.precision is None: 
+            return None
+        elif self.precision == "year":
+            return 0
+        elif self.precision == "month":
+            return 1
+        elif self.precision == "day":
+            return 2
+        else:
+            raise ValueError("offending value for self.precision:"
+                            f" {repr(self.precision)}")
         return {"year": 0, "month": 1, "day": 2}[self.precision]
     
     @property
@@ -796,20 +806,20 @@ class DateRange(object):
         elif type(other) is DateRange:
 
             if self.century_known and other.century_known:
-
+                
                 # year
                 years_overlap = overlap((self.start.year, self.end.year), 
                                         (other.start.year, other.end.year))
                 
                 # month
-                if all([ self.precision != "year", self.precision != "year" ]):
+                if self.precision_level > 0 & other.precision_level > 0:
                     months_overlap = overlap((self.start.month, self.end.month), 
                                              (other.start.month, other.end.month))
                 else:
                     months_overlap = True
                     
                 # day
-                if all([ self.precision == "day", other.precision == "day" ]):
+                if self.precision_level > 1 & other.precision_level > 1:
                     days_overlap = overlap((self.start.day, self.end.day), 
                                            (other.start.day, other.end.day))
                 else:

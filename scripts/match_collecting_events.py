@@ -115,7 +115,8 @@ class Options(dict):
         self["clear_text"] = []
         self["text_search"] = True
     
-def write_results(fout, matches, query_fields=[], subject_fields=[], sep="\t", header=False):
+def write_results(fout, matches, query_fields=[], subject_fields=[], sep="\t", 
+                  header=False):
     if header:
         query_field_names = sep.join(query_fields)
         subject_field_names = sep.join(subject_fields)
@@ -124,10 +125,17 @@ def write_results(fout, matches, query_fields=[], subject_fields=[], sep="\t", h
                     "\tscore\n")
                    
     for label, hit, score in matches:
-        query_field_values = sep.join( label[field] 
+        query_field_values = sep.join( (repr(label[field])
+                                         if field == "text"
+                                         else label[field])
+                                        if label[field] is not None else ""
                                         for field in query_fields )
-        subject_field_values = sep.join( hit[field] 
-                                        for field in subject_fields )
+        subject_field_values = sep.join( (repr(hit[field])
+                                           if field == "text"
+                                           else hit[field])
+                                          if hit[field] is not None else ""
+                                          for field in subject_fields )
+
         fout.write(f"{query_field_values}"
                    f"\t{subject_field_values}"
                    f"\t{score:.3f}\n")
@@ -212,11 +220,7 @@ def main(argv=sys.argv):
                 
                 # - by date
                 if options["date_search"] and date is not None:
-                    try:
-                        hits = db.search_by_date(date, assume_same_century=True)
-                    except:
-                        sys.stderr.write(f"---\n{repr(date)}\n---\n")
-                        raise
+                    hits = db.search_by_date(date, assume_same_century=True)
                     ids = set( ce.ID for ce in hits )
                     filtering = lambda ce_id: ce_id in ids
                 else:
