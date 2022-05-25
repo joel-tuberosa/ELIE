@@ -33,7 +33,15 @@ OPTIONS
     
     -t, --text=COL
         Indicate which column contain the label text. Default = 2
-
+    
+    --clean=FILE
+        Read regular expression patterns from the provided FILE and 
+        remove all matched occurence in the label text before saving.
+        In FILE, each line is assumed to contain one regular 
+        expression, and optionally comma-separated flags, in a field
+        spaced with a TAB. Empty lines and line starting with # are
+        ignored.
+    
     --dir=DIR
         Read all files in DIR and concatenate the information in a 
         single output. Works with --googlevision
@@ -53,10 +61,11 @@ OPTIONS
 
 '''
 
-import getopt, sys, fileinput, json, os
+import getopt, sys, fileinput, json, os, regex
 from mfnb.utils import table_to_dicts, range_reader, get_id_formatter
 from mfnb.labeldata import data_from_googlevision
 from io import StringIO
+from functools import reduce
 
 class Options(dict):
 
@@ -72,7 +81,8 @@ class Options(dict):
                                        ['id=', 'header',
                                         'separator=', 'text=',
                                         'id-format=', 'googlevision',
-                                        'table=', 'dir=', 'help'])
+                                        'table=', 'dir=', 'clean=',
+                                        'help'])
         except getopt.GetoptError as e:
             sys.stderr.write(str(e) + '\n' + __doc__)
             sys.exit(1)
@@ -97,6 +107,8 @@ class Options(dict):
                 self["dir"] = a
             elif o == '--table':
                 self["table"] = a
+            elif o == '--clean':
+                self["clean"] = a
         
         if self["googlevision"] and self["id_formatter"] is None:
             self["id_formatter"] = get_id_formatter("label:5")
@@ -120,6 +132,28 @@ class Options(dict):
         self["googlevision"] = False
         self["dir"] = None
         self["table"] = None
+        self["clean"] = None
+
+def read_expr(fname):
+    exprs = []
+    with open(fname) as f:
+        for line in f:
+            if not line.strip() or line[0] == "#":
+                continue
+            line = line.strip().split("\t")
+            if len(line) == 2:
+                expr, flags = line
+                flags = ( getattr(regex, flag) 
+                           for flag in flags.split(",") )
+                flags = reduce(lambda x, y: x | y, flags)
+                exprs.append(regex.compile(expr, flags))
+            exprs.append(regex.compile(expr))
+    return exprs
+    
+def clean_text(text, *exprs):
+    for expr in exprs:
+        text = expr.sub("", text)
+    return text
         
 def main(argv=sys.argv):
     
@@ -174,6 +208,13 @@ def main(argv=sys.argv):
                                     ID=options["id"],
                                     text=options["text"])
     
+    # clean text
+    if options["clean"] is not None:
+        exprs = read_expr(options["clean"])
+        for x in data_list:
+            x["text"] = clean_text(x["text"], *exprs)
+    
+    # save labels in JSON format
     json.dump(data_list, sys.stdout, ensure_ascii=False, indent=4)
         
     # return 0 if everything succeeded
