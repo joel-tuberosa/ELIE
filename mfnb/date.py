@@ -675,6 +675,20 @@ class Date(object):
 
         return all((year_in_range, month_in_range, day_in_range))
     
+    def overlap_with(self, other, assume_same_century=False):
+        '''
+        Test whether the Date has an overlap with the other Date or DateRange 
+        object.
+        '''
+        
+        if type(other) is Date:
+            other = DateRange(other, other)
+        elif type(other) is not DateRange:
+            raise TypeError("Date object can only be compared with other Date" 
+                            " or DateRange object with the method"
+                            " overlap_with")
+        return DateRange(self, self).overlap_with(other, assume_same_century)
+        
     def __str__(self):
         
         res = ""
@@ -804,7 +818,7 @@ class DateRange(object):
         '''        
         
         if type(other) is Date:
-            return other.is_in(self, assume_same_century)
+            return other.overlap_with(self, assume_same_century)
         
         elif type(other) is DateRange:
 
