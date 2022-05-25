@@ -225,12 +225,12 @@ class DB(object):
         # element of the database, then build the index linking tokens with
         # items and scores.
         corpus = self.get_corpus(keys=keys, masks=masks)
-        self._score_matrix = vectorizer.fit_transform(corpus)
+        score_matrix = vectorizer.fit_transform(corpus)
         j = 0
         for token in vectorizer.get_feature_names_out().tolist():
             i = 0
             for x in self:
-                score = self._score_matrix[i,j]
+                score = score_matrix[i,j]
                 if score:
                     try:
                         self._index[token].append((x, score))
@@ -238,7 +238,44 @@ class DB(object):
                         self._index[token] = [(x, score)]
                 i += 1
             j += 1
+        
+        # compute rowsums for scoring normalization
+        self._max_scores = dict( (x.ID, score_matrix[self._ids.index(x.ID)].sum())
+                                  for x in self )
+        
+    def dump_index(self, fout):
+        '''
+        Save the index in a JSON formatted file.
+        '''
+        
+        if not self.is_indexed():
+            raise ValueError("Database must be indexed with the 'make_index'"
+                             " method prior to saving.")
+
+        # Numbers are converted to Python native float, for serialization purpose.
+        # It may result in scoring imprecision when using a dumped database.
+        index = dict( (token, 
+                      [ (x.ID, float(score)) for x, score in self._index[token] ])
+                      for token in self._index )
+        max_scores = dict( (ID, float(self._max_scores[ID]))
+                            for ID in self._max_scores )
+        json.dump({"index": index, 
+                   "parameters": self._parameters,
+                   "max_scores": max_scores}, 
+                  fout, ensure_ascii=False, indent=4)
     
+    def load_index(self, f):
+        '''
+        Load an index from a JSON file.
+        '''
+        
+        data = json.load(f)
+        self._index = dict( (token,
+                             [ (self.get(ID), float(score)) for ID, score in data["index"][token] ])
+                             for token in data["index"] )
+        self._parameters = data["parameters"]
+        self._max_scores = data["max_scores"]
+        
     def search(self, query, mismatch_rule=mismatch_rule, 
                filtering=lambda ID: True):
         '''
@@ -294,11 +331,9 @@ class DB(object):
         for ID, scores in hit_scoring.items():
             score, n = scores
             
-            # maximum score if all token are matched in the collecting event
-            x_max_score = self._score_matrix[self._ids.index(ID)].sum()
-            
-            # the score is normalized by the maximum score
-            score /= x_max_score
+            # the score is normalized by the maximum score (i.e. if all token 
+            # are matched in the collecting event
+            score /= self._max_scores[ID]
             
             # ...and weighted by the number of matching token
             score *= (n/len(query_tokens))
