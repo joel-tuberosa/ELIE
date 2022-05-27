@@ -19,23 +19,9 @@ OPTIONS
         limit the text search to collecting events with overlapping
         dates.
         
-    -i, --identifier-key=STR
-        Key pointing to the identifier value in the dict object of a 
-        given label.
-    
     -f, --text-fields=STR[,...]
         Limit text search in the collecting events to the provided 
         fields.
-    
-    --clear-date
-        Remove date found in the label text. If the --date-search
-        option was set, clear the date after extracting it.
-        
-    --clear-url
-        Remove URL found in the label text.
-    
-    --clear-text=RANGE
-        Remove the text from the label in the provided range.
     
     -x, --no-text-search
         Do not perform text search.
@@ -61,10 +47,6 @@ class Options(dict):
             opts, args = getopt.getopt(argv[1:],
                                        "di:f:x", 
                                        ['date-search',
-                                        'identifier-key=',
-                                        'clear-date',
-                                        'clear-url',
-                                        'clear-text=',
                                         'text-fields=',
                                         'no-text-search',
                                         'help'])
@@ -78,8 +60,6 @@ class Options(dict):
                 sys.exit(0)
             elif o in ('-d', '--date-search'):
                 self['date_search'] = True
-            elif o in ('-i', '--identifier-key'):
-                self['id_key'] = a
             elif o in ('-f', '--text-fields'):
                 self["text_fields"] = a.split(",")
                 allowed_keys = mfnb.labeldata.CollectingEvent.keys
@@ -90,12 +70,6 @@ class Options(dict):
                     notvalid = ', '.join( repr(x) for x in notvalid )
                     raise ValueError("The following keys are not valid:"
                                     f" {notvalid}.")
-            elif o == '--clear-url':
-                self["clear_url"] = True
-            elif o == '--clear-date':
-                self["clear_date"] = True
-            elif o == '--clear-text':
-                self["clear_text"] = range_reader(a)
             elif o in ('-x', '--no-text-search'):
                 self["text_search"] = False
             
@@ -108,11 +82,7 @@ class Options(dict):
     
         # default parameter value
         self['date_search'] = False
-        self["id_key"] = "ID"
         self["text_fields"] = ["text"]
-        self["clear_date"] = False
-        self["clear_url"] = False
-        self["clear_text"] = []
         self["text_search"] = True
     
 def write_results(fout, matches, query_fields=[], subject_fields=[], sep="\t", 
@@ -196,25 +166,6 @@ def main(argv=sys.argv):
         with open(sys.argv.pop(1)) as f:
             for label in json.load(f):
                 
-                label_text = label["text"]
-                
-                # label clearing
-                
-                # - provided range
-                if options["clear_text"]:
-                    label_text = mfnb.utils.clear_text(label_text, 
-                                                       options["clear_text"])
-                
-                # - URL
-                if options["clear_url"]:
-                    _, span = mfnb.utils.find_pattern(label_text)
-                    label_text = mfnb.utils.clear_text(label_text, span)
-                
-                # - Date
-                date, span = mfnb.date.find_date(label_text)
-                if options["clear_date"]:
-                    label_text = mfnb.utils.clear_text(label_text, span)
-                
                 # search
                 hits = []
                 
@@ -228,7 +179,7 @@ def main(argv=sys.argv):
                 
                 # - by text
                 if options["text_search"]:
-                    hits = db.search(label_text, 
+                    hits = db.search(label["text"], 
                                      mismatch_rule=mfnb.utils.mismatch_rule, 
                                      filtering=filtering)
                 
