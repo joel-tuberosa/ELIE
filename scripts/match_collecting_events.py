@@ -222,9 +222,9 @@ def main(argv=sys.argv):
                 if options["date_search"] and date is not None:
                     hits = db.search_by_date(date, assume_same_century=True)
                     ids = set( ce.ID for ce in hits )
-                    filtering = lambda ce_id: ce_id in ids
+                    filtering = lambda ce: ce.ID in ids
                 else:
-                    filtering = lambda ce_id: True
+                    filtering = lambda ce: True
                 
                 # - by text
                 if options["text_search"]:
