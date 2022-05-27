@@ -181,10 +181,15 @@ def main(argv=sys.argv):
                 hits = []
                 
                 # - by date
-                if options["date_search"] and date is not None:
-                    hits = db.search_by_date(date, assume_same_century=True)
-                    ids = set( ce.ID for ce in hits )
-                    filtering = lambda ce: ce.ID in ids
+                if options["date_search"]:
+                    date, _ = mfnb.date.find_date(label.text)
+                    if date is None:
+                        filtering = lambda ce: True
+                    else:
+                        hits = db.search_by_date(date, 
+                                                 assume_same_century=True)
+                        ids = set( ce.ID for ce in hits )
+                        filtering = lambda ce: ce.ID in ids
                 else:
                     filtering = lambda ce: True
                 
@@ -196,12 +201,15 @@ def main(argv=sys.argv):
                 
                 # save labels that did not match any collecting events
                 if not hits:
-                    unmatched_labels.add(label.text)
+                    unmatched_labels.add(label.ID)
                 
                 # remove matched collecting from the set of unmatched 
                 # collecting events
                 for ce, score in hits:
-                    unmatched_ce.remove(ce.ID)
+                    try:
+                        unmatched_ce.remove(ce.ID)
+                    except KeyError:
+                        pass
                 
                 # print the result
                 matches = ( (label.export(), ce.export(), score) 
