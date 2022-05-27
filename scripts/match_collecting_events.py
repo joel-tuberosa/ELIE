@@ -22,7 +22,16 @@ OPTIONS
     -f, --text-fields=STR[,...]
         Limit text search in the collecting events to the provided 
         fields.
-    
+        
+    -u, --unmatched-logs
+        Save unmatched items in a log files:
+        
+            __unmatched_labels.txt  Record of labels that did not match
+                                    any collecting event.
+                                    
+            __unmatched_ce.txt      Record of collecting event that 
+                                    were not matched by any label.
+
     -x, --no-text-search
         Do not perform text search.
     
@@ -45,10 +54,11 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "di:f:x", 
+                                       "di:f:ux", 
                                        ['date-search',
                                         'text-fields=',
                                         'no-text-search',
+                                        'unmatched-logs',
                                         'help'])
         except getopt.GetoptError as e:
             sys.stderr.write(str(e) + '\n' + __doc__)
@@ -70,6 +80,8 @@ class Options(dict):
                     notvalid = ', '.join( repr(x) for x in notvalid )
                     raise ValueError("The following keys are not valid:"
                                     f" {notvalid}.")
+            elif o in ('-u', '--unmatched-logs'):
+                self["unmatched_logs"] = True
             elif o in ('-x', '--no-text-search'):
                 self["text_search"] = False
             
@@ -84,6 +96,7 @@ class Options(dict):
         self['date_search'] = False
         self["text_fields"] = ["text"]
         self["text_search"] = True
+        self["unmatched_logs"] = False
     
 def write_results(fout, matches, query_fields=[], subject_fields=[], sep="\t", 
                   header=False):
@@ -139,12 +152,6 @@ def main(argv=sys.argv):
     sys.stderr.write(f'''
     Parameters
     ----------
-        
-        Label text clearing:
-            date    {"yes" if options["clear_date"] else "no"}
-            URL     {"yes" if options["clear_url"] else "no"}
-            ranges  {mfnb.utils.write_ranges(options["clear_text"])}
-        
         Search in:
             date    {"yes" if options["date_search"] else "no"}
             text    {"yes" if options["text_search"] else "no"}
@@ -161,10 +168,14 @@ def main(argv=sys.argv):
                     "CE.text"],
                    header = True)
     
+    # save unmatched labels and unmatched collecting events
+    unmatched_ce = { ce.ID for ce in db }
+    unmatched_labels = set()
+    
     # read label text that is stored in a JSON input file
     while sys.argv[1:]:
         with open(sys.argv.pop(1)) as f:
-            for label in json.load(f):
+            for label in mfnb.labeldata.load_labels(f):
                 
                 # search
                 hits = []
@@ -179,15 +190,37 @@ def main(argv=sys.argv):
                 
                 # - by text
                 if options["text_search"]:
-                    hits = db.search(label["text"], 
+                    hits = db.search(label.text, 
                                      mismatch_rule=mfnb.utils.mismatch_rule, 
                                      filtering=filtering)
                 
+                # save labels that did not match any collecting events
+                if not hits:
+                    unmatched_labels.add(label.text)
+                
+                # remove matched collecting from the set of unmatched 
+                # collecting events
+                for ce, score in hits:
+                    unmatched_ce.remove(ce.ID)
+                
                 # print the result
-                matches = ( (label, ce.export(), score) for ce, score in hits )
+                matches = ( (label.export(), ce.export(), score) 
+                             for ce, score in hits )
                 write_results(sys.stdout, matches, 
                               ["ID", "text"],
                               ["ID", "location", "date", "collector", "text"])
+                
+    # print the unmatched item log
+    if options["unmatched_logs"]:
+        with open("__unmatched_labels.txt", "w") as fout:
+            fout.writelines( f"{ID}\n" for ID in unmatched_labels )
+        with open("__unmatched_ce.txt", "w") as fout:
+            fout.writelines( f"{ID}\n" for ID in unmatched_ce )
+    else:
+        sys.stderr.write("__unmatched_labels\n")
+        sys.stderr.writelines( f"\t{ID}\n" for ID in unmatched_labels )
+        sys.stderr.write("__unmatched_ce\n")        
+        sys.stderr.writelines( f"\t{ID}\n" for ID in unmatched_ce )
         
     return 0
     
