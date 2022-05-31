@@ -418,6 +418,19 @@ class DB(object):
                 fulltext.append(s)
             yield join.join(fulltext)
     
+    def subset(self, filtering):
+        '''
+        Return a subsetted database. Each element of the current 
+        database is passed as an argument to the filtering function and
+        kept only when the function returns True. Existing indexes are 
+        removed in the process.
+        '''
+        
+        values = [ x for x in self._dict.values() if filtering(x) ]
+        subdb = self.__new__(self.__class__)
+        subdb.__init__(self.element_type, values)
+        return subdb
+        
     def __len__(self):
         '''
         Returns the number of elements in the database.
