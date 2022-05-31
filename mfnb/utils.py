@@ -352,9 +352,9 @@ def get_pairwise_leven_dist(lines):
     dist = np.array([ [ get_norm_leven_dist(lines[i], lines[j]) if j < i else 0
                          for i in range(n) ]
                          for j in range(n) ])
-                         
+    
     # copy values from the matrix upper triangle to the lower triangle
-    i_lower = np.tril_indices(dist, -1)
+    i_lower = np.tril_indices(dist.shape[0], -1)
     dist[i_lower] = dist.T[i_lower]
     
     # return the pairwise distance matrix
