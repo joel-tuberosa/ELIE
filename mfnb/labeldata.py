@@ -427,8 +427,9 @@ class DB(object):
         '''
         
         values = [ x for x in self._dict.values() if filtering(x) ]
-        subdb = self.__new__(self.__class__)
-        subdb.__init__(self.element_type, values)
+        subdb = DB.__new__(DB)
+        subdb.__init__(self.element_type, values=values)
+        subdb.__name__ = self.__class__.__name__
         return subdb
         
     def __len__(self):
