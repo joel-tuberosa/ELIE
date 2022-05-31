@@ -375,7 +375,7 @@ def get_levenKMedoids(lines, n_clusters=8, random_state=12345):
     '''
 
     kmedoids = KMedoids(n_clusters=n_clusters, 
-                        metrics=get_pairwise_leven_dist,
+                        metric=get_pairwise_leven_dist,
                         random_state=random_state).fit(lines)
 
 def find_levenKMedoids(lines, max_cluster=8, method="elbow", 
