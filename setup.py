@@ -15,7 +15,8 @@ setup(
           'dateparser',
           'sklearn',
           'regex',
-          'leven'
+          'leven',
+          'scikit-learn-extra'
       ],
     packages=["mfnb"],
     scripts=['scripts/make_collecting_events.py', 

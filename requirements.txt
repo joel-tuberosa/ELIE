@@ -5,3 +5,4 @@ regex
 leven
 pygeo
 sphinx
+scikit-learn-extra
