@@ -5,11 +5,16 @@
 '''
 
 import regex
+import unicodedata
+import numpy as np
+from kneed import KneeLocator
 from math import log
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from sklearn_extra.cluster import KMedoids
+from sklearn.metrics import silhouette_score
 from leven import levenshtein
 from nltk import regexp_tokenize, word_tokenize
-import unicodedata
+
 
 # =============================================================================
 # CONSTANTS
@@ -312,3 +317,124 @@ def ngram_search(a, ngrams, mismatch_rule=mismatch_rule):
 def strip_accents(s):
    return ''.join(c for c in unicodedata.normalize('NFD', s)
                   if unicodedata.category(c) != 'Mn')
+
+def get_norm_leven_dist(a, b):
+    '''
+    Calculate the Levenshtein distance between two character strings, 
+    then normalize this score by the length of the longest string.
+    
+    Parameters
+    ----------
+        a : str
+            A character string.
+        
+        b : str
+            Another character string.
+    '''
+    
+    l = max([len(a), len(b)])
+    return levenshtein(a, b)/l
+
+def get_pairwise_leven_dist(lines):
+    '''
+    Calculate Levenshtein distances between all possible pairs of lines
+    provided in input.
+    
+    Parameters
+    ----------
+        lines : list
+            A list of str that will be compared by pair.
+    '''
+    
+    # calculate all possible pairwise distance (avoid diagonal and duplicate 
+    # comparisons)
+    n = len(lines)
+    dist = np.array([ [ get_norm_leven_dist(lines[i], lines[j]) if j < i else 0
+                         for i in range(n) ]
+                         for j in range(n) ])
+                         
+    # copy values from the matrix upper triangle to the lower triangle
+    i_lower = np.tril_indices(dist, -1)
+    dist[i_lower] = dist.T[i_lower]
+    
+    # return the pairwise distance matrix
+    return dist
+
+def get_levenKMedoids(lines, n_clusters=8, random_state=12345):
+    '''
+    Attempt to cluster strings given their similarity (expressed as 
+    Levenshtein distance).
+    
+    Parameters
+    ----------
+        lines : list
+            A list of str that will be compared by pair.
+            
+        n_clusters : int
+            The number of clusters to define. Default=8.
+    '''
+
+    kmedoids = KMedoids(n_clusters=n_clusters, 
+                        metrics=get_pairwise_leven_dist,
+                        random_state=random_state).fit(lines)
+
+def find_levenKMedoids(lines, max_cluster=8, method="elbow", 
+                       random_state=12345):
+    '''
+    Optimize clustering of strings given their similarity (expressed as
+    Levenshtein distance).
+    
+    Parameters
+    ----------
+        lines : list
+            A list of str that will be compared by pair.
+        
+        max_cluster : int
+            Attempt clustering up to this number of clusters.
+        
+        method : str
+            Specify the selection method.
+                elbow       Select the cluster number corresponding to 
+                            the elbow of the SSE curve.
+                
+                silhouette  Select the cluster number corresponding to 
+                            the maximum silhouette coefficient.
+    '''
+    
+    # calculate KMedoids for 1 to max_cluster cluster numbers
+    kmedoids_results = [ get_levenKMedoids(lines, i, random_state) 
+                          for i in range(1, max_cluster+1) ]
+    
+    # elbow selection
+    if method == "elbow":
+    
+        # extract the sum of squared error (SSE) for each KMedoids
+        sse = [ kmedoids.inertia_ for kmedoids in kmedoids_results ]
+        
+        # locate the knee, assuming that SSE values are decreasing with increased 
+        # cluster number and forming a convex curve
+        kl = KneeLocator(range(1, max_cluster+1), sse, curve="convex", 
+                         direction="decreasing")
+        
+        # get the KMedoids clustering at the elbow of the SSE curve
+        best = kl.elbow-1
+        
+    # silhouette coefficient selection
+    elif method == "silhouette":
+        
+        # extract the silhouette coefficient for each KMedoids
+        silhouette_coeff = [ silhouette_score(lines, kmedoids.labels_, 
+                                              metric=get_pairwise_leven_dist, 
+                                              random_state=random_state)
+                              for kmedoids in kmedoids_results ]
+        
+        # locate the higher silhouette coefficient
+        best = silhouette_coeff.index(max(silhouette_coeff))
+    
+    # wrong method value
+    else:
+        raise ValueError(f'unknown method: {repr(method)}, method can be'
+                          ' either "elbow" or "silhouette"')
+    
+    # return the best KMedoids according to the chosed method
+    return kmedoids_results[best]
