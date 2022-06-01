@@ -11,6 +11,13 @@
 import json, regex, dateparser, sys
 from mfnb.utils import overlap, roman_to_int
 
+# delete the dateparser warning
+if not sys.warnoptions:
+    import warnings
+    warnings.filterwarnings(
+        "ignore",
+        message="The localize method is no longer necessary")
+
 # =============================================================================
 # CLASSES
 # -----------------------------------------------------------------------------

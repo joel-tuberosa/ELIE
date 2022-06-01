@@ -36,7 +36,7 @@ DESCRIPTION
     information within the label, such as collector names, dates or
     geographical localisation.
     
-    /!\ still under development /!\
+    /!\ still under development /!\ 
 
 OPTIONS
     -c, --collector
@@ -77,8 +77,7 @@ OPTIONS
 '''
 
 import getopt, sys, json, fileinput, regex
-import mfnb.date, mfnb.labeldata, mfnb.geo, mfnb.name
-from mfnb.utils import get_id_formatter, clear_text, tokenize, get_text_segments, get_ngrams
+import mfnb.date, mfnb.labeldata, mfnb.geo, mfnb.name, mfnb.utils
 from io import StringIO
 from random import randrange
 
@@ -92,10 +91,10 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:], 
-                                       "cdf:gm:s:", 
+                                       "cdf:gm:rs:", 
                                        ['collector', 'date', 'id-format=', 
                                         'geo', 'min-length=', 'min-score=', 
-                                        'collector-db=', 'help'])
+                                        'collector-db=', 'refine', 'help'])
         except getopt.GetoptError as e:
             sys.stderr.write(str(e) + '\n' + __doc__)
             sys.exit(1)
@@ -111,11 +110,13 @@ class Options(dict):
             elif o in ('-d', '--date'):
                 self["date"] = True
             elif o in ('-f', '--id-format'):
-                self["id_formatter"] = get_id_formatter(a)
+                self["id_formatter"] = mfnb.utils.get_id_formatter(a)
             elif o in ('-g', '--geo'):
                 self["geo"] = True
             elif o in ('-m', '--min-length'):
                 self["min_word_length"] = int(a)
+            elif o in ('-r', '--refine'):
+                self["refine"] = True
             elif o in ('-s', '--min-score'):
                 self["min_score"] = float(a)
                 
@@ -131,10 +132,11 @@ class Options(dict):
         self["collector"] = False
         self["collector_db"] = None
         self['date'] = False
-        self["id_formatter"] = get_id_formatter("label:5")
+        self["id_formatter"] = mfnb.utils.get_id_formatter("label:5")
         self["geo"] = False   
         self["min_word_length"] = 3
         self["min_score"] = 0.8
+        self["refine"] = False
         
 def parse_date(text):
     '''
@@ -175,6 +177,45 @@ def parse_name(text, db=None, allow_unknown=False, thresh=0):
     matched_str = text[slice(*span)]
     namestr = " & ".join(names)
     return (matched_str, span, namestr)
+
+def refine(labels):
+    '''
+    Identify K-medoids within a group of labels. Does not do anything
+    if there are less than 4 elements.
+    '''
+    
+    # extract text
+    lines = [ label.text for label in labels ]
+    n = len(lines)
+
+    # does not attempt anything for less than 8 elements
+    ### --> we could implement an outlier detection
+    if n < 8:
+        return [labels]
+        
+    # the maximum number of cluster to evaluate is 20, or the number of
+    # elements divided by 2.
+    elif n < 20:
+        max_cluster = n//2
+    else:
+        max_cluster = 20
+    
+    # attempt to optimise clustering using the knee selection method on the SSE 
+    # values
+    kmedoids = mfnb.utils.find_levenKMedoids(lines, max_cluster=max_cluster)
+    
+    # if the cluster identification failed with this method, do not cluster
+    if kmedoids is None:
+        return [labels]
+    
+    # otherwise returns a list of clusters (which are lists of sorted items)
+    clusters = dict()
+    for i, label in zip(kmedoids.labels_, labels):
+        try:
+            clusters[i].append(label)
+        except KeyError:
+            clusters[i] = [label]
+    return list(clusters.values())
         
 def main(argv=sys.argv):
     
@@ -202,7 +243,6 @@ def main(argv=sys.argv):
                                           
     # label to be classified
     to_be_sorted = [ label.ID for label in db ]
-    i = 1
     
     # write the header
     header = "label.ID\tlabel.v\tgroup.ID"
@@ -214,6 +254,9 @@ def main(argv=sys.argv):
     # remove newlines from text
     p = regex.compile("\n\r?")
     #remove_newlines = lambda x: p.sub(" // ", x)
+    
+    # label group number
+    i = 0
     
     # Successively, sample a label, finds matching labels in the database, 
     # attribute these labels to a group and remove these labels from the labels
@@ -229,90 +272,103 @@ def main(argv=sys.argv):
                      if score >= options["min_score"] ]
         matches.append(seed_label)
         
+        # find K-medoids within the matched labels
+        if options["refine"]:
+            clusters = refine(matches)
+        else:
+            clusters = [matches]
+        
         # print the result
-        group_id = options["id_formatter"](i)
-        for label in matches:
+        for cluster in clusters:
+            i += 1
+            group_id = options["id_formatter"](i)
+            for label in cluster:
+                
+                # the text is clean up from the matched patterns
+                text = label.text
             
-            ### labels within group could be classified with a neighbor 
-            ### joining algorithm or using the vectorizer
-            
-            # the text is clean up from the matched patterns
-            text = label.text
-        
-            # output table fields containing label info
-            label_cols = f'{label.ID}\t{repr(label.text)}\t{group_id}'
-            
-            # check list of parsed and retrieved information
-            found_info = {"geo": False, "date": False, "collector": False} 
-            
-            # text segment breaks
-            segments = []
-            
-            # parse the text to retrieve geolocalization information,
-            # then remove the intepreted text.
-            span = None
-            if options["geo"]:
-                verbatim, span, interpreted = parse_geo(text)
-                if span != -1: text = clear_text(text, span)
-                geo_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                if span == -1:
-                    found_info["geo"] = False
+                # output table fields containing label info
+                label_cols = f'{label.ID}\t{repr(label.text)}\t{group_id}'
+                
+                # check list of parsed and retrieved information
+                found_info = {"geo": False, "date": False, "collector": False} 
+                
+                # text segment breaks
+                segments = []
+                
+                # parse the text to retrieve geolocalization information,
+                # then remove the intepreted text.
+                span = None
+                if options["geo"]:
+                    verbatim, span, interpreted = parse_geo(text)
+                    if span != -1: text = mfnb.utils.clear_text(text, span)
+                    geo_cols = f'\t{repr(verbatim)}\t{interpreted}'
+                    if span == -1:
+                        found_info["geo"] = False
+                    else:
+                        found_info["geo"] = True
+                        segments += list(span)
                 else:
-                    found_info["geo"] = True
-                    segments += list(span)
-            else:
-                geo_cols = ""
+                    geo_cols = ""
+                
+                # parse the text to retrieve date information, then remove
+                # the intepreted text.
+                if options["date"]:
+                    verbatim, span, interpreted = parse_date(text)
+                    if span != -1: text = mfnb.utils.clear_text(text, span)
+                    date_cols = f'\t{repr(verbatim)}\t{interpreted}'
+                    if span == -1:
+                        found_info["date"] = False
+                    else:
+                        found_info["date"] = True
+                        segments += list(span)
+                else:
+                    date_cols = ""
+                
+                # parse the text to retrieve the collector name
+                if options["collector"]:
+                    hits = []
+                    start = 0
+                    text_segments = mfnb.utils.get_text_segments(
+                        text, sorted(segments))
+                    for text_segment in text_segments:
+                        seg_l = len(text_segment)
+                        text_segment = text_segment.strip()
+                        if not text_segment: continue
+                        verbatim, span, interpreted = parse_name(
+                            text_segment, collector_db, 0.75)
+                        if span != -1:
+                            span = (start+span[0], start+span[1])
+                            hits.append((verbatim, 
+                                         span,
+                                         interpreted, 
+                                         len(interpreted)))
+                        start += seg_l
+                    if hits:
+                        hits.sort(key = lambda x: x[3], reverse=True)
+                        verbatim, span, interpreted, _ = hits[0]
+                    else:
+                        verbatim, span, interpreted = "", -1, ""
+                    if span != -1: text = mfnb.utils.clear_text(text, span)
+                    collector_cols = f'\t{repr(verbatim)}\t{interpreted}'
+                    if span == -1:
+                        found_info["collector"] = False
+                    else:
+                        found_info["collector"] = True
+                else:
+                    collector_cols = ""
+                            
+                # write label info
+                sys.stdout.write(f'{label_cols}'
+                                 f'{geo_cols}'
+                                 f'{date_cols}'
+                                 f'{collector_cols}\n')
             
-            # parse the text to retrieve date information, then remove
-            # the intepreted text.
-            if options["date"]:
-                verbatim, span, interpreted = parse_date(text)
-                if span != -1: text = clear_text(text, span)
-                date_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                if span == -1:
-                    found_info["date"] = False
-                else:
-                    found_info["date"] = True
-                    segments += list(span)
-            else:
-                date_cols = ""
-            
-            # parse the text to retrieve the collector name
-            if options["collector"]:
-                hits = []
-                start = 0
-                for text_segment in get_text_segments(text, sorted(segments)):
-                    seg_l = len(text_segment)
-                    text_segment = text_segment.strip()
-                    if not text_segment: continue
-                    verbatim, span, interpreted = parse_name(text_segment, collector_db, 0.75)
-                    if span != -1:
-                        span = (start+span[0], start+span[1])
-                        hits.append((verbatim, span, interpreted, len(interpreted)))
-                    start += seg_l
-                if hits:
-                    hits.sort(key = lambda x: x[3], reverse=True)
-                    verbatim, span, interpreted, _ = hits[0]
-                else:
-                    verbatim, span, interpreted = "", -1, ""
-                if span != -1: text = clear_text(text, span)
-                collector_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                if span == -1:
-                    found_info["collector"] = False
-                else:
-                    found_info["collector"] = True
-            else:
-                collector_cols = ""
-                        
-            # write label info
-            sys.stdout.write(f'{label_cols}{geo_cols}{date_cols}{collector_cols}\n')
-        
         # remove matched IDs from the list of elements to be sorted
         match_ids = { label.ID for label in matches }
         to_be_sorted = [ ID 
                           for ID in to_be_sorted 
                           if ID not in match_ids ]
-        i += 1
     return 0
     
 if __name__ == "__main__":

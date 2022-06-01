@@ -427,18 +427,19 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
     
         # extract the sum of squared error (SSE) for each KMedoids
         sse = [ kmedoids.inertia_ for kmedoids, dist in kmedoids_results ]
-        
-        print("SSE:", sse)
-        
+                
         # locate the knee, assuming that SSE values are decreasing with increased 
         # cluster number and forming a convex curve
         kl = KneeLocator(range(2, max_cluster+1), sse, curve="convex", 
                          direction="decreasing")
         
-        print("kl:", kl)
+        # best takes the value -1 if the method failed
+        if kl.elbow is None:
+            best = -1
         
         # get the KMedoids clustering at the elbow of the SSE curve
-        best = kl.elbow-2
+        else:
+            best = kl.elbow-2
         
     # silhouette coefficient selection
     elif method == "silhouette":
@@ -448,9 +449,7 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
                                               metric="precomputed", 
                                               random_state=random_state)
                               for kmedoids, dist in kmedoids_results ]
-        
-        print("silhouette:", silhouette_coeff)
-        
+                
         # locate the higher silhouette coefficient
         best = silhouette_coeff.index(max(silhouette_coeff))
     
@@ -460,4 +459,6 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
                           ' either "elbow" or "silhouette"')
     
     # return the best KMedoids according to the chosed method
+    if best == -1:
+        return None
     return kmedoids_results[best][0]
