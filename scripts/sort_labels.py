@@ -8,6 +8,35 @@ DESCRIPTION
     Cluster label based on text similarity and parse localisation, date
     and collector's names in the raw text. Attribute unique identifier 
     to discovered groups.
+    
+    Clustering
+    ----------
+    
+    By default, the clustering is performed by the following iterative 
+    process:
+        1) Pick a random label from the collection of unsorted label
+           (seed label).
+        2) Find every label for which the similarity value calculated 
+           with the seed label is greater than the provided threshold 
+           (customizable with option -s).
+        3) Store all matched labels in a group and removed them from
+           the collection of unsorted labels.
+        4) Stop if the unsorted label collection is empty, otherwise
+           go back to step 1.
+    
+    With option -r, the sorted groups are subclustered using the
+    K-medoids method based on pairwise Levenshtein distance. To avoid 
+    overclustering, it is therefore advised to use a low similarity 
+    threshold value when using this protocol.
+    
+    Parsing
+    -------
+    
+    Options -c, -d and -g activate text parsing to identify expected 
+    information within the label, such as collector names, dates or
+    geographical localisation.
+    
+    /!\ still under development /!\
 
 OPTIONS
     -c, --collector
@@ -35,13 +64,16 @@ OPTIONS
         Minimum word length to be included in the search index. 
         Default = 3.
     
+    -r, --refine
+        Use the K-medoids method, based on pairwise Levenshtein 
+        distances, to find clusters within groups.
+    
     -s, --min-score=FLOAT
         Minimum similarity score for two label to be put in the same 
         group.
     
     --help
         Display this message
-
 '''
 
 import getopt, sys, json, fileinput, regex
