@@ -57,7 +57,7 @@ def range_reader(s):
 
 
 def table_to_dicts(f, skip_first=False, sep="\t", data_sep=", ", 
-                   identifier=None, **kwargs):
+                   identifier=None, clean=[], **kwargs):
     '''
     Convert data from a tabular format to a list of dict. Data is only 
     interpreted as character strings.
@@ -80,6 +80,11 @@ def table_to_dicts(f, skip_first=False, sep="\t", data_sep=", ",
             Use the provided function to generate an identifier from a 
             positive integer representing the row number in the input
             table. It is added to the data with the key "ID".
+        
+        clean : list
+            Quotes will be stripped from the string at the provided 
+            column indexes and newline character notation "\\n" will be
+            converted to actual newline characters.
         
         * : int|list
             Any keyword argument is interpreted as a field name. If the 
@@ -114,7 +119,8 @@ def table_to_dicts(f, skip_first=False, sep="\t", data_sep=", ",
             first_line = False
             continue
         fields = line.split(sep)
-        data = dict( (key, data_sep.join( fields[i].strip() 
+        data = dict( (key, data_sep.join( clean_str(fields[i].strip())
+                                          if i in clean else fields[i].strip()
                                            for i in kwargs[key] 
                                            if fields[i].strip() ))
                       for key in kwargs 
@@ -462,3 +468,18 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
     if best == -1:
         return None
     return kmedoids_results[best][0]
+
+def clean_str(s):
+    '''
+    Stip quotes and convert \\n to newline characters.
+    '''
+    
+    # remove quotes
+    if s[0] == "'" and s[-1] == "'":
+        s = s.strip("'")
+    elif s[0] == '"' and s[-1] == '"':
+        s = s.trip('"')
+    
+    # convert newline
+    s = s.replace(r"\n", "\n")
+    return s

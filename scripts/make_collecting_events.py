@@ -37,11 +37,17 @@ OPTIONS
         Indicate which column(s) contain(s) the location information, 
         the different fields are separated by semi-columns in the
         final value. Default = 2
-
+    
+    -q, --clean=COL[,...]
+        Indicate column(s) that may contain(s) quoted strings and 
+        newline character notations (i.e "\\n"). The quotes will be 
+        stripped from these strings and the newline notations will be
+        converted to actual UNIX newlines.
+    
     -s, --separator=STR
         Set the field separator to read the table. Default = '\t'
     
-    -v, --text=COL[,...]
+    -t, --text=COL[,...]
         Indicate which column(s) contain(s) a reprensentative text 
         label transcript. Default = 4
     
@@ -63,10 +69,10 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "c:d:f:hi:l:s:v:", 
+                                       "c:d:f:hi:l:q:s:t:", 
                                        ['collector=', 'date=',
                                         'location=', 'header',
-                                        'id=',
+                                        'id=', 'clean=',
                                         'separator=', 'text=', 
                                         'id-format=', 'help'])
         except getopt.GetoptError as e:
@@ -89,6 +95,8 @@ class Options(dict):
                 self["location"] = range_reader(a)
             elif o in ('-i', '--id'):
                 self["ID"] = int(a)-1
+            elif o in ('-q', '--clean'):
+                self["clean"] = range_reader(a)
             elif o in ('-s', '--separator'):
                 self["separator"] = a
             elif o in ('-t', '--text'):
@@ -108,6 +116,7 @@ class Options(dict):
         self["header"] = True
         self["ID"] = None
         self["collector"] = 2
+        self["clean"] = []
         self["separator"] = "\t"
         self["id_formatter"] = get_id_formatter("colev:5")
         self["text"] = 3
@@ -131,6 +140,7 @@ def main(argv=sys.argv):
                                 sep=options["separator"],
                                 data_sep=", ",
                                 identifier=options["id_formatter"],
+                                clean=options["clean"],
                                 **columns)
     
     # save in a JSON formatted file
