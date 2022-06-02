@@ -29,6 +29,10 @@ OPTIONS
     -h, --header
         The input data contains a header line that is to be ignored.
     
+    -i, --id=COL
+        Indicate which column contains the identifiers. The default run 
+        attributes newly created identifiers.
+    
     -l, --location=COL[,...]
         Indicate which column(s) contain(s) the location information, 
         the different fields are separated by semi-columns in the
@@ -59,9 +63,10 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "c:d:f:hl:s:v:", 
+                                       "c:d:f:hi:l:s:v:", 
                                        ['collector=', 'date=',
                                         'location=', 'header',
+                                        'id=',
                                         'separator=', 'text=', 
                                         'id-format=', 'help'])
         except getopt.GetoptError as e:
@@ -82,12 +87,18 @@ class Options(dict):
                 self["id_formatter"] = get_id_formatter(a)
             elif o in ('-l', '--location'):
                 self["location"] = range_reader(a)
+            elif o in ('-i', '--id'):
+                self["ID"] = int(a)-1
             elif o in ('-s', '--separator'):
                 self["separator"] = a
             elif o in ('-t', '--text'):
                 self["text"] = int(a)-1
-
+        
         self.args = args
+        
+        # if the ID column is provided, do not use the ID formatter
+        if self["ID"] is not None:
+            self["id_formatter"] = None
     
     def set_default(self):
     
@@ -95,6 +106,7 @@ class Options(dict):
         self["location"] = [0]
         self["date"] = 1
         self["header"] = True
+        self["ID"] = None
         self["collector"] = 2
         self["separator"] = "\t"
         self["id_formatter"] = get_id_formatter("colev:5")
@@ -108,17 +120,20 @@ def main(argv=sys.argv):
     options = Options(argv)
     sys.argv[1:] = options.args
     
-    # organize the main job...
+    # set up the column parameters
+    columns = dict( (key, options[key]) 
+                     for key in ("location", "date", "collector", "text", "ID") 
+                     if options[key] is not None )
+    
+    # extract the data from a table
     data_list = table_to_dicts(fileinput.input(), 
                                 skip_first=options["header"],
                                 sep=options["separator"],
                                 data_sep=", ",
                                 identifier=options["id_formatter"],
-                                location=options["location"],
-                                date=options["date"],
-                                collector=options["collector"],
-                                text=options["text"])
+                                **columns)
     
+    # save in a JSON formatted file
     json.dump(data_list, sys.stdout, ensure_ascii=False, indent=4)
         
     # return 0 if everything succeeded
