@@ -23,7 +23,8 @@ setup(
              'scripts/match_collecting_events.py',
              'scripts/make_labels.py',
              'scripts/search_labels.py',
-             'scripts/sort_labels.py'
+             'scripts/sort_labels.py',
+             'scripts/checkout_collecting_events.py'
             ],
     platforms=['any'],
     version='1.0a1',

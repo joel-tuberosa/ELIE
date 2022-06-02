@@ -85,34 +85,25 @@ def list_ce_by_groups(sorted_labels, best_matches):
         try:
             best_match, score = best_matches[label_ID]
         except KeyError:
-            #sys.stderr.write(f"the label {repr(label_ID)} do not match any"
-            #                  " collecting event.\n")
-            continue
+            best_match, score = ("unassigned", 0)
         try:
             ce_by_group[group_ID].append((best_match, score))
         except KeyError:
             ce_by_group[group_ID] = [(best_match, score)]
     return ce_by_group
-    
-def get_tables(grouped_ce):
-    ce_IDs, scores = zip(*grouped_ce)
-    
-    # mean scores
-    score_table = dict()
-    for ce_ID, score in grouped_ce:
-        try: 
-            score_table[ce_ID].append(score)
-        except KeyError:
-            score_table[ce_ID] = [score]
-    mean_scores = dict( (ce_ID, mean(score_table[ce_ID]))
-                        for ce_ID in score_table )
-                        
-    # frequencies
-    freqs = dict( (x, ce_IDs.count(x)/len(ce_IDs)) for x in set(ce_IDs) )
-    
-    # table
-    return [ (ce_ID, mean_scores[ce_ID], freqs[ce_ID]) 
-              for ce_ID in mean_scores ]
+
+def get_group_best_ce(ce_by_group):
+    best_ce_by_group = dict()
+    for group_ID in ce_by_group:
+        ce_IDs, scores = zip(*ce_by_group[group_ID])
+        n = len(ce_IDs)
+        prop = [ ce_IDs.count(ce_ID)/n for ce_ID in ce_IDs ]
+        best_prop = max(prop)
+        best_i = prop.index(best_prop)
+        best_ce, best_score = ce_by_group[group_ID][best_i]
+        confidence = best_prop*best_score
+        best_ce_by_group[group_ID] = (best_ce, confidence)
+    return best_ce_by_group
         
 def main(argv=sys.argv):
     
@@ -134,21 +125,16 @@ def main(argv=sys.argv):
     # get best matches
     best_matches = get_best_matched_ce(matched_ce)
     
-    # compute probability of label group to represent a given collecting event
-    # - each collecting event is given a score related to its proportion in the 
-    #   group
-    sys.stdout.write("group.ID\tce.ID\tmean.score\tfreq\n")
+    # for each group, find the most frequent CE and calculate a confidence
+    # level
     ce_by_group = list_ce_by_groups(sorted_labels, best_matches)
-    for group_ID in ce_by_group:
-        for ce_ID, mean_score, freq in get_tables(ce_by_group[group_ID]):
-            sys.stdout.write(f"{group_ID}\t{ce_ID}\t{mean_score:.03f}\t{freq:.03f}\n")
-    
-    # - each group is given a score related to the proportions of matching 
-    #   collecting events
-    ## best match
-    ## ..
-    
-    # 
+    best_ce_by_group = get_group_best_ce(ce_by_group)
+
+    # output the result
+    sys.stdout.write("group.ID\tce.ID\tconfidence\n")
+    for group_ID in sorted(best_ce_by_group.keys()):
+        ce_ID, confidence = best_ce_by_group[group_ID]
+        sys.stdout.write(f"{group_ID}\t{ce_ID}\t{confidence:.03f}\n")
     
     # return 0 if everything succeeded
     return 0
