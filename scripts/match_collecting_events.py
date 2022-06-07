@@ -22,7 +22,20 @@ OPTIONS
     -f, --text-fields=STR[,...]
         Limit text search in the collecting events to the provided 
         fields.
+
+    -m, --method=METHOD
+        Provide with the search method to use.
         
+            (1) Every exactly matched token adds 1 unit to the scoring 
+                The scoring is calculated as the expected amount of 
+                units in case of a perfect match, divided by the actual
+                amounts of units.
+                 
+            (2) Similar as method 1, but units are weighted according to
+                their relative TF-IDF score.
+        
+        Default: 1
+
     -u, --unmatched-logs
         Save unmatched items in a log files:
         
@@ -54,8 +67,9 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "di:f:ux", 
+                                       "di:f:m:ux", 
                                        ['date-search',
+                                        'method=',
                                         'text-fields=',
                                         'no-text-search',
                                         'unmatched-logs',
@@ -80,6 +94,8 @@ class Options(dict):
                     notvalid = ', '.join( repr(x) for x in notvalid )
                     raise ValueError("The following keys are not valid:"
                                     f" {notvalid}.")
+            elif o in ('-m', '--method'):
+                self["method"] = int(a)
             elif o in ('-u', '--unmatched-logs'):
                 self["unmatched_logs"] = True
             elif o in ('-x', '--no-text-search'):
@@ -94,6 +110,7 @@ class Options(dict):
     
         # default parameter value
         self['date_search'] = False
+        self["method"] = 1
         self["text_fields"] = ["text"]
         self["text_search"] = True
         self["unmatched_logs"] = False
@@ -137,7 +154,9 @@ def main(argv=sys.argv):
         db = mfnb.labeldata.load_collecting_events(f)
     
     # build the token index with words found in location and collector data
-    db.make_index(min_len=3, keys=options["text_fields"])
+    db.make_index(method=options["method"], 
+                  min_len=3,
+                  keys=options["text_fields"])
     
     # build the date index
     db.make_date_index()
@@ -147,19 +166,6 @@ def main(argv=sys.argv):
     
     # compile the URL pattern (only needed if option --clear-url was set
     url_pattern = regex.compile(r"(?:http://[/\w]){i<=2}")
-    
-    # display parameter
-    sys.stderr.write(f'''
-    Parameters
-    ----------
-        Search in:
-            date    {"yes" if options["date_search"] else "no"}
-            text    {"yes" if options["text_search"] else "no"}
-        
-        Collecting text fields:
-            "{'", "'.join(options["text_fields"])}"
-        
-    ----------\n''')
     
     # print the header for the result table
     write_results(sys.stdout, [], 
