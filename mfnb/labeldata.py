@@ -10,7 +10,7 @@
 import json, sys, mfnb.date, regex
 from nltk import regexp_tokenize
 from math import log
-from mfnb.utils import mismatch_rule, get_word_tokenize_pattern, strip_accents
+from mfnb.utils import mismatch_rule, get_word_tokenize_pattern, strip_accents, get_norm_leven_dist
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from leven import levenshtein
 
@@ -277,7 +277,7 @@ class DB(object):
         self._max_scores = data["max_scores"]
         
     def search(self, query, mismatch_rule=mismatch_rule, 
-               filtering=lambda ID: True):
+               filtering=lambda x: True, scoring=0):
         '''
         Search elements of the database with the query text.
 
@@ -289,14 +289,32 @@ class DB(object):
 
             mismatch_rule : function
                 A function that takes the query value as unique 
-                argument and returns an integer corresponding to the 
-                number of allowed mismatches.
+                argument and returns the regular expression part 
+                parametring a fuzzy match.
 
             filtering : function
-                A function that evaluate the ID attributes of the 
-                matched database elements and returns True or False
-                whether these elements have to be kept in the final
-                result of the search.
+                A function that evaluates every matched element and
+                returns True or False whether these elements have to be
+                kept in the final result of the search.
+
+            scoring : int
+                Set up the scoring method.
+
+                    0   The score is calculated as the product of the 
+                        rates of matching token in the query and in the
+                        subject, then weighted accounting for 
+                        mismatches and TF-IDF scores (this is the 
+                        default method).
+
+                    1   The score is calculated as the normalized 
+                        Levenshtein similarity between the query and 
+                        the target. This Levenshtein similarity is
+                        calculated on a simplified version of the text,
+                        removing accents, case and treating consecutive 
+                        white spaces as single space characters.
+
+                    2   The score is calculated as the product of the 
+                        two previous methods' results.
         '''
                 
         if not self.is_indexed():
@@ -331,7 +349,12 @@ class DB(object):
         # calculate the final score
         hit_scoring = dict()
         for q, x, matched_token, identity, score in results:
-        
+            
+            # with the scoring method implying Levenshtein distance, do not 
+            # account for the identity as mismatches will be evaluated further
+            if scoring > 0:
+                identity = 1
+
             # the hit score of a given collecting event is the sum of the 
             # normalized TFIDF scores matched in this collecting event any
             # of the query tokens
@@ -345,17 +368,33 @@ class DB(object):
         
         # return a list of the matches ordered by normalized score (high to low)
         result = []
-        for ID, scores in hit_scoring.items():
-            score, n = scores
-            
-            # the score is normalized by the maximum score (i.e. if all token 
-            # are matched in the collecting event
-            score /= self._max_scores[ID]
-            
-            # ...and weighted by the number of matching token
-            score *= (n/len(query_tokens))
-            
-            result.append((self.get(ID), score))
+
+        # scoring methods 0 and 2 includes token scores
+        if scoring != 1:
+            for ID, scores in hit_scoring.items():
+                score, n = scores
+                
+                # the score is normalized by the maximum score (i.e. if all token 
+                # are matched in the collecting event
+                score /= self._max_scores[ID]
+                
+                # ...and weighted by the number of matching token
+                score *= (n/len(query_tokens))
+                
+                # ...and with method 2, weighted by the normalized Levenshtein 
+                # distance
+                if scoring == 2:
+                    score *= (1-get_norm_leven_dist(query, self.get(ID).text, 
+                                                    simplify=True))
+                result.append((self.get(ID), score))
+        else:
+            for ID, scores in hit_scoring.items():
+                score, n = scores
+
+                # in method 1, the score is the normalized Levenshtein distance
+                score = 1-get_norm_leven_dist(query, self.get(ID).text, 
+                                              simplify=True)
+                result.append((self.get(ID), score))
         
         # result are sorted from best to lowest matching score    
         result.sort(key=lambda x: x[1], reverse = True)
@@ -382,9 +421,12 @@ class DB(object):
         
         # retrieve matching tokens
         if mismatch_rule is None:
-            result = [ (self.get(x), value, score) 
-                        for x, score in self._index[value] 
-                        if filtering(x) ]
+            try:
+                result = [ (x, value, 1, score) 
+                            for x, score in self._index[value] 
+                            if filtering(x) ]
+            except KeyError:
+                result = []
         else:
             pattern = regex.compile(fr"(?:{value}){mismatch_rule(value)}")
             
@@ -408,8 +450,7 @@ class DB(object):
             result = [ result[i] 
                         for i in range(len(result)) 
                         if i==0 or result[i-1][0] != result[i][0] ]
-
-        return result    
+        return result
     
     def get_corpus(self, keys=None, masks=None, join="\n"):
     
