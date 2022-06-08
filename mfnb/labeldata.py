@@ -279,7 +279,24 @@ class DB(object):
     def search(self, query, mismatch_rule=mismatch_rule, 
                filtering=lambda ID: True):
         '''
-        Search elements using input text.
+        Search elements of the database with the query text.
+
+        Parameters
+        ----------
+            query : str
+                A text that will be tokenized and search over the 
+                database index.
+
+            mismatch_rule : function
+                A function that takes the query value as unique 
+                argument and returns an integer corresponding to the 
+                number of allowed mismatches.
+
+            filtering : function
+                A function that evaluate the ID attributes of the 
+                matched database elements and returns True or False
+                whether these elements have to be kept in the final
+                result of the search.
         '''
                 
         if not self.is_indexed():
