@@ -10,7 +10,10 @@
 import json, sys, mfnb.date, regex
 from nltk import regexp_tokenize
 from math import log
-from mfnb.utils import mismatch_rule, get_word_tokenize_pattern, strip_accents, get_norm_leven_dist
+from mfnb.utils import (mismatch_rule, 
+                        get_word_tokenize_pattern, 
+                        strip_accents, 
+                        get_norm_leven_dist)
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from leven import levenshtein
 
@@ -277,7 +280,7 @@ class DB(object):
         self._max_scores = data["max_scores"]
         
     def search(self, query, mismatch_rule=mismatch_rule, 
-               filtering=lambda x: True, scoring=0):
+               filtering=lambda x: True, scoring="w"):
         '''
         Search elements of the database with the query text.
 
@@ -297,24 +300,22 @@ class DB(object):
                 returns True or False whether these elements have to be
                 kept in the final result of the search.
 
-            scoring : int
+            scoring : str
                 Set up the scoring method.
-
-                    0   The score is calculated as the product of the 
-                        rates of matching token in the query and in the
-                        subject, then weighted accounting for 
-                        mismatches and TF-IDF scores (this is the 
-                        default method).
-
-                    1   The score is calculated as the normalized 
-                        Levenshtein similarity between the query and 
-                        the target. This Levenshtein similarity is
-                        calculated on a simplified version of the text,
-                        removing accents, case and treating consecutive 
-                        white spaces as single space characters.
-
-                    2   The score is calculated as the product of the 
-                        two previous methods' results.
+                    "w" The score is calculated as the product of the 
+                    rates of matching token in the query and in the
+                    subject, then weighted accounting for mismatches 
+                    and TF-IDF scores (default).
+                    
+                    "l" The score is calculated as the normalized 
+                    Levenshtein similarity between the query and the 
+                    target. This Levenshtein similarity is calculated
+                    on a simplified version of the text, removing 
+                    accents, case and treating consecutive white spaces
+                    as single space characters.
+                    
+                    "w+l" The score is calculated as the product of the 
+                    two previous methods' results.
         '''
                 
         if not self.is_indexed():
@@ -352,7 +353,7 @@ class DB(object):
             
             # with the scoring method implying Levenshtein distance, do not 
             # account for the identity as mismatches will be evaluated further
-            if scoring > 0:
+            if scoring != "w":
                 identity = 1
 
             # the hit score of a given collecting event is the sum of the 
@@ -369,8 +370,8 @@ class DB(object):
         # return a list of the matches ordered by normalized score (high to low)
         result = []
 
-        # scoring methods 0 and 2 includes token scores
-        if scoring != 1:
+        # scoring methods w and w+l includes token scores
+        if scoring in ("w", "w+l"):
             for ID, scores in hit_scoring.items():
                 score, n = scores
                 
@@ -381,21 +382,23 @@ class DB(object):
                 # ...and weighted by the number of matching token
                 score *= (n/len(query_tokens))
                 
-                # ...and with method 2, weighted by the normalized Levenshtein 
-                # distance
-                if scoring == 2:
+                # ...and with method w+l, weighted by the normalized 
+                # Levenshtein distance
+                if scoring == "w+l":
                     score *= (1-get_norm_leven_dist(query, self.get(ID).text, 
                                                     simplify=True))
                 result.append((self.get(ID), score))
-        else:
+        elif scoring == "l":
             for ID, scores in hit_scoring.items():
                 score, n = scores
 
-                # in method 1, the score is the normalized Levenshtein distance
+                # in method l, the score is the normalized Levenshtein distance
                 score = 1-get_norm_leven_dist(query, self.get(ID).text, 
                                               simplify=True)
                 result.append((self.get(ID), score))
-        
+        else:
+            raise ValueError(f"unknown scoring method: {repr(scoring)}")
+
         # result are sorted from best to lowest matching score    
         result.sort(key=lambda x: x[1], reverse = True)
         return result      

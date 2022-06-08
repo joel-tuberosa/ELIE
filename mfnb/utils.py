@@ -517,7 +517,8 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
 
 def clean_str(s):
     '''
-    Stip quotes and convert \\n to newline characters.
+    Stip quotes, convert \\n to newline characters and \\t to 
+    tabulations.
     '''
     
     # remove quotes
@@ -528,4 +529,7 @@ def clean_str(s):
     
     # convert newline
     s = s.replace(r"\n", "\n")
+
+    # convert TABs
+    s = s.replace(r"\t", "\t")
     return s
