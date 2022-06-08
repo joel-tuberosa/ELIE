@@ -16,7 +16,8 @@ setup(
           'sklearn',
           'regex',
           'leven',
-          'scikit-learn-extra'
+          'scikit-learn-extra',
+          'kneed'
       ],
     packages=["mfnb"],
     scripts=['scripts/make_collecting_events.py', 

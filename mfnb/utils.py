@@ -22,6 +22,7 @@ from nltk import regexp_tokenize, word_tokenize
 ### allow 2-3 items in the URL
 NURI_pattern = regex.compile(r"(?:http://(?:[\w\s.-]+/)+\s?[\w]+){s<=3}",
                              flags=regex.MULTILINE | regex.V1)
+WS_pattern = regex.compile(r"\s+", flags=regex.MULTILINE)
 
 # =============================================================================
 # FUNCTIONS
@@ -320,11 +321,34 @@ def ngram_search(a, ngrams, mismatch_rule=mismatch_rule):
     return sorted( (ngram, ngram_dist(a, ngram)) 
                     for ngram in matching_ngrams )
 
-def strip_accents(s):
-   return ''.join(c for c in unicodedata.normalize('NFD', s)
-                  if unicodedata.category(c) != 'Mn')
+def smoothen_white_spaces(s, pattern=WS_pattern):
+    '''
+    Strip white spaces from the input string and convert other 
+    consecutive white spaces into single space characters.
+    '''
 
-def get_norm_leven_dist(a, b):
+    return pattern.sub(" ", s.strip())
+
+def strip_accents(s):
+    '''
+    Strip accent from a unicode character string.
+    '''
+    return ''.join(c for c in unicodedata.normalize('NFD', s)
+                   if unicodedata.category(c) != 'Mn')
+
+def simplify_str(s):
+    '''
+    Strip the input string, convert any remaining consecutive white 
+    spaces into single space characters, convert to lowercase and
+    strip accents.
+    '''
+
+    s = smoothen_white_spaces(s)
+    s = strip_accents(s)
+    s = s.lower()
+    return s
+
+def get_norm_leven_dist(a, b, simplify=False):
     '''
     Calculate the Levenshtein distance between two character strings, 
     then normalize this score by the length of the longest string.
@@ -336,12 +360,18 @@ def get_norm_leven_dist(a, b):
         
         b : str
             Another character string.
+
+        simplify : bool
+            If set True, convert any consecutive white spaces into
+            single space characters, convert to lowercase and strip
+            accents.
     '''
-    
+    if simplify:
+        a, b = simplify_str(a), simplify_str(b)
     l = max([len(a), len(b)])
     return levenshtein(a, b)/l
 
-def get_pairwise_leven_dist(lines):
+def get_pairwise_leven_dist(lines, simplify=False):
     '''
     Calculate Levenshtein distances between all possible pairs of lines
     provided in input.
@@ -350,12 +380,18 @@ def get_pairwise_leven_dist(lines):
     ----------
         lines : list
             A list of str that will be compared by pair.
+
+        simplify : bool
+            If set True, convert any consecutive white spaces into
+            single space characters, convert to lowercase and strip
+            accents.
     '''
     
     # calculate all possible pairwise distance (avoid diagonal and duplicate 
     # comparisons)
     n = len(lines)
-    dist = np.array([ [ get_norm_leven_dist(lines[i], lines[j]) if j < i else 0
+    dist = np.array([ [ get_norm_leven_dist(lines[i], lines[j], simplify=simplify) 
+                          if j < i else 0
                          for i in range(n) ]
                          for j in range(n) ])
     
@@ -366,7 +402,7 @@ def get_pairwise_leven_dist(lines):
     # return the pairwise distance matrix
     return dist
 
-def get_levenKMedoids(lines, n_clusters=8, random_state=12345):
+def get_levenKMedoids(lines, n_clusters=8, simplify=False, random_state=12345):
     '''
     Attempt to cluster strings given their similarity (expressed as 
     Levenshtein distance).
@@ -379,12 +415,17 @@ def get_levenKMedoids(lines, n_clusters=8, random_state=12345):
         n_clusters : int
             The number of clusters to define. Default=8.
         
+        simplify : bool
+            If set True, convert any consecutive white spaces into
+            single space characters, convert to lowercase and strip
+            accents.
+
         random_state : int
             A random seed
     '''
     
     # calculate pairwise distances between input strings
-    dist = get_pairwise_leven_dist(lines)
+    dist = get_pairwise_leven_dist(lines, simplify=simplify)
         
     # find n_clusters KMedoids
     kmedoids = KMedoids(n_clusters=n_clusters, 
@@ -394,7 +435,7 @@ def get_levenKMedoids(lines, n_clusters=8, random_state=12345):
     return (kmedoids, dist)
 
 def find_levenKMedoids(lines, max_cluster=8, method="elbow", 
-                       random_state=12345):
+                       simplify=False, random_state=12345):
     '''
     Optimize clustering of strings given their similarity (expressed as
     Levenshtein distance).
@@ -416,6 +457,11 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
                 silhouette  Select the cluster number corresponding to 
                             the maximum silhouette coefficient.
         
+        simplify : bool
+            If set True, convert any consecutive white spaces into
+            single space characters, convert to lowercase and strip
+            accents.
+
         random_state : int
             A random seed
     '''
@@ -425,7 +471,7 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
         raise ValueError("max_cluster value must be an integer greater than 1")
     
     # calculate KMedoids for 1 to max_cluster cluster numbers
-    kmedoids_results = [ get_levenKMedoids(lines, i, random_state) 
+    kmedoids_results = [ get_levenKMedoids(lines, i, simplify, random_state) 
                           for i in range(2, max_cluster+1) ]
     
     # elbow selection
