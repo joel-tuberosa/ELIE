@@ -25,16 +25,29 @@ OPTIONS
 
     -m, --method=METHOD
         Provide with the search method to use.
-        
-            (1) Every exactly matched token adds 1 unit to the scoring 
-                The scoring is calculated as the expected amount of 
-                units in case of a perfect match, divided by the actual
-                amounts of units.
-                 
-            (2) Similar as method 1, but units are weighted according to
-                their relative TF-IDF score.
-        
-        Default: 1
+
+            (1) (Default) Every exactly matched token adds 1 unit to 
+            the scoring The scoring is calculated as the expected 
+            amount of units in case of a perfect match, divided by the
+            actual amounts of units.
+
+            (2) Similar as method 1, but units are weighted according
+            to their relative TF-IDF score.
+
+    -s, --scoring=METHOD
+        Indicate how to calculate the hit scoring.
+
+            (w) (Default) The score is calculated as the product of the
+            rates of matching token in the query and in the subject, 
+            then weighted accounting for mismatches and TF-IDF scores.
+
+            (l) The score is calculated as the normalized Levenshtein 
+            similarity between the query and the target. This 
+            Levenshtein similarity is calculated on a simplified 
+            version of the text, removing accents, case and treating 
+            consecutive white spaces as single space characters.
+
+            (w+l) Calculate the product of both scoring method.
 
     -u, --unmatched-logs
         Save unmatched items in a log files:
@@ -67,10 +80,11 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "di:f:m:ux", 
+                                       "di:f:m:us:x", 
                                        ['date-search',
                                         'method=',
                                         'text-fields=',
+                                        'scoring=',
                                         'no-text-search',
                                         'unmatched-logs',
                                         'help'])
@@ -96,6 +110,8 @@ class Options(dict):
                                     f" {notvalid}.")
             elif o in ('-m', '--method'):
                 self["method"] = int(a)
+            elif o in ('-s', '--scoring'):
+                self["scoring"] = a
             elif o in ('-u', '--unmatched-logs'):
                 self["unmatched_logs"] = True
             elif o in ('-x', '--no-text-search'):
@@ -111,6 +127,7 @@ class Options(dict):
         # default parameter value
         self['date_search'] = False
         self["method"] = 1
+        self["scoring"] = "w"
         self["text_fields"] = ["text"]
         self["text_search"] = True
         self["unmatched_logs"] = False
@@ -203,7 +220,8 @@ def main(argv=sys.argv):
                 if options["text_search"]:
                     hits = db.search(label.text, 
                                      mismatch_rule=mfnb.utils.mismatch_rule, 
-                                     filtering=filtering)
+                                     filtering=filtering,
+                                     scoring=options["scoring"])
                 
                 # save labels that did not match any collecting events
                 if not hits:
