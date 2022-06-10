@@ -96,12 +96,24 @@ def get_group_best_ce(ce_by_group):
     best_ce_by_group = dict()
     for group_ID in ce_by_group:
         ce_IDs, scores = zip(*ce_by_group[group_ID])
+
+        # calculate the proportion of each different collecting events
+        # associated with the group and find the collecting event with
+        # the highest proportion.
         n = len(ce_IDs)
-        prop = [ ce_IDs.count(ce_ID)/n for ce_ID in ce_IDs ]
-        best_prop = max(prop)
-        best_i = prop.index(best_prop)
-        best_ce, best_score = ce_by_group[group_ID][best_i]
-        confidence = best_prop*best_score
+        prop = sorted([ (ce_ID, ce_IDs.count(ce_ID)/n) 
+                         for ce_ID in set(ce_IDs) ],
+                      key=lambda x: x[1])
+        best_ce, best_prop = prop[-1]
+
+        # gather the hit score of all labels matching the best_ce and calculate
+        # a mean score.
+        mean_score = mean( scores[i] 
+                            for i in range(len(ce_IDs))
+                            if ce_IDs[i] == best_ce )
+        confidence = best_prop*mean_score
+
+        # for each group, save the best CE and the associated confidence score
         best_ce_by_group[group_ID] = (best_ce, confidence)
     return best_ce_by_group
         
