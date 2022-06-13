@@ -78,6 +78,7 @@ OPTIONS
 
 import getopt, sys, json, fileinput, regex
 import mfnb.date, mfnb.labeldata, mfnb.geo, mfnb.name, mfnb.utils
+import numpy as np
 from io import StringIO
 from random import randrange
 
@@ -178,19 +179,36 @@ def parse_name(text, db=None, allow_unknown=False, thresh=0):
     namestr = " & ".join(names)
     return (matched_str, span, namestr)
 
-def refine(labels):
+def refine(labels, get_median_dist=False):
     '''
     Identify K-medoids within a group of labels. Does not do anything
     if there are less than 4 elements.
+
+    Parameters
+    ----------
+        labels : list
+            A list of Label object, whose text attribute will be 
+            compared.
+
+        get_median_dist : bool
+            Output each label along with its median distance with 
+            other labels in the same cluster.
     '''
-    
+
     # extract text
     lines = [ label.text for label in labels ]
     n = len(lines)
 
+    # calculates the pairwise distance matrix
+    dist = mfnb.utils.get_pairwise_leven_dist(lines, simplify=True)
+
     # does not attempt anything for less than 8 elements
-    ### --> we could implement an outlier detection
     if n < 8:
+
+        # get median distance for each point
+        if get_median_dist:
+            margin_medians = mfnb.utils.get_median_dists(dist)
+            labels = list(zip(labels, margin_medians))
         return [labels]
         
     # the maximum number of cluster to evaluate is 20, or the number of
@@ -202,21 +220,42 @@ def refine(labels):
     
     # attempt to optimise clustering using the knee selection method on the SSE 
     # values
-    kmedoids = mfnb.utils.find_levenKMedoids(lines, max_cluster=max_cluster)
+    kmedoids = mfnb.utils.find_levenKMedoids(dist, max_cluster=max_cluster)
     
     # if the cluster identification failed with this method, do not cluster
     if kmedoids is None:
+        
+        # get median distance for each point
+        if get_median_dist:
+            margin_medians = mfnb.utils.get_median_dists(dist)
+            labels = list(zip(labels, margin_medians))
         return [labels]
     
     # otherwise returns a list of clusters (which are lists of sorted items)
     clusters = dict()
-    for i, label in zip(kmedoids.labels_, labels):
+    index_map = dict()
+    for cluster_index, label_index in zip(kmedoids.labels_, range(len(labels))):
+        label = labels[label_index]
         try:
-            clusters[i].append(label)
+            clusters[cluster_index].append(label)
+            index_map[cluster_index].append(label_index)
         except KeyError:
-            clusters[i] = [label]
+            clusters[cluster_index] = [label]
+            index_map[cluster_index] = [label_index]
+    
+    # calculate median distances within each subcluster
+    if get_median_dist:
+        for cluster_index in index_map:
+            indexes = np.array(index_map[cluster_index])
+            rows, cols = indexes[:,None], indexes[None,:]
+            subdist = dist[rows, cols]
+            subdist_median = mfnb.utils.get_median_dists(subdist)
+            clusters[cluster_index] = list(zip(clusters[cluster_index], 
+                                               subdist_median))
+
+    # return a list of lists containing labels from the same cluster
     return list(clusters.values())
-        
+
 def main(argv=sys.argv):
     
     # read options and remove options strings from argv (avoid option 

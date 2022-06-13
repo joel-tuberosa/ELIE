@@ -4,6 +4,8 @@
     manipulation and formatting.
 '''
 
+from multiprocessing.sharedctypes import Value
+from re import A
 import regex
 import unicodedata
 import numpy as np
@@ -402,15 +404,40 @@ def get_pairwise_leven_dist(lines, simplify=False):
     # return the pairwise distance matrix
     return dist
 
-def get_levenKMedoids(lines, n_clusters=8, simplify=False, random_state=12345):
+def get_median_dists(dist):
+    '''
+    Extract the median values for each row of the input matrix.
+
+    Parameters
+    ----------
+        dist : ndarray
+            A pairwise distance matrix embedded in a 2D array. The 
+            diagonal of this matrix is supposed to go from top left to
+            bottom right and is ignored during median extraction.
+    '''
+    
+    # check matrix
+    check = (np.allclose(dist, dist.T, atol=1e-8, rtol=1e-8),
+             len(dist.shape) == 2) 
+    if not all(check):
+        raise ValueError("input must be a symmetrical pairwise distance"
+                         " matrix")
+    n = dist.shape[0]
+
+    # calculate median value while ignoring the diagonal values
+    return [ np.median([ dist[i,j] for j in range(n) if i != j ])
+                          for i in range(n) ]
+
+def get_levenKMedoids(x, n_clusters=8, simplify=False, random_state=12345):
     '''
     Attempt to cluster strings given their similarity (expressed as 
     Levenshtein distance).
     
     Parameters
     ----------
-        lines : list
-            A list of str that will be compared by pair.
+        x : list|ndarray
+            Can be either a list of str that will be compared by pair
+            or a pairwise distance matrix embedded in an 2D array.
             
         n_clusters : int
             The number of clusters to define. Default=8.
@@ -424,15 +451,26 @@ def get_levenKMedoids(lines, n_clusters=8, simplify=False, random_state=12345):
             A random seed
     '''
     
+    # check x
+    if all( type(e) is str for e in x ):
+        str_input = True
+    elif len(x.shape) == 2 and x.shape[0] == x.shape[1]:
+        str_input = False
+    else:
+        raise ValueError('x must be either a list of str to be'
+                         ' compared, or the corresponding pairwise'
+                         ' distance matrix.')
+
     # calculate pairwise distances between input strings
-    dist = get_pairwise_leven_dist(lines, simplify=simplify)
+    if str_input:
+        x = get_pairwise_leven_dist(x, simplify=simplify)
         
     # find n_clusters KMedoids
     kmedoids = KMedoids(n_clusters=n_clusters, 
                         metric="precomputed",
                         init="k-medoids++",
-                        random_state=random_state).fit(dist)
-    return (kmedoids, dist)
+                        random_state=random_state).fit(x)
+    return (kmedoids, x)
 
 def find_levenKMedoids(lines, max_cluster=8, method="elbow", 
                        simplify=False, random_state=12345):
