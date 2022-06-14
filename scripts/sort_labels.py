@@ -187,13 +187,17 @@ def refine(labels, get_median_dist=False):
     Parameters
     ----------
         labels : list
+            A Label DB or a list of Label objects, whose text attribute
             A list of Label object, whose text attribute will be 
-            compared.
+            will be compared.
 
         get_median_dist : bool
             Output each label along with its median distance with 
             other labels in the same cluster.
     '''
+
+    # list input
+    labels = [ label for label in labels ]
 
     # extract text
     lines = [ label.text for label in labels ]

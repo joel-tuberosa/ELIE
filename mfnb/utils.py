@@ -520,7 +520,7 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
                 
         # locate the knee, assuming that SSE values are decreasing with increased 
         # cluster number and forming a convex curve
-        kl = KneeLocator(range(1, max_cluster+1), sse, curve="convex", 
+        kl = KneeLocator(range(max_cluster), sse, curve="convex", 
                          direction="decreasing")
         
         # best takes the value -1 if the method failed
@@ -529,7 +529,7 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
         
         # get the KMedoids clustering at the elbow of the SSE curve
         else:
-            best = kl.elbow-1
+            best = kl.elbow
         
     # silhouette coefficient selection
     elif method == "silhouette":
