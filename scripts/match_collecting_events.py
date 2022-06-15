@@ -2,7 +2,7 @@
 
 '''
 USAGE
-    match_collecting_events.py [OPTION] DB FILE[...]
+    match_collecting_events.py [OPTION] DB [FILE...]
 
 DESCRIPTION
     Load a collecting event database (a JSON formatted file), match
@@ -117,9 +117,8 @@ class Options(dict):
             elif o in ('-x', '--no-text-search'):
                 self["text_search"] = False
             
-        if len(args) < 2:
-            raise ValueError("At least the database file and one input"
-                             " file has to be provided.")
+        if len(args) < 1:
+            raise ValueError("Database file not provided.")
         self.args = args
     
     def set_default(self):
@@ -156,7 +155,38 @@ def write_results(fout, matches, query_fields=[], subject_fields=[], sep="\t",
         fout.write(f"{query_field_values}"
                    f"\t{subject_field_values}"
                    f"\t{score:.3f}\n")
-        
+
+def parse_labels(f):
+    '''
+    Parse labels from the input file.
+    '''
+
+    # each label is comprised within curly brackets, there are no nested
+    # brackets
+    s, on = "", False
+    for line in f:
+        start, end = line.find("{"), line.find("}")
+        if start == -1:
+            if on: 
+                s += line[:end]
+                if end > -1:
+                    yield mfnb.labeldata.Label(**json.loads("{"+s+"}"))
+                    s, on = "", False
+            elif end > -1:
+                raise ValueError("Input format error: nested curly brackets"
+                                 " found")
+        else:
+            if on:
+                raise ValueError("Input format error: nested curly brackets"
+                                 " found")
+            end = line.find("}")
+            s += line[start+1:end]
+            if end == -1:
+                on = True
+            else:
+                yield mfnb.labeldata.Label(**json.loads("{"+s+"}"))
+                s, on = "", False
+
 def main(argv=sys.argv):
     
     # read options and remove options strings from argv (avoid option 
@@ -177,13 +207,7 @@ def main(argv=sys.argv):
     
     # build the date index
     db.make_date_index()
-    
-    # make a date_parser
-    date_parser = mfnb.date.DatePatterns()        
-    
-    # compile the URL pattern (only needed if option --clear-url was set
-    url_pattern = regex.compile(r"(?:http://[/\w]){i<=2}")
-    
+        
     # print the header for the result table
     write_results(sys.stdout, [], 
                    ["label.ID", "label.text"], 
@@ -195,52 +219,50 @@ def main(argv=sys.argv):
     unmatched_ce = { ce.ID for ce in db }
     unmatched_labels = set()
     
-    # read label text that is stored in a JSON input file
-    while sys.argv[1:]:
-        with open(sys.argv.pop(1)) as f:
-            for label in mfnb.labeldata.load_labels(f):
-                
-                # search
-                hits = []
-                
-                # - by date
-                if options["date_search"]:
-                    date, _ = mfnb.date.find_date(label.text)
-                    if date is None:
-                        filtering = lambda ce: True
-                    else:
-                        hits = db.search_by_date(date, 
-                                                 assume_same_century=True)
-                        ids = set( ce.ID for ce in hits )
-                        filtering = lambda ce: ce.ID in ids
-                else:
-                    filtering = lambda ce: True
-                
-                # - by text
-                if options["text_search"]:
-                    hits = db.search(label.text, 
-                                     mismatch_rule=mfnb.utils.mismatch_rule, 
-                                     filtering=filtering,
-                                     scoring=options["scoring"])
-                
-                # save labels that did not match any collecting events
-                if not hits:
-                    unmatched_labels.add(label.ID)
-                
-                # remove matched collecting from the set of unmatched 
-                # collecting events
-                for ce, score in hits:
-                    try:
-                        unmatched_ce.remove(ce.ID)
-                    except KeyError:
-                        pass
-                
-                # print the result
-                matches = ( (label.export(), ce.export(), score) 
-                             for ce, score in hits )
-                write_results(sys.stdout, matches, 
-                              ["ID", "text"],
-                              ["ID", "location", "date", "collector", "text"])
+    # read label text that is stored in one or several JSON input 
+    # files
+    for label in parse_labels(fileinput.input()):
+
+        # search
+        hits = []
+        
+        # - by date
+        if options["date_search"]:
+            date, _ = mfnb.date.find_date(label.text)
+            if date is None:
+                filtering = lambda ce: True
+            else:
+                hits = db.search_by_date(date, assume_same_century=True)
+                ids = set( ce.ID for ce in hits )
+                filtering = lambda ce: ce.ID in ids
+        else:
+            filtering = lambda ce: True
+        
+        # - by text
+        if options["text_search"]:
+            hits = db.search(label.text, 
+                                mismatch_rule=mfnb.utils.mismatch_rule, 
+                                filtering=filtering,
+                                scoring=options["scoring"])
+        
+        # save labels that did not match any collecting events
+        if not hits:
+            unmatched_labels.add(label.ID)
+        
+        # remove matched collecting from the set of unmatched 
+        # collecting events
+        for ce, score in hits:
+            try:
+                unmatched_ce.remove(ce.ID)
+            except KeyError:
+                pass
+        
+        # print the result
+        matches = ( (label.export(), ce.export(), score) 
+                        for ce, score in hits )
+        write_results(sys.stdout, matches, 
+                        ["ID", "text"],
+                        ["ID", "location", "date", "collector", "text"])
                 
     # print the unmatched item log
     if options["unmatched_logs"]:
