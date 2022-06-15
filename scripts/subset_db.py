@@ -62,7 +62,7 @@ def main(argv=sys.argv):
     db = [ x for x in db if x["ID"] in id_list ]
 
     # write the subset DB in stdout
-    json.dump(db, sys.stdout)
+    json.dump(db, sys.stdout, ensure_ascii=False, indent=4)
 
     # return 0 if everything succeeded
     return 0
