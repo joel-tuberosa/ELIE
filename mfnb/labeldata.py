@@ -127,7 +127,7 @@ class DB(object):
     Store a searchable collection of elements of the same type.
     '''
         
-    def __init__(self, dbtype, values=[]):
+    def __init__(self, values, dbtype=None):
         '''
         Load a list of object.
         '''
@@ -137,8 +137,13 @@ class DB(object):
             if not hasattr(dbtype, attr):
                 raise TypeError("Element type of the database must have an"
                                f" '{attr}' attribute.")
-        self.element_type = dbtype
-                               
+        
+        # type guess
+        if dbtype is None:
+            self.element_type = type(values[0])
+        else:
+            self.element_type = dbtype
+
         # type check
         if not all( type(x) is self.element_type for x in values ):
             raise TypeError("Input values must only be"
@@ -160,6 +165,14 @@ class DB(object):
                              " initialization.")
         self._element_type = value
     
+    def dump_db(self, f):
+        '''
+        Save the database in JSON format.
+        '''
+
+        obj = [ x.export() for x in self ]
+        json.dump(obj, f, ensure_ascii=False, indent=4)
+
     def get(self, value):
         return self._dict[value]
     
@@ -489,7 +502,7 @@ class DB(object):
         
         values = [ x for x in self._dict.values() if filtering(x) ]
         subdb = DB.__new__(DB)
-        subdb.__init__(self.element_type, values=values)
+        subdb.__init__(values, dbtype=self.element_type)
         subdb.__name__ = self.__class__.__name__
         return subdb
         
@@ -512,26 +525,26 @@ class LabelDB(DB):
     Store label data and allow text search.
     '''
     
-    def __init__(self, values=[]):
+    def __init__(self, values):
         '''
         Load a list of labels.
         '''
                 
         # type check and DB build
-        DB.__init__(self, Label, values)
+        DB.__init__(self, values, dbtype=Label)
         
 class CollectingEventDB(DB):
     '''
     Store collecting events and allow text-based search.
     '''
     
-    def __init__(self, values=[]):
+    def __init__(self, values):
         '''
         Load a list of collecting events.
         '''
         
         # type check and DB build
-        DB.__init__(self, CollectingEvent, values)
+        DB.__init__(self, values, dbtype=CollectingEvent)
     
     def has_date_index(self):
         return hasattr(self, "_date_index")
@@ -611,6 +624,20 @@ class CollectingEventDB(DB):
 # =============================================================================
 # FUNCTIONS
 # -----------------------------------------------------------------------------
+def load_db(f):
+    '''
+    Build a database from data stored in a JSON file. Guess the 
+    database type from the type of the first parsed object.
+    
+    Parameters
+    ----------
+        f : file
+            File object to access JSON data with the json.load method.
+    '''    
+
+    return DB([ Label(**x) for x in json.load(f) ])
+
+
 def load_labels(f):
     '''
     Build a label database from data stored in a JSON file.
