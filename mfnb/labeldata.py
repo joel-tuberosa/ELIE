@@ -8,6 +8,7 @@
 '''
 
 import json, sys, mfnb.date, regex
+from typing import Type
 from nltk import regexp_tokenize
 from math import log
 from mfnb.utils import (mismatch_rule, 
@@ -624,20 +625,6 @@ class CollectingEventDB(DB):
 # =============================================================================
 # FUNCTIONS
 # -----------------------------------------------------------------------------
-def load_db(f):
-    '''
-    Build a database from data stored in a JSON file. Guess the 
-    database type from the type of the first parsed object.
-    
-    Parameters
-    ----------
-        f : file
-            File object to access JSON data with the json.load method.
-    '''    
-
-    return DB([ Label(**x) for x in json.load(f) ])
-
-
 def load_labels(f):
     '''
     Build a label database from data stored in a JSON file.

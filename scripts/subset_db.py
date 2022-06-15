@@ -14,7 +14,7 @@ OPTIONS
 
 '''
 
-import getopt, sys, fileinput, mfnb.labeldata
+import getopt, sys, fileinput, json
 
 class Options(dict):
 
@@ -53,16 +53,16 @@ def main(argv=sys.argv):
     
     # load the database to subset
     with open(db_fname) as f:
-        db = mfnb.labeldata.load_db(f)
-
+        db = json.load(f)
+    
     # load the IDs of the element to be kept
     id_list = [ line.strip() for line in fileinput.input() ]
     
     # subset the DB
-    db = db.subset(lambda x: x.ID in id_list)
+    db = [ x for x in db if x["ID"] in id_list ]
 
     # write the subset DB in stdout
-    db.dump_db(sys.stdout)
+    json.dump(db, sys.stdout)
 
     # return 0 if everything succeeded
     return 0
