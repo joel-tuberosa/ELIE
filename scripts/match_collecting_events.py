@@ -18,7 +18,7 @@ OPTIONS
         Prior to the text search, identify a date in the label, then 
         limit the text search to collecting events with overlapping
         dates.
-        
+
     -f, --text-fields=STR[,...]
         Limit text search in the collecting events to the provided 
         fields.
@@ -33,6 +33,10 @@ OPTIONS
 
             (2) Similar as method 1, but units are weighted according
             to their relative TF-IDF score.
+
+    -p, --persist
+        If limited search was unsuccessful (i.e. limiting to collecting
+        events with overlapping dates) search onto the whole database.
 
     -s, --scoring=METHOD
         Indicate how to calculate the hit scoring.
@@ -80,10 +84,11 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "di:f:m:us:x", 
+                                       "di:f:m:pus:x", 
                                        ['date-search',
                                         'method=',
                                         'text-fields=',
+                                        'persist',
                                         'scoring=',
                                         'no-text-search',
                                         'unmatched-logs',
@@ -100,7 +105,6 @@ class Options(dict):
                 self['date_search'] = True
             elif o in ('-f', '--text-fields'):
                 self["text_fields"] = a.split(",")
-                allowed_keys = mfnb.labeldata.CollectingEvent.keys
                 notvalid = [ x 
                              for x in self["text_fields"] 
                              if x not in mfnb.labeldata.CollectingEvent.keys ]
@@ -110,6 +114,8 @@ class Options(dict):
                                     f" {notvalid}.")
             elif o in ('-m', '--method'):
                 self["method"] = int(a)
+            elif o in ('-p', '--persist'):
+                self["persist"] = True
             elif o in ('-s', '--scoring'):
                 self["scoring"] = a
             elif o in ('-u', '--unmatched-logs'):
@@ -126,6 +132,7 @@ class Options(dict):
         # default parameter value
         self['date_search'] = False
         self["method"] = 1
+        self["persist"] = False
         self["scoring"] = "w"
         self["text_fields"] = ["text"]
         self["text_search"] = True
@@ -241,9 +248,17 @@ def main(argv=sys.argv):
         # - by text
         if options["text_search"]:
             hits = db.search(label.text, 
-                                mismatch_rule=mfnb.utils.mismatch_rule, 
-                                filtering=filtering,
-                                scoring=options["scoring"])
+                             mismatch_rule=mfnb.utils.mismatch_rule, 
+                             filtering=filtering,
+                             scoring=options["scoring"])
+
+            # try on the whole database if --persist option was set
+            if all((options["persist"], options["date_search"], 
+                    date is not None, not hits)):
+                hits = db.search(label.text, 
+                                 mismatch_rule=mfnb.utils.mismatch_rule, 
+                                 filtering=lambda ce: True,
+                                 scoring=options["scoring"])
         
         # save labels that did not match any collecting events
         if not hits:
