@@ -2,12 +2,13 @@
 
 '''
 USAGE
-    checkout_collecting_events.py [OPTION] SORTED MATCHES
+    checkout_collecting_events.py [OPTION] SORTED MATCHES[...]
 
 DESCRIPTION
     Identify inconsistensies between the outputs of sort_labels.py 
     (SORTED) and match_collecting_events.py (MATCHES) in order to 
-    validate collecting event attributions.
+    validate collecting event attributions. Several MATCHES files can
+    be provided. 
 
 OPTIONS
     --help
@@ -55,20 +56,21 @@ def read_sorted_labels(fname):
             sorted_labels[label_ID] = group_ID
     return sorted_labels
 
-def read_matched_ce(fname):
+def read_matched_ce(*fnames):
     matched_ce = dict()
-    with open(fname) as f:
-        header = f.readline().strip().split("\t")
-        i, j = header.index("label.ID"), header.index("CE.ID")
-        k = header.index("score")
-        for line in f:
-            line = line.strip().split("\t")
-            label_ID, ce_ID = line[i], line[j]
-            score = float(line[k])
-            try:
-                matched_ce[label_ID].append((ce_ID, score))
-            except KeyError:
-                matched_ce[label_ID] = [(ce_ID, score)]
+    for fname in fnames:
+        with open(fname) as f:
+            header = f.readline().strip().split("\t")
+            i, j = header.index("label.ID"), header.index("CE.ID")
+            k = header.index("score")
+            for line in f:
+                line = line.strip().split("\t")
+                label_ID, ce_ID = line[i], line[j]
+                score = float(line[k])
+                try:
+                    matched_ce[label_ID].append((ce_ID, score))
+                except KeyError:
+                    matched_ce[label_ID] = [(ce_ID, score)]
     return matched_ce
 
 def get_best_matched_ce(matched_ce):
@@ -116,7 +118,7 @@ def get_group_best_ce(ce_by_group):
         # for each group, save the best CE and the associated confidence score
         best_ce_by_group[group_ID] = (best_ce, confidence)
     return best_ce_by_group
-        
+
 def main(argv=sys.argv):
     
     # read options and remove options strings from argv (avoid option 
@@ -124,15 +126,17 @@ def main(argv=sys.argv):
     # fileinput.input().
     options = Options(argv)
     sys.argv[1:] = options.args
+
+    # identify input files
     sorted_labels_fname = options.args[0]
-    matched_ce_fname = options.args[1]
+    matched_ce_fnames = options.args[1:]
     
     # read the sorted label table (output from sort_labels.py)
     sorted_labels = read_sorted_labels(sorted_labels_fname)
     
     # read the matched collecting event table (output 
     # from match_collecting_events.py)
-    matched_ce = read_matched_ce(matched_ce_fname)
+    matched_ce = read_matched_ce(*matched_ce_fnames)
     
     # get best matches
     best_matches = get_best_matched_ce(matched_ce)
