@@ -14,7 +14,8 @@ OPTIONS
 
 '''
 
-import getopt, sys, fileinput, json
+import getopt, sys, fileinput
+from mfnb.labeldata import parse_json_db
 
 class Options(dict):
 
@@ -41,7 +42,7 @@ class Options(dict):
     
         # default parameter value
         pass
-    
+            
 def main(argv=sys.argv):
     
     # read options and remove options strings from argv (avoid option 
@@ -50,10 +51,28 @@ def main(argv=sys.argv):
     options = Options(argv)
     sys.argv[1:] = options.args
     
-    # organize the main job...
-    for line in fileinput.input():
-        pass
+    # initiate the input stream
+    elements = parse_json_db(fileinput.input())
     
+    # get the header from the first element of the input stream
+    try:
+        x = next(elements)
+
+    # nothing in the input
+    except StopIteration:
+        return 0
+    
+    # field names
+    keys = list(x.keys())
+
+    # output table header and first line
+    sys.stdout.write("\t".join(keys) + "\n")
+    sys.stdout.write("\t".join( x[key] for key in keys ) + "\n")
+
+    # table content
+    for x in elements:
+        sys.stdout.write("\t".join( x[key] for key in keys ) + "\n")
+
     # return 0 if everything succeeded
     return 0
 

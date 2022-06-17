@@ -666,10 +666,10 @@ def data_from_googlevision(f, identifier, start=1):
             "text": text})
     return data_list
 
-def parse_labels(f):
+def parse_json_db(f):
     '''
-    Stream labels from the input file object that should contains a 
-    JSON label database.
+    Stream dictionnary objects from the input file object that should 
+    contains a JSON label or collecting event database.
     '''
 
     # each label is comprised within curly brackets, there are no nested
@@ -681,7 +681,7 @@ def parse_labels(f):
             if on: 
                 s += line[:end]
                 if end > -1:
-                    yield Label(**json.loads("{"+s+"}"))
+                    yield json.loads("{"+s+"}")
                     s, on = "", False
             elif end > -1:
                 raise ValueError("Input format error: nested curly brackets"
@@ -695,5 +695,21 @@ def parse_labels(f):
             if end == -1:
                 on = True
             else:
-                yield Label(**json.loads("{"+s+"}"))
+                yield json.loads("{"+s+"}")
                 s, on = "", False
+
+def parse_labels(f):
+    '''
+    Stream labels from the input file object that should contains a 
+    JSON label database.
+    '''
+
+    for x in parse_json_db(f): yield Label(**x)
+
+def parse_collecting_events(f):
+    '''
+    Stream labels from the input file object that should contains a 
+    JSON label database.
+    '''
+
+    for x in parse_json_db(f): yield CollectingEvent(**x)

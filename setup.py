@@ -26,7 +26,8 @@ setup(
              'scripts/search_labels.py',
              'scripts/sort_labels.py',
              'scripts/checkout_collecting_events.py',
-             'scripts/subset_db.py'
+             'scripts/subset_db.py',
+             'scripts/table_export.py'
             ],
     platforms=['any'],
     version='1.0a1',
