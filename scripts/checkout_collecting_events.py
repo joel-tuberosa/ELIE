@@ -136,15 +136,16 @@ def summarise_ce_by_group(ce_by_group):
     cluster_per_ce = dict()
     ce_per_cluster = dict()
     for group_ID in ce_by_group:
+        try:
+            ce_per_cluster[group_ID] += 1
+        except KeyError:
+            ce_per_cluster[group_ID] = 1
         for ce_ID, score in ce_by_group[group_ID]:
             try:
                 cluster_per_ce[ce_ID] += 1
             except KeyError:
                 cluster_per_ce[ce_ID] = 1
-            try:
-                ce_per_cluster[group_ID] += 1
-            except KeyError:
-                ce_per_cluster[group_ID] = 1
+
     return dict(cluster_per_ce=summarise_counts(cluster_per_ce),
                 ce_per_cluster=summarise_counts(ce_per_cluster))
 
@@ -240,12 +241,11 @@ def main(argv=sys.argv):
     if options["log"] is None:
         sys.stderr.write(stat_log)
     else:
-        with open(options["log"]) as f:
-            f.write(stat_log)
+        with open(options["log"], "w") as fout:
+            fout.write(stat_log)
 
     # return 0 if everything succeeded
     return 0
 
 # does not execute main if the script is imported as a module
 if __name__ == '__main__': sys.exit(main())
-
