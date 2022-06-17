@@ -7,10 +7,8 @@
     nltk and leven.
 '''
 
-import json, sys, mfnb.date, regex
-from typing import Type
+import json, mfnb.date, regex
 from nltk import regexp_tokenize
-from math import log
 from mfnb.utils import (mismatch_rule, 
                         get_word_tokenize_pattern, 
                         strip_accents, 
@@ -667,4 +665,35 @@ def data_from_googlevision(f, identifier, start=1):
             "ID": identifier(len(data_list)+start),
             "text": text})
     return data_list
-    
+
+def parse_labels(f):
+    '''
+    Stream labels from the input file object that should contains a 
+    JSON label database.
+    '''
+
+    # each label is comprised within curly brackets, there are no nested
+    # brackets
+    s, on = "", False
+    for line in f:
+        start, end = line.find("{"), line.find("}")
+        if start == -1:
+            if on: 
+                s += line[:end]
+                if end > -1:
+                    yield Label(**json.loads("{"+s+"}"))
+                    s, on = "", False
+            elif end > -1:
+                raise ValueError("Input format error: nested curly brackets"
+                                 " found")
+        else:
+            if on:
+                raise ValueError("Input format error: nested curly brackets"
+                                 " found")
+            end = line.find("}")
+            s += line[start+1:end]
+            if end == -1:
+                on = True
+            else:
+                yield Label(**json.loads("{"+s+"}"))
+                s, on = "", False

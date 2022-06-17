@@ -6,8 +6,7 @@
 
 from multiprocessing.sharedctypes import Value
 from re import A
-import regex
-import unicodedata
+import regex, unicodedata
 import numpy as np
 from kneed import KneeLocator
 from math import log

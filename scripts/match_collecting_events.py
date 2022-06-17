@@ -70,7 +70,7 @@ OPTIONS
 '''
 
 
-import sys, getopt, fileinput, regex, json
+import sys, getopt, fileinput
 import mfnb.date, mfnb.labeldata, mfnb.utils
 from math import log
 
@@ -163,37 +163,6 @@ def write_results(fout, matches, query_fields=[], subject_fields=[], sep="\t",
                    f"\t{subject_field_values}"
                    f"\t{score:.3f}\n")
 
-def parse_labels(f):
-    '''
-    Parse labels from the input file.
-    '''
-
-    # each label is comprised within curly brackets, there are no nested
-    # brackets
-    s, on = "", False
-    for line in f:
-        start, end = line.find("{"), line.find("}")
-        if start == -1:
-            if on: 
-                s += line[:end]
-                if end > -1:
-                    yield mfnb.labeldata.Label(**json.loads("{"+s+"}"))
-                    s, on = "", False
-            elif end > -1:
-                raise ValueError("Input format error: nested curly brackets"
-                                 " found")
-        else:
-            if on:
-                raise ValueError("Input format error: nested curly brackets"
-                                 " found")
-            end = line.find("}")
-            s += line[start+1:end]
-            if end == -1:
-                on = True
-            else:
-                yield mfnb.labeldata.Label(**json.loads("{"+s+"}"))
-                s, on = "", False
-
 def main(argv=sys.argv):
     
     # read options and remove options strings from argv (avoid option 
@@ -228,7 +197,7 @@ def main(argv=sys.argv):
     
     # read label text that is stored in one or several JSON input 
     # files
-    for label in parse_labels(fileinput.input()):
+    for label in mfnb.labeldata.parse_labels(fileinput.input()):
 
         # search
         hits = []
