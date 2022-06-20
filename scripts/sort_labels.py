@@ -39,11 +39,9 @@ DESCRIPTION
     /!\ still under development /!\ 
 
 OPTIONS
-    -c, --collector
-        Try to identify the Collector name.
-        
-    --collector-db=FILE
-        Search putative name in the FILE.
+    -c, --collector=FILE
+        Attempt to identifiy collector names from the provided FILE, in 
+        the labels.
         
     -d, --date
         Try to identify a date pattern.
@@ -92,10 +90,10 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:], 
-                                       "cdf:gm:rs:", 
-                                       ['collector', 'date', 'id-format=', 
+                                       "c:df:gm:rs:", 
+                                       ['collector=', 'date', 'id-format=', 
                                         'geo', 'min-length=', 'min-score=', 
-                                        'collector-db=', 'refine', 'help'])
+                                        'refine', 'help'])
         except getopt.GetoptError as e:
             sys.stderr.write(str(e) + '\n' + __doc__)
             sys.exit(1)
@@ -105,8 +103,6 @@ class Options(dict):
                 sys.stdout.write(__doc__)
                 sys.exit(0)
             elif o in ('-c', '--collector'):
-                self["collector"] = True
-            elif o == '--collector-db':
                 self["collector_db"] = a
             elif o in ('-d', '--date'):
                 self["date"] = True
@@ -130,7 +126,6 @@ class Options(dict):
     def set_default(self):
     
         # default parameter value
-        self["collector"] = False
         self["collector_db"] = None
         self['date'] = False
         self["id_formatter"] = mfnb.utils.get_id_formatter("label:5")
@@ -166,7 +161,7 @@ def parse_geo(text):
     geostr = str(latlng)
     return (matched_str, span, geostr)
 
-def parse_name(text, db=None, allow_unknown=False, thresh=0):
+def parse_name(text, db, thresh=0):
     '''
     Tries to identify names in the input text and returns the matched
     string, the span of the matched string and the intepreted value.
