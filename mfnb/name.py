@@ -205,24 +205,23 @@ def abbreviation_search(query, target):
     token sequence with the same starts.
     '''
 
-    query = simplify_str(query.lower())
-    target = simplify_str(target.lower())
-    query_tokens = regexp_tokenize(query, "\w+")
-    target_tokens = regexp_tokenize(target, "\w+")
-
-    i = c = 0
-    for token0 in target_tokens:
-        if abbreviation_match(query_tokens[i], token0):
-            c += 1
+    query_tokens = regexp_tokenize(query.lower(), "\w+")
+    target_tokens = regexp_tokenize(target.lower(), "\w+")
+    start, i = -1, 0
+    for j in range(len(target_tokens)):
+        if abbreviation_match(query_tokens[i], target_tokens[j]):
+            if start == -1: start = j
+            i += 1
         else:
-            c = 0
-        i += 1
-    if c == len(query_tokens):
-        p = regex.compiler(r"\s+".join(target_tokens[i:c]), flags=regex.I)
+            start = -1
+            i = 0
+        if i == len(query_tokens): break
+    if i == len(query_tokens) and start > -1:
+        p = regex.compile(r"\W+".join(target_tokens[start:start+i]), regex.I)
         m = p.search(strip_accents(target))
         if m is None:
             raise AssertionError("Problem while retrieving the original text")
-        return m.group()
+        return target[slice(*m.span())]
     else:
         return None
 
@@ -234,5 +233,9 @@ def abbreviation_match(query, target):
 
     query, target = simplify_str(query), simplify_str(target)
     query = query.rstrip(".")
-    return all( query[i] == target[i] for i in range(len(query)) )
+    if not query: return False
+    try:
+        return all( query[i] == target[i] for i in range(len(query)) )
+    except IndexError:
+        return False
     
