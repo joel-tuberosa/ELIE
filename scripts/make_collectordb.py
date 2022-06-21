@@ -80,16 +80,14 @@ def read_collectors(f):
     Build collector instances from a TSV input
     '''
 
-    collectors = []
     attributes = None
     for line in fileinput.input():
         if attributes is None:
             attributes = locate_attributes(line)
             continue
-        fields = line.strip().split("\t")
+        fields = [ field.strip() for field in line.split("\t") ]
         data = dict( (key, fields[attributes[key]]) for key in attributes )
-        collectors.append(Collector(**data))
-    return collectors
+        yield Collector(**data)
 
 def main(argv=sys.argv):
     
@@ -100,7 +98,9 @@ def main(argv=sys.argv):
     sys.argv[1:] = options.args
     
     # organize the main job...
-    json.dump(read_collectors(fileinput.input()), 
+    data = [ collector.export() 
+              for collector in read_collectors(fileinput.input()) ]
+    json.dump(data, 
               sys.stdout, 
               ensure_ascii=False, 
               indent=4)

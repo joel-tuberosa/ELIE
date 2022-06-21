@@ -6,7 +6,8 @@
 '''
 
 import regex, json
-from mfnb.utils import mismatch_rule, overlap
+from mfnb.utils import mismatch_rule, overlap, simplify_str, strip_accents
+from nltk import regexp_tokenize
 
 # =============================================================================
 # CLASSES
@@ -53,13 +54,14 @@ class Collector(object):
         '''
         
         if self.firstname is None:
-            f = q = ""
+            F = f = q = ""
         else:
             f = abbreviate_name(self.firstname)
             q = abbreviate_name(self.firstname, dots=True)
+            F = self.firstname
         return format.format(f=f,
                              q=q,
-                             F=self.firstname,
+                             F=F,
                              N=self.name)
     
     def all_formats(self):
@@ -124,7 +126,9 @@ def search_collectors(s, collectors, mismatch_rule=mismatch_rule):
     # try to find surname only
     surname_matches = []
     for collector in collectors:
-        p = regex.compile(collector.name + mismatch_rule(collector.name), 
+        name_regex = r"\b" + collector.name + r"\b"
+        name = collector.name
+        p = regex.compile(name_regex + mismatch_rule(name), 
                           regex.BESTMATCH | regex.V1)
         m = p.search(s)
         if m is not None:
@@ -134,7 +138,7 @@ def search_collectors(s, collectors, mismatch_rule=mismatch_rule):
     
     # try to identify the full names
     fullname_matches = []
-    for m, collector in surname_matches:
+    for m, collector, score in surname_matches:
         matches = []
         for name, format in collector.all_formats():
             name_regex = r"\b" + name.replace(".", r"\.") + r"\b"
@@ -148,7 +152,7 @@ def search_collectors(s, collectors, mismatch_rule=mismatch_rule):
         
         # record the best match
         if matches:
-            matches.sort(reverse=True)
+            matches.sort(key=lambda x: x[1], reverse=True)
             fullname_matches.append(matches[0])
         else:
             fullname_matches.append((None, 0))
@@ -194,3 +198,41 @@ def load_collectors(f):
     '''
 
     return [ Collector(**data) for data in json.load(f) ]
+
+def abbreviation_search(query, target):
+    '''
+    Tokenize the query and the target, then try to match a similar 
+    token sequence with the same starts.
+    '''
+
+    query = simplify_str(query.lower())
+    target = simplify_str(target.lower())
+    query_tokens = regexp_tokenize(query, "\w+")
+    target_tokens = regexp_tokenize(target, "\w+")
+
+    i = c = 0
+    for token0 in target_tokens:
+        if abbreviation_match(query_tokens[i], token0):
+            c += 1
+        else:
+            c = 0
+        i += 1
+    if c == len(query_tokens):
+        p = regex.compiler(r"\s+".join(target_tokens[i:c]), flags=regex.I)
+        m = p.search(strip_accents(target))
+        if m is None:
+            raise AssertionError("Problem while retrieving the original text")
+        return m.group()
+    else:
+        return None
+
+def abbreviation_match(query, target):
+    '''
+    Return True if the query is contains the first letters of the
+    target.
+    '''
+
+    query, target = simplify_str(query), simplify_str(target)
+    query = query.rstrip(".")
+    return all( query[i] == target[i] for i in range(len(query)) )
+    
