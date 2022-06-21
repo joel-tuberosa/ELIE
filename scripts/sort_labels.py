@@ -161,18 +161,21 @@ def parse_geo(text):
     geostr = str(latlng)
     return (matched_str, span, geostr)
 
-def parse_name(text, db, thresh=0):
+def parse_names(text, collectors, thresh=0):
     '''
     Tries to identify names in the input text and returns the matched
     string, the span of the matched string and the intepreted value.
     '''
     
-    names, span = mfnb.name.find_names(text, db=db, thresh=thresh)
-    if span is None:
-        return ("", -1, "")
-    matched_str = text[slice(*span)]
-    namestr = " & ".join(names)
-    return (matched_str, span, namestr)
+    names, spans, scores = zip(*mfnb.name.find_collectors(text, collectors))
+    if not names:
+        return [("", -1, "")]
+    results = []
+    for name, span, score in zip(names, spans, scores):
+        matched_str = text[slice(*span)]
+        namestr = name.format("{q} {N}")
+        results.append((matched_str, span, namestr))
+    return results
 
 def refine(labels, get_median_dist=False):
     '''
@@ -364,37 +367,19 @@ def main(argv=sys.argv):
                     date_cols = ""
                 
                 # parse the text to retrieve the collector name
-                if options["collector"]:
-                    hits = []
-                    start = 0
-                    text_segments = mfnb.utils.get_text_segments(
-                        text, sorted(segments))
-                    for text_segment in text_segments:
-                        seg_l = len(text_segment)
-                        text_segment = text_segment.strip()
-                        if not text_segment: continue
-                        verbatim, span, interpreted = parse_name(
-                            text_segment, collector_db, 0.75)
-                        if span != -1:
-                            span = (start+span[0], start+span[1])
-                            hits.append((verbatim, 
-                                         span,
-                                         interpreted, 
-                                         len(interpreted)))
-                        start += seg_l
-                    if hits:
-                        hits.sort(key = lambda x: x[3], reverse=True)
-                        verbatim, span, interpreted, _ = hits[0]
-                    else:
-                        verbatim, span, interpreted = "", -1, ""
-                    if span != -1: text = mfnb.utils.clear_text(text, span)
+                if options["collector"] is not None:
+                    with open(option["collector"]) as f:
+                        collectors = mfnb.name.load_collectors(f)
+                    interpreted = []
+                    verbatim = []
+                    matches = mfnb.name.find_collectors(text, collectors)
+                    for collector, span, score in matches:
+                        interpreted.append(collector.format("{q} {N}"))
+                        verbatim.append(text[slice(*span)])
+                        text = mfnb.utils.clear_text(text, span)
+                    interpreted = ", ".join(interpreted)
+                    verbatim = "|".join(verbatim)
                     collector_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                    if span == -1:
-                        found_info["collector"] = False
-                    else:
-                        found_info["collector"] = True
-                else:
-                    collector_cols = ""
                             
                 # write label info
                 sys.stdout.write(f'{label_cols}'
