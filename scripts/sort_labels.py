@@ -79,6 +79,7 @@ import mfnb.date, mfnb.labeldata, mfnb.geo, mfnb.name, mfnb.utils
 import numpy as np
 from io import StringIO
 from random import randrange
+from functools import partial
 
 class Options(dict):
 
@@ -103,7 +104,7 @@ class Options(dict):
                 sys.stdout.write(__doc__)
                 sys.exit(0)
             elif o in ('-c', '--collector'):
-                self["collector_db"] = a
+                self["collector"] = a
             elif o in ('-d', '--date'):
                 self["date"] = True
             elif o in ('-f', '--id-format'):
@@ -116,17 +117,11 @@ class Options(dict):
                 self["refine"] = True
             elif o in ('-s', '--min-score'):
                 self["min_score"] = float(a)
-                
-        self.args = args
-        if self["collector"] and self["collector_db"] is None:
-            raise ValueError("Please locate the collector DB with the" 
-                             " --collector-db option if you want to parse the"
-                             " input text to find collector names.")
     
     def set_default(self):
     
         # default parameter value
-        self["collector_db"] = None
+        self["collector"] = None
         self['date'] = False
         self["id_formatter"] = mfnb.utils.get_id_formatter("label:5")
         self["geo"] = False   
@@ -275,13 +270,10 @@ def main(argv=sys.argv):
     db.make_index(method=2, min_len=min_len)
     
     # index the collector DB if required
-    if options["collector_db"]:
-        with open(options["collector_db"]) as f:
-            collector_db = mfnb.labeldata.LabelDB(
-                [ mfnb.labeldata.Label(**d) 
-                   for d in json.load(f) ])
-        collector_db.make_index(method=1, min_len=1)
-                                          
+    if options["collector"] is not None:
+        with open(option["collector"]) as f:
+            collectors = mfnb.name.load_collectors(f)
+
     # label to be classified
     to_be_sorted = [ label.ID for label in db ]
     
@@ -368,8 +360,6 @@ def main(argv=sys.argv):
                 
                 # parse the text to retrieve the collector name
                 if options["collector"] is not None:
-                    with open(option["collector"]) as f:
-                        collectors = mfnb.name.load_collectors(f)
                     interpreted = []
                     verbatim = []
                     matches = mfnb.name.find_collectors(text, collectors)
