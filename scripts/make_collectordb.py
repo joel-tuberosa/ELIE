@@ -20,7 +20,7 @@ OPTIONS
 
 import getopt, sys, fileinput, json
 from multiprocessing.sharedctypes import Value
-from mfnb.name import Collector
+from mfnb.name import Collector, read_metadata
 
 class Options(dict):
 
@@ -82,11 +82,23 @@ def read_collectors(f):
 
     attributes = None
     for line in fileinput.input():
+
+        # interpret the first line as a header to locate the different columns
         if attributes is None:
             attributes = locate_attributes(line)
             continue
+            
+        # fetch attribute values from the corresponding columns
         fields = [ field.strip() for field in line.split("\t") ]
         data = dict( (key, fields[attributes[key]]) for key in attributes )
+        
+        # interpret the metadata string
+        try:
+            data["metadata"] = read_metadata(data["metadata"])
+        except KeyError:
+            data["metadata"] = {}
+
+        # stream Collector instances built from the data
         yield Collector(**data)
 
 def main(argv=sys.argv):

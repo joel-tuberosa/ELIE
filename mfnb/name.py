@@ -239,3 +239,43 @@ def abbreviation_match(query, target):
     except IndexError:
         return False
     
+def read_metadata(s):
+    '''
+    Interpret a metada string, returns a dictionnary object. Metadata 
+    string are formatted as such:
+
+    key1="value"[; key2="value"...]
+
+    - key1[, key2...] must be compatible with python variable syntax.
+    - "value" will be interpreted as str, by stripping the double 
+      quotes.
+    - key-value pairs must separated by ";".
+    - keys and values must be linked by an "=". 
+    - keys must be unique.
+    '''
+    
+    # data are contained in a dict object
+    metadata = dict() 
+
+    # key-value pair regular expression
+    p = regex.compile(r"""
+            # key
+            (?P<key>[A-z_]\w*)
+            # equal
+            (?:\s*=\s*)
+            # value
+            (?P<value>(?P<quote>['"])(?P<string>.*?)(?<!\\)(?P=quote))
+            """, regex.X)
+
+    # parse key-value pairs
+    for item in s.split(";"):
+        item = item.strip()
+        if not item: continue
+        m = p.search(item)
+        if m is None:
+            raise ValueError(f"Invalid key-value pair syntax: {repr(item)}")
+        key = m.group("key")
+        value = m.group("value")
+        quote = m.group("quote")
+        metadata[key] = value.strip(quote)
+    return metadata
