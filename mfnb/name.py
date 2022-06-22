@@ -164,7 +164,7 @@ def search_collectors(s, collectors, mismatch_rule=mismatch_rule):
         if first_name_matched:    
             results.append((collector, my.span(), 1, y))
         else:
-            results.append((collector, my.span(), 0, x))
+            results.append((collector, mx.span(), 0, x))
     results.sort(key=lambda x: (x[2], x[3]), reverse=True)
 
     return [ (collector, span, s)
