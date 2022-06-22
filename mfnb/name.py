@@ -117,7 +117,7 @@ def abbreviate_name(s, dots=False):
     names += s[span[1]:span[1]+1].upper() + dot
     return names
 
-def search_collectors(s, collectors, mismatch_rule=mismatch_rule):
+def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule):
     '''
     Parse the input string s to identify any name from the provided 
     list of Collector object.
@@ -167,12 +167,51 @@ def search_collectors(s, collectors, mismatch_rule=mismatch_rule):
             results.append((collector, mx.span(), 0, x))
     results.sort(key=lambda x: (x[2], x[3]), reverse=True)
 
-    return [ (collector, span, s)
+    return [ (collector, span, score)
              if first_name_matched 
-             else (collector, span, s*0.9) 
-              for collector, span, first_name_matched, s in results ]
+             else (collector, span, score*0.9) 
+              for collector, span, first_name_matched, score in results ]
 
-def find_collectors(s, collectors, mismatch_rules=mismatch_rule):
+def search_collectors_abbr(s, collectors):
+    results = []
+    for collector in collectors:
+        for format in collector.all_formats():
+            hit, span = abbreviation_search(format, s, get_span=True)
+            if hit is None:
+                continue
+            else:
+                results.append(hit, span, 1)
+    return results
+
+def default_search_method_selector(collector):
+    try:
+        if collector.metadata["entity_type"] == "person":
+            return search_collectors_regex
+        else:
+            return search_collectors_abbr
+    except KeyError:
+        return search_collectors_regex
+
+def search_collectors(s, collectors,
+                      search_rule=default_search_method_selector):
+
+    # sort collectors with different search methods
+    searches = dict()
+    for collector in collectors:
+        try:
+            searches[search_rule(collector)].append(collector)
+        except KeyError:
+            searches[search_rule(collector)] = [collector]
+    
+    # perform searches on the different subset, with the attributed methods
+    results = []
+    for search_function in searches:
+        collectors = searches[search_function]
+        results += search_function(s, collectors)
+    return results
+
+def find_collectors(s, collectors,
+                    search_rule=default_search_method_selector):
     '''
     Search collector names in the input string and return the highest scoring 
     and non-overlapping matches. 
@@ -180,7 +219,7 @@ def find_collectors(s, collectors, mismatch_rules=mismatch_rule):
 
     # aggregate overlapping matches, always keep the highest scoring match
     results = []
-    matches = search_collectors(s, collectors, mismatch_rules)
+    matches = search_collectors(s, collectors, search_rule)
     sorted_matches = sorted(matches, key=lambda x: x[1])
     results.append(sorted_matches[0])
     for collector, span, score in sorted_matches[1:]:
@@ -199,7 +238,7 @@ def load_collectors(f):
 
     return [ Collector(**data) for data in json.load(f) ]
 
-def abbreviation_search(abbreviation, target):
+def fullname_search(abbreviation, target, get_span=False):
     '''
     Tokenize the abbreviation and the target, then try to match a
     similar token sequence with the same starts.
@@ -209,7 +248,7 @@ def abbreviation_search(abbreviation, target):
     target_tokens = regexp_tokenize(target.lower(), "\w+")
     start, i = -1, 0
     for j in range(len(target_tokens)):
-        if abbreviation_match(abbreviation_tokens[i], target_tokens[j]):
+        if fullname_match(abbreviation_tokens[i], target_tokens[j]):
             if start == -1: start = j
             i += 1
         else:
@@ -221,11 +260,12 @@ def abbreviation_search(abbreviation, target):
         m = p.search(strip_accents(target))
         if m is None:
             raise AssertionError("Problem while retrieving the original text")
-        return target[slice(*m.span())]
+        hit = target[slice(*m.span())]
+        return (hit, m.span()) if get_span else hit
     else:
-        return None
+        return (None, None) if get_span else None
 
-def abbreviation_match(abbreviation, target):
+def fullname_match(abbreviation, target):
     '''
     Return True if the provided string is an abbreviation of the
     target, namely, having matching first letters with optional dots.
@@ -240,7 +280,7 @@ def abbreviation_match(abbreviation, target):
     except IndexError:
         return False
 
-def fullname_search(fullname, target):
+def abbreviation_search(fullname, target, get_span=False):
     '''
     Search abbreviation in the target string that could correspond to
     the query text.
@@ -250,7 +290,7 @@ def fullname_search(fullname, target):
     target_tokens = regexp_tokenize(target.lower(), "\w+")
     start, i = -1, 0
     for j in range(len(target_tokens)):
-        if abbreviation_match(target_tokens[j], fullname_tokens[i]):
+        if fullname_match(target_tokens[j], fullname_tokens[i]):
             if start == -1: start = j
             i += 1
         else:
@@ -262,9 +302,10 @@ def fullname_search(fullname, target):
         m = p.search(strip_accents(target))
         if m is None:
             raise AssertionError("Problem while retrieving the original text")
-        return target[slice(*m.span())]
+        hit = target[slice(*m.span())]
+        return (hit, m.span()) if get_span else hit
     else:
-        return None
+        return (None, None) if get_span else None
 
 def read_metadata(s):
     '''
