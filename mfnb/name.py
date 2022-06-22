@@ -17,7 +17,7 @@ class Collector(object):
     Store the name of a collector or an entity.
     '''
 
-    def __init__(self, ID, name, firstname="", **metadata):
+    def __init__(self, ID, name, firstname="", metadata={}):
         self._data = {
             "ID": ID,
             "name": name,
@@ -199,24 +199,24 @@ def load_collectors(f):
 
     return [ Collector(**data) for data in json.load(f) ]
 
-def abbreviation_search(query, target):
+def abbreviation_search(abbreviation, target):
     '''
-    Tokenize the query and the target, then try to match a similar 
-    token sequence with the same starts.
+    Tokenize the abbreviation and the target, then try to match a
+    similar token sequence with the same starts.
     '''
 
-    query_tokens = regexp_tokenize(query.lower(), "\w+")
+    abbreviation_tokens = regexp_tokenize(abbreviation.lower(), "\w+")
     target_tokens = regexp_tokenize(target.lower(), "\w+")
     start, i = -1, 0
     for j in range(len(target_tokens)):
-        if abbreviation_match(query_tokens[i], target_tokens[j]):
+        if abbreviation_match(abbreviation_tokens[i], target_tokens[j]):
             if start == -1: start = j
             i += 1
         else:
             start = -1
             i = 0
-        if i == len(query_tokens): break
-    if i == len(query_tokens) and start > -1:
+        if i == len(abbreviation_tokens): break
+    if i == len(abbreviation_tokens) and start > -1:
         p = regex.compile(r"\W+".join(target_tokens[start:start+i]), regex.I)
         m = p.search(strip_accents(target))
         if m is None:
@@ -225,20 +225,47 @@ def abbreviation_search(query, target):
     else:
         return None
 
-def abbreviation_match(query, target):
+def abbreviation_match(abbreviation, target):
     '''
-    Return True if the query is contains the first letters of the
-    target.
+    Return True if the provided string is an abbreviation of the
+    target, namely, having matching first letters with optional dots.
     '''
 
-    query, target = simplify_str(query), simplify_str(target)
-    query = query.rstrip(".")
-    if not query: return False
+    abbreviation, target = simplify_str(abbreviation), simplify_str(target)
+    abbreviation = abbreviation.rstrip(".")
+    if not abbreviation: return False
     try:
-        return all( query[i] == target[i] for i in range(len(query)) )
+        return all( abbreviation[i] == target[i] 
+                     for i in range(len(abbreviation)) )
     except IndexError:
         return False
-    
+
+def fullname_search(fullname, target):
+    '''
+    Search abbreviation in the target string that could correspond to
+    the query text.
+    '''
+
+    fullname_tokens = regexp_tokenize(fullname.lower(), "\w+")
+    target_tokens = regexp_tokenize(target.lower(), "\w+")
+    start, i = -1, 0
+    for j in range(len(target_tokens)):
+        if abbreviation_match(target_tokens[j], fullname_tokens[i]):
+            if start == -1: start = j
+            i += 1
+        else:
+            start = -1
+            i = 0
+        if i == len(fullname_tokens): break  
+    if i == len(fullname_tokens) and start > -1:
+        p = regex.compile(r"\W+".join(target_tokens[start:start+i]), regex.I)
+        m = p.search(strip_accents(target))
+        if m is None:
+            raise AssertionError("Problem while retrieving the original text")
+        return target[slice(*m.span())]
+    else:
+        return None
+
 def read_metadata(s):
     '''
     Interpret a metada string, returns a dictionnary object. Metadata 
