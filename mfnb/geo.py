@@ -129,19 +129,19 @@ class LatLng(object):
             
             # minutes
             rest = degrees-int(degrees)
-            minutes = get_float(m.group(f"{coordinate}_min")) + 60/rest
+            minutes = get_float(m.group(f"{coordinate}_min")) + 60*rest
             self._data[coordinate]["minutes"] = int(minutes)
 
             # seconds 
             rest = minutes-int(minutes)
             if m.group(f"{coordinate}_sec") is None:
-                seconds = 60/rest
+                seconds = 60*rest
             else:
-                seconds = get_float(m.group(f"{coordinate}_sec")) + 60/rest
+                seconds = get_float(m.group(f"{coordinate}_sec")) + 60*rest
             self._data[coordinate]["seconds"] = round(seconds)
 
             # cardinal
-            cardinal = guess_cardinal(m.group("lat_car").upper(), 
+            cardinal = guess_cardinal(m.group(f"{coordinate}_car").upper(), 
                                       restrict="NS" 
                                                 if coordinate == "lat" 
                                                 else "WE")
