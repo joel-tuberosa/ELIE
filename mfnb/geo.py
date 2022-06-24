@@ -12,8 +12,7 @@
 # 403121, 1050539
 # 
 
-from multiprocessing.sharedctypes import Value
-import regex, sys
+import regex
 
 class Distance(object):
     '''
