@@ -95,6 +95,9 @@ class Collector(object):
 
         json.dumps(self.export(), ensure_ascii=False, indent=4)
 
+    def __repr__(self):
+        return f'Collector({self.text})'
+
 def abbreviate_name(s, dots=False):
     '''
     Returns the first letter of each element of the input name. 
@@ -175,12 +178,12 @@ def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule):
 def search_collectors_abbr(s, collectors):
     results = []
     for collector in collectors:
-        for format in collector.all_formats():
-            hit, span = abbreviation_search(format, s, get_span=True)
+        for name, format in collector.all_formats():
+            hit, span = abbreviation_search(name, s, get_span=True)
             if hit is None:
                 continue
             else:
-                results.append(hit, span, 1)
+                results.append((collector, span, 1))
     return results
 
 def default_search_method_selector(collector):
@@ -189,7 +192,7 @@ def default_search_method_selector(collector):
             return search_collectors_regex
         else:
             return search_collectors_abbr
-    except KeyError:
+    except (AttributeError, KeyError):
         return search_collectors_regex
 
 def search_collectors(s, collectors,

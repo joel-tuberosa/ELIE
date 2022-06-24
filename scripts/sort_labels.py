@@ -117,7 +117,9 @@ class Options(dict):
                 self["refine"] = True
             elif o in ('-s', '--min-score'):
                 self["min_score"] = float(a)
-    
+
+        self.args = args
+
     def set_default(self):
     
         # default parameter value
@@ -271,7 +273,7 @@ def main(argv=sys.argv):
     
     # index the collector DB if required
     if options["collector"] is not None:
-        with open(option["collector"]) as f:
+        with open(options["collector"]) as f:
             collectors = mfnb.name.load_collectors(f)
 
     # label to be classified
@@ -328,22 +330,7 @@ def main(argv=sys.argv):
                 
                 # text segment breaks
                 segments = []
-                
-                # parse the text to retrieve geolocalization information,
-                # then remove the intepreted text.
-                span = None
-                if options["geo"]:
-                    verbatim, span, interpreted = parse_geo(text)
-                    if span != -1: text = mfnb.utils.clear_text(text, span)
-                    geo_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                    if span == -1:
-                        found_info["geo"] = False
-                    else:
-                        found_info["geo"] = True
-                        segments += list(span)
-                else:
-                    geo_cols = ""
-                
+               
                 # parse the text to retrieve date information, then remove
                 # the intepreted text.
                 if options["date"]:
@@ -362,15 +349,30 @@ def main(argv=sys.argv):
                 if options["collector"] is not None:
                     interpreted = []
                     verbatim = []
-                    matches = mfnb.name.find_collectors(text, collectors)
-                    for collector, span, score in matches:
-                        interpreted.append(collector.format("{q} {N}"))
+                    hits = mfnb.name.find_collectors(text, collectors)
+                    for collector, span, score in hits:
+                        interpreted.append(collector.text)
                         verbatim.append(text[slice(*span)])
                         text = mfnb.utils.clear_text(text, span)
                     interpreted = ", ".join(interpreted)
                     verbatim = "|".join(verbatim)
                     collector_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                            
+
+                # parse the text to retrieve geolocalization information,
+                # then remove the intepreted text.
+                span = None
+                if options["geo"]:
+                    verbatim, span, interpreted = parse_geo(text)
+                    if span != -1: text = mfnb.utils.clear_text(text, span)
+                    geo_cols = f'\t{repr(verbatim)}\t{interpreted}'
+                    if span == -1:
+                        found_info["geo"] = False
+                    else:
+                        found_info["geo"] = True
+                        segments += list(span)
+                else:
+                    geo_cols = ""
+
                 # write label info
                 sys.stdout.write(f'{label_cols}'
                                  f'{geo_cols}'
