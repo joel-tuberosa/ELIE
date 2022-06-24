@@ -99,7 +99,7 @@ class LatLng(object):
             (?P<lng_sec>\d+(?:\.\d+)?")?\s? # second
             (?P<lng_car>[ВЗEW][A-Z]*)       # east/west
             ){e<=1:[°'",.*]}\b
-         """, flags=regex.X | regex.BESTMATCH)
+         """, flags=regex.X | regex.BESTMATCH | regex.I)
     
     ### include a pattern with -+ coordinates (without NSWE)
     
@@ -109,7 +109,7 @@ class LatLng(object):
         coordinates.
         '''
     
-        m = LatLng.pattern.fullmatch(value.upper())
+        m = LatLng.pattern.fullmatch(value)
         if m is None:
             raise ValueError(f'Coordinates could not be found in "{value}"')
         
@@ -124,14 +124,14 @@ class LatLng(object):
                 "minutes": get_float(m.group("lat_min")),
                 "seconds": get_float(m.group("lat_sec")) 
                     if m.group("lat_sec") is not None else 0,
-                "cardinal": guess_cardinal(m.group("lat_car")),
+                "cardinal": guess_cardinal(m.group("lat_car").upper()),
                    },
             "lng": {
                 "degrees": get_float(m.group("lng_deg")),
                 "minutes": get_float(m.group("lng_min")),
                 "seconds": get_float(m.group("lng_sec")) 
                     if m.group("lng_sec") is not None else 0,
-                "cardinal": guess_cardinal(m.group("lng_car"))
+                "cardinal": guess_cardinal(m.group("lng_car").upper())
                     }
                 }
     
@@ -192,11 +192,11 @@ def find_lat_lng(s, get_span=True):
     Find latitude and longitude str in a text.
     '''
     
-    m = LatLng.pattern.search(s.upper())
+    m = LatLng.pattern.search(s)
     if m is None:
         result = span = None
     else:
-        result = m.group()
+        result = LatLng(m.group())
         span = m.span()
     return (result, span) if get_span else result
 
@@ -209,6 +209,7 @@ def find_distance(s, get_span=True):
     if m is None:
         result, span = None
     else:
-        result = m.group()
+        result = Distance(m.group())
         span = m.span()
     return (result, span) if get_span else result
+
