@@ -13,6 +13,11 @@
 # 
 
 import regex
+from nltk import regexp_tokenize
+from mfnb.utils import simplify_str
+from geopy.geocoders import GeoNames
+
+GEONAMES_USERNAME = "joel.tuberosa"
 
 class Distance(object):
     '''
@@ -183,6 +188,10 @@ def guess_cardinal(value):
         return "N"
     elif value[0] in "ЮS":
         return "S"
+    elif value[0] in "ВE":
+        return "E"
+    elif value[0] in "ЗW":
+        return "W"
     else:
         raise ValueError(f'unrecognized cardinal: "{value}"')
 
@@ -212,3 +221,22 @@ def find_distance(s, get_span=True):
         span = m.span()
     return (result, span) if get_span else result
 
+def parse_geo(s):
+    '''
+    Attempt to find a location in the provided string
+    '''
+
+    # 1- attempt to find a geolocalization
+    latlng, span = find_lat_lng(s)
+    if latlng is not None:
+        return 
+
+    # extract words of more than 3 characters
+    s = simplify_str(s)
+    tokens = regexp_tokenize(s, pattern="[A-z]+")
+
+    # get location hints from all tokens
+
+
+# geocode function    
+geocode = GeoNames(user_name=GEONAMES_USERNAME).geocode

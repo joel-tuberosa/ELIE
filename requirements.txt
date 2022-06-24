@@ -3,7 +3,7 @@ dateparser
 sklearn
 regex
 leven
-pygeo
+geopy
 sphinx
 kneed
 scikit-learn-extra

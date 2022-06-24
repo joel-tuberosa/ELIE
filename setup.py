@@ -17,7 +17,8 @@ setup(
           'regex',
           'leven',
           'scikit-learn-extra',
-          'kneed'
+          'kneed',
+          'geopy'
       ],
     packages=["mfnb"],
     scripts=['scripts/make_collecting_events.py', 
