@@ -12,7 +12,74 @@
 # 403121, 1050539
 # 
 
+from multiprocessing.sharedctypes import Value
 import regex, sys
+
+class Distance(object):
+    '''
+    Store a distance value.
+    '''
+    
+    pattern = regex.compile(r"(?P<value>[0-9]+)\s?(?P<unit>k?m|ft)", regex.I)
+
+    def __init__(self, value, unit=None):
+
+        if type(value) is str:
+
+            # value is a str, unit is provided with the parameter
+            if value.isnumeric():
+                value = float(value)
+
+            # value and unit are provided within an expression such as 1m, 1km 
+            # or 3ft
+            else:
+                m = self.pattern.fullmatch(value)
+                if m is None:
+                    raise ValueError("distance value could not be parsed from"
+                                     " input str")
+                value, unit = float(m.group("value")), m.group("unit").lower()
+
+        # input value is a real number in any compatible format
+        else:
+            try:
+                value = float(value)
+            except ValueError:
+                raise ValueError("input value must be either a str expression"
+                                 " of a distance, or a real value")
+
+        # verify that unit has been provided if needed
+        if unit == "ft":
+            value *= 3.2808399
+        elif unit == "km":
+            value *= 1000
+        elif unit != "m":
+            if unit is None:
+                raise ValueError("unit must be provided either through the"
+                                 " input expression or through the"
+                                 " corresponding parameter.")
+            else:
+                raise ValueError(f'unrecognized unit: {repr(unit)}. Possible'
+                                  ' units are "m", "km", or "ft".')
+
+        # stored value
+        self._value = value
+        
+    @property
+    def meters(self):
+        return self._value
+    
+    @property
+    def feet(self):
+        return self._value * 0.3048
+
+    def __repr__(self):
+        return f"Distance({self.meters:.03f}m)"
+    
+    def __float__(self):
+        return self._value
+
+    def __eq__(self, other):
+        return float(self) == float(other)
 
 class LatLng(object):
     
@@ -42,7 +109,7 @@ class LatLng(object):
         coordinates.
         '''
     
-        m = LatLng.pattern.search(value.upper())
+        m = LatLng.pattern.fullmatch(value.upper())
         if m is None:
             raise ValueError(f'Coordinates could not be found in "{value}"')
         
@@ -120,14 +187,27 @@ def guess_cardinal(value):
     else:
         raise ValueError(f'unrecognized cardinal: "{value}"')
 
-def find_lat_lng_str(value, get_span=True):
+def find_lat_lng(s, get_span=True):
     '''
     Find latitude and longitude str in a text.
     '''
     
-    m = LatLng.pattern.search(value.upper())
+    m = LatLng.pattern.search(s.upper())
     if m is None:
         result = span = None
+    else:
+        result = m.group()
+        span = m.span()
+    return (result, span) if get_span else result
+
+def find_distance(s, get_span=True):
+    '''
+    Find a distance in a text.
+    '''
+
+    m = Distance.pattern.search(s)
+    if m is None:
+        result, span = None
     else:
         result = m.group()
         span = m.span()

@@ -151,7 +151,7 @@ def parse_geo(text):
     interpreted value.
     '''
     
-    latlng, span = mfnb.geo.find_lat_lng_str(text)            
+    latlng, span = mfnb.geo.find_lat_lng(text)            
     if span is None:
         return ("", -1, "")
     matched_str = text[slice(*span)]
