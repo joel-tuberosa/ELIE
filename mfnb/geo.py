@@ -120,24 +120,32 @@ class LatLng(object):
         numberp = regex.compile(r"\d+(?:\.\d+)?")
         get_float = lambda x: float(numberp.match(x).group())
         
-        ### Convert to int and pass the division remaining to the 
-        ### subsequent value. Round seconds.
-        self._data = {
-            "lat": {
-                "degrees": get_float(m.group("lat_deg")),
-                "minutes": get_float(m.group("lat_min")),
-                "seconds": get_float(m.group("lat_sec")) 
-                    if m.group("lat_sec") is not None else 0,
-                "cardinal": guess_cardinal(m.group("lat_car").upper()),
-                   },
-            "lng": {
-                "degrees": get_float(m.group("lng_deg")),
-                "minutes": get_float(m.group("lng_min")),
-                "seconds": get_float(m.group("lng_sec")) 
-                    if m.group("lng_sec") is not None else 0,
-                "cardinal": guess_cardinal(m.group("lng_car").upper())
-                    }
-                }
+        self._data = {"lat": {}, "lng": {}}
+        for coordinate in self._data:
+            
+            # degrees
+            degrees = get_float(m.group(f"{coordinate}_deg"))
+            self._data[coordinate]["degrees"] = int(degrees)
+            
+            # minutes
+            rest = degrees-int(degrees)
+            minutes = get_float(m.group(f"{coordinate}_min")) + 60/rest
+            self._data[coordinate]["minutes"] = int(minutes)
+
+            # seconds 
+            rest = minutes-int(minutes)
+            if m.group(f"{coordinate}_sec") is None:
+                seconds = 60/rest
+            else:
+                seconds = get_float(m.group(f"{coordinate}_sec")) + 60/rest
+            self._data[coordinate]["seconds"] = round(seconds)
+
+            # cardinal
+            cardinal = guess_cardinal(m.group("lat_car").upper(), 
+                                      restrict="NS" 
+                                                if coordinate == "lat" 
+                                                else "WE")
+            self._data[coordinate]["cardinal"] = cardinal
     
     @property
     def lat(self):
@@ -178,19 +186,22 @@ class LatLng(object):
                 f'{self._data["lng"]["seconds"]}"'
                 f'{self._data["lng"]["cardinal"]}"'
                 )
-        
-def guess_cardinal(value):
+    
+    def __repr__(self):
+        return f"LatLng({self})"
+
+def guess_cardinal(value, restrict="NSEW"):
     '''
     Guess the cardinal according to the first letter of 'value'.
     '''
     
-    if value[0] in "CN":
+    if value[0] in "CN" and "N" in restrict:
         return "N"
-    elif value[0] in "ЮS":
+    elif value[0] in "ЮS" and "S" in restrict:
         return "S"
-    elif value[0] in "ВE":
+    elif value[0] in "ВE" and "E" in restrict:
         return "E"
-    elif value[0] in "ЗW":
+    elif value[0] in "ЗW" and "W" in restrict:
         return "W"
     else:
         raise ValueError(f'unrecognized cardinal: "{value}"')
@@ -238,5 +249,6 @@ def parse_geo(s):
     # get location hints from all tokens
 
 
+
 # geocode function    
-geocode = GeoNames(user_name=GEONAMES_USERNAME).geocode
+geocode = GeoNames(username=GEONAMES_USERNAME).geocode
