@@ -223,6 +223,8 @@ def find_collectors(s, collectors,
     # aggregate overlapping matches, always keep the highest scoring match
     results = []
     matches = search_collectors(s, collectors, search_rule)
+    if not matches:
+        return []
     sorted_matches = sorted(matches, key=lambda x: x[1])
     results.append(sorted_matches[0])
     for collector, span, score in sorted_matches[1:]:

@@ -12,9 +12,9 @@
 # 403121, 1050539
 # 
 
-import regex
+import regex, sys
 from nltk import regexp_tokenize
-from mfnb.utils import simplify_str
+from mfnb.utils import simplify_str, strip_accents
 from geopy.geocoders import GeoNames
 
 GEONAMES_USERNAME = "joel.tuberosa"
@@ -85,8 +85,55 @@ class Distance(object):
     def __eq__(self, other):
         return float(self) == float(other)
 
-class LatLng(object):
+class Degree(object):
+    '''
+    Store a degree value, that can be decomposed into minutes and 
+    seconds.
+    '''
+
+    def __init__(self, degrees=0, minutes=0, seconds=.0):
+
+        # degrees
+        value, degrees = degrees, int(degrees)
+        rest = value - degrees
+
+        # minutes
+        value = minutes + 60*rest
+        minutes = int(value)
+        rest = value - minutes
+
+        # seconds
+        seconds = seconds + 60*rest
+
+        self._data = {"degrees": degrees, 
+                      "minutes": minutes,
+                      "seconds": seconds,
+                      "raw_value": degrees + (minutes + (seconds/60))/60}
+
+    @property
+    def degrees(self):
+        return self._data["degrees"]
+
+    @property
+    def minutes(self):
+        return self._data["minutes"]
+
+    @property
+    def seconds(self):
+        return self._data["seconds"]
     
+    @property
+    def value(self):
+        return self._data["raw_value"]
+    
+    def __str__(self):
+        return f'''{self.degrees:d}°{self.minutes:d}'{self.seconds:0.1f}"'''
+    
+    def __repr__(self):
+        return f'{self}'
+        
+class LatLng(object):
+
     pattern = regex.compile(r"""
         \b(?<lat>
             (?P<lat_deg>\d+(?:\.\d+)?°)\s?  # degree
@@ -105,47 +152,27 @@ class LatLng(object):
             ){e<=1:[°'",.*]}\b
          """, flags=regex.X | regex.BESTMATCH | regex.I)
     
-    ### include a pattern with -+ coordinates (without NSWE)
-    
     def __init__(self, value):
         '''
         Parse the input str to identify latitude and longitude 
         coordinates.
         '''
-    
-        m = LatLng.pattern.fullmatch(value)
-        if m is None:
-            raise ValueError(f'Coordinates could not be found in "{value}"')
-        
-        numberp = regex.compile(r"\d+(?:\.\d+)?")
-        get_float = lambda x: float(numberp.match(x).group())
-        
-        self._data = {"lat": {}, "lng": {}}
-        for coordinate in self._data:
-            
-            # degrees
-            degrees = get_float(m.group(f"{coordinate}_deg"))
-            self._data[coordinate]["degrees"] = int(degrees)
-            
-            # minutes
-            rest = degrees-int(degrees)
-            minutes = get_float(m.group(f"{coordinate}_min")) + 60*rest
-            self._data[coordinate]["minutes"] = int(minutes)
 
-            # seconds 
-            rest = minutes-int(minutes)
-            if m.group(f"{coordinate}_sec") is None:
-                seconds = 60*rest
-            else:
-                seconds = get_float(m.group(f"{coordinate}_sec")) + 60*rest
-            self._data[coordinate]["seconds"] = round(seconds)
+        # initiate from an str containing a latitude/longitude notation
+        if type(value) is str:
+            coordinates = read_latlng(value)
+            self._data = (coordinates["lat"], coordinates["lng"])
 
-            # cardinal
-            cardinal = guess_cardinal(m.group(f"{coordinate}_car").upper(), 
-                                      restrict="NS" 
-                                                if coordinate == "lat" 
-                                                else "WE")
-            self._data[coordinate]["cardinal"] = cardinal
+        # initiate from a 2-element array containing latitude and longitude as
+        # float values
+        elif len(value) == 2 and all( type(x) is float for x in value ):
+            
+            # latitude
+            lat = (Degree(abs(value[0])), "N" if value[0] >= 0 else "S")
+            
+            # longitude
+            lng = (Degree(abs(value[1])), "E" if value[1] >= 0 else "N")
+            self._data = (lat, lng)
     
     @property
     def lat(self):
@@ -153,11 +180,11 @@ class LatLng(object):
         Returns decimal latitude value.
         '''
         
-        value = (self._data["lat"]["degrees"]    +
-                 self._data["lat"]["minutes"]/60 + 
-                 self._data["lat"]["seconds"]/60)
-        value *= 1 if self._data["lat"]["cardinal"] == "N" else -1
-        return value
+        value = self._data[0][0].value
+        if self._data[0][1] == "N":
+            return value
+        else:
+            return value*-1
     
     @property
     def lng(self):
@@ -165,30 +192,76 @@ class LatLng(object):
         Returns decimal longitude value.
         '''
         
-        value = (self._data["lng"]["degrees"]    +
-                 self._data["lng"]["minutes"]/60 + 
-                 self._data["lng"]["seconds"]/60)
-        value *= 1 if self._data["lgn"]["cardinal"] == "E" else -1
-        return value
+        value = self._data[0][0].value
+        if self._data[1][1] == "E":
+            return value
+        else:
+            return value*-1
 
     @property
     def latlng(self):
         return (self.lat, self.lng)
 
     def __str__(self):
-        return (f'{self._data["lat"]["degrees"]}°'
-                f"{self._data['lat']['minutes']}'" 
-                f'{self._data["lat"]["seconds"]}"'
-                f'{self._data["lat"]["cardinal"]}"'
-                ' '
-                f'{self._data["lng"]["degrees"]}°'
-                f"{self._data['lng']['minutes']}'" 
-                f'{self._data["lng"]["seconds"]}"'
-                f'{self._data["lng"]["cardinal"]}"'
-                )
+        return (f"{self._data[0][0]}{self._data[0][1]}"
+                f" {self._data[1][0]}{self._data[1][1]}")
     
     def __repr__(self):
         return f"LatLng({self})"
+
+def read_latlng(s):
+    m = LatLng.pattern.fullmatch(s)
+    if m is None:
+        raise ValueError(f'Expression "{s}" does not match a known'
+                          ' latitude/longitude notation syntax')
+    
+    numberp = regex.compile(r"\d+(?:\.\d+)?")
+    def get_float(x, p=numberp): 
+        return float(p.match(x).group())
+    
+    data = {"lat": {}, "lng": {}}
+    for coordinate in data:
+        
+        # degrees
+        degrees = get_float(m.group(f"{coordinate}_deg"))
+        
+        # minutes
+        minutes = get_float(m.group(f"{coordinate}_min"))
+
+        # seconds 
+        if m.group(f"{coordinate}_sec") is None:
+            seconds = 0
+        else:
+            seconds = get_float(m.group(f"{coordinate}_sec")) 
+            
+        # cardinal
+        cardinal = guess_cardinal(m.group(f"{coordinate}_car").upper(), 
+                                    restrict="NS" 
+                                            if coordinate == "lat" 
+                                            else "WE")
+        data[coordinate] = (Degree(degrees, minutes, seconds), cardinal)
+    return data
+
+def degree_decomp(value):
+    '''
+    Decompose a degree value into degrees, minutes and seconds. 
+    '''
+
+    # degrees
+    degrees = int(value)
+    rest = value - degrees
+
+    # minutes
+    value = 60*rest
+    minutes = int(value)
+    rest = value - minutes
+
+    # seconds
+    seconds = 60*rest
+
+    return {"degrees": degrees, 
+            "minutes": minutes,
+            "seconds": seconds}
 
 def guess_cardinal(value, restrict="NSEW"):
     '''
@@ -232,23 +305,54 @@ def find_distance(s, get_span=True):
         span = m.span()
     return (result, span) if get_span else result
 
-def parse_geo(s):
+def parse_geo(s, username=GEONAMES_USERNAME):
     '''
     Attempt to find a location in the provided string
     '''
 
-    # 1- attempt to find a geolocalization
+    geocoder = GeoNames(username=username)
+
+    # 1- attempt to find a latitude-longitude coordinate
     latlng, span = find_lat_lng(s)
     if latlng is not None:
-        return 
+        return (latlng, geocoder.reverse(str(latlng)).address, span)
 
+    # 2- attempt to find a location using GeoNames
     # extract words of more than 3 characters
     s = simplify_str(s)
-    tokens = regexp_tokenize(s, pattern="[A-z]+")
+    tokens = regexp_tokenize(s, pattern="[A-z]{3,}")
 
-    # get location hints from all tokens
+    # get location hints from all possible tokens n-grams, stop at the first 
+    # found location
+    hit, query = parse_geo_from_ngrams(geocoder, tokens)
+    if hit is None:
+        return (None, None, None)
 
+    # retrieve the original text
+    p = regex.compile(r"(?:.*?)".join( fr"(?:{token})"  
+                                        for token in query ),
+                      regex.MULTILINE)
+    m = p.search(strip_accents(s.lower()))
+    if m is None:
+        sys.stderr.write("parse_geo warning: impossible to retrieve the"
+                         " original text.\n")
+        span = (None, None)
+    else:
+        span = m.span()
 
+    return (LatLng((hit.latitude, hit.longitude)), hit.address, span)
 
-# geocode function    
-geocode = GeoNames(username=GEONAMES_USERNAME).geocode
+def parse_geo_from_ngrams(geocoder, tokens):
+    '''
+    Attempts to find a geolocation with the provided tokens, by using 
+    queries constituted of all possible n-grams formed with successive 
+    tokens.
+    '''
+
+    for l in range(len(tokens), 0, -1):
+        for i in range(len(tokens)-l+1):
+            query = tokens[i:i+l]
+            hit = geocoder.geocode(" ".join(query))
+            if hit is not None:
+                return (hit, query)
+    return (None, [])

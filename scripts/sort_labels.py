@@ -144,21 +144,21 @@ def parse_date(text):
     datestr = date.get_isoformat()
     return (matched_str, span, datestr)
 
-def parse_geo(text):
+def parse_geo(text, username=mfnb.geo.GEONAMES_USERNAME):
     '''
     Tries to identify a geolocalization in the input text and returns
     the matched string, the span of the matched string and the 
     interpreted value.
     '''
     
-    latlng, span = mfnb.geo.find_lat_lng(text)            
+    latlng, address, span = mfnb.geo.parse_geo(text, username)
     if span is None:
         return ("", -1, "")
     matched_str = text[slice(*span)]
-    geostr = str(latlng)
+    geostr = f"{address} ({latlng})"
     return (matched_str, span, geostr)
 
-def parse_names(text, collectors, thresh=0):
+def parse_names(text, collectors):
     '''
     Tries to identify names in the input text and returns the matched
     string, the span of the matched string and the intepreted value.
@@ -357,6 +357,8 @@ def main(argv=sys.argv):
                     interpreted = ", ".join(interpreted)
                     verbatim = "|".join(verbatim)
                     collector_cols = f'\t{repr(verbatim)}\t{interpreted}'
+                else:
+                    collector_cols = ""
 
                 # parse the text to retrieve geolocalization information,
                 # then remove the intepreted text.
