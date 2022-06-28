@@ -4,18 +4,20 @@
     manipulation and formatting.
 '''
 
-from multiprocessing.sharedctypes import Value
-from re import A
+from dataclasses import replace
+import subprocess
+from pyparsing import col
 import regex, unicodedata
 import numpy as np
 from kneed import KneeLocator
 from math import log
+from sklearn import neighbors
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn_extra.cluster import KMedoids
 from sklearn.metrics import silhouette_score
 from leven import levenshtein
 from nltk import regexp_tokenize, word_tokenize
-
+from functools import partial
 
 # =============================================================================
 # CONSTANTS
@@ -571,66 +573,76 @@ def clean_str(s):
     s = s.replace(r"\t", "\t")
     return s
 
-def nw_align(x, y, match = 1, mismatch = 1, gap = 1):
+def simplified_text_alignment(lines):
     '''
-    Aligns string x and y using the Needleman-Wunsch algorithm.
+    Align multiple text lines with MAFFT aligner.
     '''
 
-    # Credits: Kamil Slowikowski (https://gist.github.com/slowkow)
+    # some characters must be replaced, accent characters are used as 
+    # replacement for special characters that are not processed by the aligner
+    # program
+    replacement = {
+        "<": "è", 
+        ">": "é", 
+        "=": "ë", 
+        "-": "ä",
+        " ": "ö"
+    }
+
+    # format the text to be aligned
+    formated_lines = []
+    for line in lines:
+
+        # simplify the input text
+        line = simplify_str(line)
+
+        # substitue special characters
+        for c in replacement:
+            line = line.replace(c, replacement[c])
+        formated_lines.append(line)
     
-    nx = len(x)
-    ny = len(y)
+    # FASTA formating
+    input_text = ""
+    for i in range(len(formated_lines)):
+        input_text += f">{i}\n{formated_lines[i]}\n"
     
-    # Optimal score at each possible pair of characters.
-    F = np.zeros((nx + 1, ny + 1))
-    F[:,0] = np.linspace(0, -nx * gap, nx + 1)
-    F[0,:] = np.linspace(0, -ny * gap, ny + 1)
-    
-    # Pointers to trace through an optimal aligment.
-    P = np.zeros((nx + 1, ny + 1))
-    P[:,0] = 3
-    P[0,:] = 4
-    
-    # Temporary scores.
-    t = np.zeros(3)
-    for i in range(nx):
-        for j in range(ny):
-            if x[i] == y[j]:
-                t[0] = F[i,j] + match
-            else:
-                t[0] = F[i,j] - mismatch
-            t[1] = F[i,j+1] - gap
-            t[2] = F[i+1,j] - gap
-            tmax = np.max(t)
-            F[i+1,j+1] = tmax
-            if t[0] == tmax:
-                P[i+1,j+1] += 2
-            if t[1] == tmax:
-                P[i+1,j+1] += 3
-            if t[2] == tmax:
-                P[i+1,j+1] += 4
-    
-    # Trace through an optimal alignment.
-    i = nx
-    j = ny
-    rx = []
-    ry = []
-    while i > 0 or j > 0:
-        if P[i,j] in [2, 5, 6, 9]:
-            rx.append(x[i-1])
-            ry.append(y[j-1])
-            i -= 1
-            j -= 1
-        elif P[i,j] in [3, 5, 7, 9]:
-            rx.append(x[i-1])
-            ry.append('-')
-            i -= 1
-        elif P[i,j] in [4, 6, 7, 9]:
-            rx.append('-')
-            ry.append(y[j-1])
-            j -= 1
-    
-    # Reverse the strings.
-    rx = ''.join(rx)[::-1]
-    ry = ''.join(ry)[::-1]
-    return '\n'.join([rx, ry])
+    # run MAFFT as a subprocess
+    cmd = ["mafft", "--text", "--maxiterate", "1000", "--globalpair", "-"]
+    p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
+                         stdout=subprocess.PIPE, text=True)
+    o, e = p.communicate(input_text)
+
+    # retrieve aligned lines
+    aligned_formated = regex.findall(r"(?<=>.+\n)[^>]+", o, flags=regex.M)
+
+    # convert back the special characters
+    replacement = dict( (value, key) for key, value in replacement.items() )
+    aligned = []
+    for line in aligned_formated:
+        
+        # remove newline characters
+        line = line.replace("\n", "")
+
+        # convert gaps to spaces
+        line = line.replace("-", " ")
+
+        # substitue special characters
+        for c in replacement:
+            line = line.replace(c, replacement[c])
+        aligned.append(line)
+
+    return aligned
+
+def consensus_text(aligned):
+    '''
+    Returns a single string corresponding to the most frequent character finds
+    at each position of the alignment.
+    '''
+
+    consensus = ""
+    for column in zip(*aligned):
+        freq = [ (c, column.count(c)) for c in set(column) ]
+        freq.sort(key=lambda x: x[1])
+        consensus += freq[-1][0]
+    return consensus
+
