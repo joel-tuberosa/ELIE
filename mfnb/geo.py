@@ -13,9 +13,11 @@
 # 
 
 import regex, sys
+import xml.etree.ElementTree as ET
 from nltk import regexp_tokenize
 from mfnb.utils import simplify_str, strip_accents
 from geopy.geocoders import GeoNames
+from urllib.request import urlopen
 
 GEONAMES_USERNAME = "joel.tuberosa"
 
@@ -350,9 +352,89 @@ def parse_geo_from_ngrams(geocoder, tokens):
     '''
 
     for l in range(len(tokens), 0, -1):
+        hits = []
+        queries = dict()
         for i in range(len(tokens)-l+1):
             query = tokens[i:i+l]
             hit = geocoder.geocode(" ".join(query))
             if hit is not None:
-                return (hit, query)
+                hits.append(hit)
+
+                # associated the query with hit ID for further retrieval
+                queries[hit.raw["geonameId"]] = query
+        
+        # if no hits were found, continue with smaller n-grams
+        if not hits:
+            continue
+
+        # group the hits by country
+        groups = GeoNames_group_by_country(hits)
+
+        # sort each group by feature rank
+        for country in groups:
+            groups[country].sort(key=GeoNames_feature_rank)
+
+        # keep the group that countains the highest information level
+        # (i.e country over city)
+        hits = sorted(groups.values(), 
+                      key=lambda group: GeoNames_feature_rank(group[0]))[0]
+        
+        # keep the hit with the most precise information level
+        hit = hits[-1]
+
+        # stop the search and return the best hit
+        return (hit, queries[hit.raw["geonameId"]])
+         
     return (None, [])
+
+def GeoNames_feature_rank(hit):
+    '''
+    Return the ranking of the GeoNames result's feature. 
+    '''
+    
+    fcl_order = [
+        "A", #country, state, region,...
+        "P", #city, village,...
+        "H", #stream, lake, ...
+        "L", #parks,area, ...
+        "T", #mountain,hill,rock,...
+        "U", #undersea
+        "V", #forest,heath,...
+        "R", #road, railroad
+        "S"  #spot, building, farm
+        ]
+    
+    return fcl_order.index(hit.raw["fcl"])
+
+def GeoNames_group_by_country(hits):
+    '''
+    Groups GeoNames results by country.
+    '''
+
+    groups = dict()
+    for hit in hits:
+        try:
+            groups[hit.raw["countryCode"]].append(hit)
+        except KeyError:
+            groups[hit.raw["countryCode"]] = [hit]
+    return groups
+
+def GeoNames_iscountry(hit):
+    '''
+    Returns True if the evaluated GeoNames result is a country.
+    '''
+
+    return hit.raw["name"] == hit.raw["countryName"]
+
+def GeoNames_hierarchy(hit, username=GEONAMES_USERNAME):
+    '''
+    Retrieves the upper hierarchy of the provided hit.
+    '''
+
+    url = ("http://api.geonames.org/hierarchy?"
+           f"geonameId={hit.raw['geonameId']}&"
+           f"username={username}")
+    with urlopen(url) as page:
+        root = ET.fromstring(page.read().decode())
+    return [ entity.find("name").text 
+              for entity in root.findall("geoname") ]
