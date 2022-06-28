@@ -623,8 +623,8 @@ def simplified_text_alignment(lines):
         # remove newline characters
         line = line.replace("\n", "")
 
-        # convert gaps to spaces
-        line = line.replace("-", " ")
+        # convert gaps to _
+        line = line.replace("-", "_")
 
         # substitue special characters
         for c in replacement:
@@ -633,7 +633,7 @@ def simplified_text_alignment(lines):
 
     return aligned
 
-def consensus_text(aligned):
+def consensus_text(aligned, remove_gaps=True):
     '''
     Returns a single string corresponding to the most frequent character finds
     at each position of the alignment.
@@ -644,5 +644,7 @@ def consensus_text(aligned):
         freq = [ (c, column.count(c)) for c in set(column) ]
         freq.sort(key=lambda x: x[1])
         consensus += freq[-1][0]
+    if remove_gaps:
+        consensus = consensus.replace("_", "")
     return consensus
 
