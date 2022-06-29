@@ -70,6 +70,29 @@ OPTIONS
         Minimum similarity score for two label to be put in the same 
         group.
     
+    -v, --consensus=METHOD
+        Instead of parsing each label, build a consensus from the label
+        cluster and parse it to retrieve information that will apply to
+        all labels of the cluster. Verbatim information is lost with
+        this option but the processing is faster.
+
+        Possible METHOD values:
+            
+            "alignment" Perform an alignment with MAFFT, then build a 
+                        consensus string from the most frequent 
+                        character at each position. Requires MAFFT to
+                        be installed.
+
+            "pick"      Pick the text that has the lowest median 
+                        pairwise distance with other texts of the 
+                        cluster.
+
+        Default is "pick".
+
+    -q, --consensus-quorum=INT
+        Apply the consensus method only if the number of label in the 
+        analyzed cluster is greater than the provided value. Default=2.
+
     --help
         Display this message
 '''
@@ -91,10 +114,11 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:], 
-                                       "c:df:gm:rs:", 
+                                       "c:df:gm:rs:v:q", 
                                        ['collector=', 'date', 'id-format=', 
                                         'geo', 'min-length=', 'min-score=', 
-                                        'refine', 'help'])
+                                        'refine', 'consensus=', 
+                                        'consensus-quorum=', 'help'])
         except getopt.GetoptError as e:
             sys.stderr.write(str(e) + '\n' + __doc__)
             sys.exit(1)
@@ -117,6 +141,10 @@ class Options(dict):
                 self["refine"] = True
             elif o in ('-s', '--min-score'):
                 self["min_score"] = float(a)
+            elif o in ('-v', '--consensus'):
+                self["consensus"] = read_consensus(a)
+            elif o in ('-q', '--consensus-quorum'):
+                self["quorum"] = int(a)
 
         self.args = args
 
@@ -130,7 +158,18 @@ class Options(dict):
         self["min_word_length"] = 3
         self["min_score"] = 0.8
         self["refine"] = False
-        
+        self["consensus"] = None
+        self["quorum"] = 2
+
+def read_consensus(a):
+    a = mfnb.utils.simplify_str(a)
+    if mfnb.name.fullname_match(a, "alignment"):
+        return "alignment"
+    elif mfnb.name.fullname_match(a, "pick"):
+        return "pick"
+    else:
+        raise ValueError(f"unrecognized consensus method: {repr(a)}")
+
 def parse_date(text):
     '''
     Tries to identify a date in the input text and returns the matched 
@@ -174,7 +213,7 @@ def parse_names(text, collectors):
         results.append((matched_str, span, namestr))
     return results
 
-def refine(labels, get_median_dist=False):
+def refine(labels, dist=None, get_median_dist=False):
     '''
     Identify K-medoids within a group of labels. Does not do anything
     if there are less than 4 elements.
@@ -185,6 +224,11 @@ def refine(labels, get_median_dist=False):
             A Label DB or a list of Label objects, whose text attribute
             A list of Label object, whose text attribute will be 
             will be compared.
+
+        dist : NDarray
+            A symetrical pairwise distance matrix that will be used for
+            the clustering instead of calculating one from the provided
+            labels.
 
         get_median_dist : bool
             Output each label along with its median distance with 
@@ -199,7 +243,8 @@ def refine(labels, get_median_dist=False):
     n = len(lines)
 
     # calculates the pairwise distance matrix
-    dist = mfnb.utils.get_pairwise_leven_dist(lines, simplify=True)
+    if dist is None:
+        dist = mfnb.utils.get_pairwise_leven_dist(lines, simplify=True)
 
     # does not attempt anything for less than 8 elements
     if n < 8:
@@ -255,6 +300,76 @@ def refine(labels, get_median_dist=False):
     # return a list of lists containing labels from the same cluster
     return list(clusters.values())
 
+def parse_info(text, geo=False, date=False, collectors=[]):
+    '''
+    Parse information from the provided text.
+    '''
+
+    # parsed and interpreted information
+    found_info = {
+        "geo": {
+            "verbatim": "",
+            "interpreted": ""
+            },
+        "date": {
+            "verbatim": "",
+            "interpreted": ""
+            }, 
+        "collectors": {
+            "verbatim": "",
+            "interpreted": ""
+            }
+        } 
+    
+    # text segment breaks
+    segments = []
+    
+    # parse the text to retrieve date information, then remove
+    # the intepreted text.
+    if date:
+        verbatim, span, interpreted = parse_date(text)
+        if span != -1: text = mfnb.utils.clear_text(text, span)
+        found_info["date"]["verbatim"] = verbatim
+        found_info["date"]["interpreted"] = interpreted
+        if span != -1:
+            segments += list(span)
+    
+    # parse the text to retrieve the collector name
+    if collectors:
+        interpreted = []
+        verbatim = []
+        hits = mfnb.name.find_collectors(text, collectors)
+        for collector, span, score in hits:
+            interpreted.append(collector.text)
+            verbatim.append(text[slice(*span)])
+            text = mfnb.utils.clear_text(text, span)
+        interpreted = ", ".join(interpreted)
+        verbatim = "|".join(verbatim)
+        found_info["collectors"]["verbatim"] = verbatim
+        found_info["collectors"]["interpreted"] = interpreted
+        
+    # parse the text to retrieve geolocalization information,
+    # then remove the intepreted text.
+    if geo:
+        verbatim, span, interpreted = parse_geo(text)
+        if span != -1: text = mfnb.utils.clear_text(text, span)
+        found_info["geo"]["verbatim"] = verbatim
+        found_info["geo"]["interpreted"] = interpreted
+        if span != -1:
+            segments += list(span)
+    
+    return found_info
+
+def format_result_line(label, group_id, found_info, 
+                       fields=("geo", "date", "collectors")):
+
+    line = f'{label.ID}\t{repr(label.text)}\t{group_id}'
+    for field in fields:
+        if found_info[field]["interpreted"]:
+            line += (f'\t{found_info[field]["verbatim"]}'
+                     f'\t{found_info[field]["interpreted"]}')
+    return line + "\n"
+
 def main(argv=sys.argv):
     
     # read options and remove options strings from argv (avoid option 
@@ -275,10 +390,41 @@ def main(argv=sys.argv):
     if options["collector"] is not None:
         with open(options["collector"]) as f:
             collectors = mfnb.name.load_collectors(f)
+    else:
+        collectors = []
 
     # label to be classified
     to_be_sorted = [ label.ID for label in db ]
     
+    # consensus method to be used
+    if options["consensus"] == "alignment":
+        consensus = True
+        get_consensus = mfnb.utils.text_alignment_consensus
+    elif options["consensus"] == "pick":
+        consensus = True
+        get_consensus = mfnb.utils.text_pick_consensus
+    else:
+        consensus = False
+
+    # parser function
+    global parse_info
+    parse_info = partial(parse_info, 
+                         geo=options["geo"], 
+                         date=options["date"],
+                         collectors=collectors)
+
+    # result line formatter function
+    fields = []
+    if options["geo"]:
+        fields.append("geo")
+    if options["date"]:
+        fields.append("date")
+    if collectors:
+        fields.append("collectors")
+    global format_result_line
+    format_result_line = partial(format_result_line,
+                                 fields=fields)
+
     # write the header
     header = "label.ID\tlabel.v\tgroup.ID"
     for option in ["geo", "date", "collector"]:
@@ -317,69 +463,26 @@ def main(argv=sys.argv):
         for cluster in clusters:
             i += 1
             group_id = options["id_formatter"](i)
+
+            # if the consensus option is selected and the cluster reaches the 
+            # quorum, information is parsed within the consensus text instead
+            # of within each individual label
+            if consensus and len(cluster) >= options["quorum"]:
+                text = get_consensus([ label.text for label in cluster ], 
+                                     simplify=True)
+                found_info = parse_info(text)
+            else:
+                found_info = None
+
             for label in cluster:
                 
-                # the text is clean up from the matched patterns
-                text = label.text
-            
-                # output table fields containing label info
-                label_cols = f'{label.ID}\t{repr(label.text)}\t{group_id}'
+                # parse info from individual label if needed
+                if found_info is None:
+                    found_info = parse_info(label.text)
                 
-                # check list of parsed and retrieved information
-                found_info = {"geo": False, "date": False, "collector": False} 
-                
-                # text segment breaks
-                segments = []
-               
-                # parse the text to retrieve date information, then remove
-                # the intepreted text.
-                if options["date"]:
-                    verbatim, span, interpreted = parse_date(text)
-                    if span != -1: text = mfnb.utils.clear_text(text, span)
-                    date_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                    if span == -1:
-                        found_info["date"] = False
-                    else:
-                        found_info["date"] = True
-                        segments += list(span)
-                else:
-                    date_cols = ""
-                
-                # parse the text to retrieve the collector name
-                if options["collector"] is not None:
-                    interpreted = []
-                    verbatim = []
-                    hits = mfnb.name.find_collectors(text, collectors)
-                    for collector, span, score in hits:
-                        interpreted.append(collector.text)
-                        verbatim.append(text[slice(*span)])
-                        text = mfnb.utils.clear_text(text, span)
-                    interpreted = ", ".join(interpreted)
-                    verbatim = "|".join(verbatim)
-                    collector_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                else:
-                    collector_cols = ""
-
-                # parse the text to retrieve geolocalization information,
-                # then remove the intepreted text.
-                span = None
-                if options["geo"]:
-                    verbatim, span, interpreted = parse_geo(text)
-                    if span != -1: text = mfnb.utils.clear_text(text, span)
-                    geo_cols = f'\t{repr(verbatim)}\t{interpreted}'
-                    if span == -1:
-                        found_info["geo"] = False
-                    else:
-                        found_info["geo"] = True
-                        segments += list(span)
-                else:
-                    geo_cols = ""
-
                 # write label info
-                sys.stdout.write(f'{label_cols}'
-                                 f'{geo_cols}'
-                                 f'{date_cols}'
-                                 f'{collector_cols}\n')
+                result_line = format_result_line(label, group_id, found_info)
+                sys.stdout.write(result_line)
             
         # remove matched IDs from the list of elements to be sorted
         match_ids = { label.ID for label in matches }

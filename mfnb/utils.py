@@ -4,20 +4,15 @@
     manipulation and formatting.
 '''
 
-from dataclasses import replace
 import subprocess
-from pyparsing import col
 import regex, unicodedata
 import numpy as np
 from kneed import KneeLocator
 from math import log
-from sklearn import neighbors
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn_extra.cluster import KMedoids
 from sklearn.metrics import silhouette_score
 from leven import levenshtein
 from nltk import regexp_tokenize, word_tokenize
-from functools import partial
 
 # =============================================================================
 # CONSTANTS
@@ -421,7 +416,7 @@ def get_median_dists(dist):
     check = (np.allclose(dist, dist.T, atol=1e-8, rtol=1e-8),
              len(dist.shape) == 2) 
     if not all(check):
-        raise ValueError("input must be a symmetrical pairwise distance"
+        raise ValueError("input must be a symetrical pairwise distance"
                          " matrix")
     n = dist.shape[0]
 
@@ -573,34 +568,65 @@ def clean_str(s):
     s = s.replace(r"\t", "\t")
     return s
 
-def simplified_text_alignment(lines):
+def mask_special_char(text, charset, mask="~"):
+    '''
+    Masks and indexes the special character found in the input text. 
+    Returns a the masked text along with a list of the substituted 
+    characters, in the order they were found.
+    '''
+
+    charset = list(charset) + [mask]
+    masked_chars = []
+    masked_text = ""
+    for i in range(len(text)):
+        c = text[i]
+        if c in charset:
+            masked_text += mask
+            masked_chars.append(c)
+        else:
+            masked_text += c
+    return (masked_text, masked_chars)
+
+def unmask_special_char(masked_text, masked_chars, mask="~"):
+    '''
+    Recovers the original text from the return values of the function
+    mask_special_char.
+    '''
+
+    text = ""
+    i = 0
+    for c in masked_text:
+        if c == mask:
+            text += masked_chars[i]
+            i += 1
+        else:
+            text += c
+    return text    
+
+def text_alignment(lines, simplify=False):
     '''
     Align multiple text lines with MAFFT aligner.
     '''
 
-    # some characters must be replaced, accent characters are used as 
+    # some characters must be replaced, accent characters are used here as 
     # replacement for special characters that are not processed by the aligner
-    # program
-    replacement = {
-        "<": "è", 
-        ">": "é", 
-        "=": "ë", 
-        "-": "ä",
-        " ": "ö"
-    }
+    # program. this implies that the input must not contains these characters.
+    charset = "<>=- "
 
     # format the text to be aligned
     formated_lines = []
+    lines_masked_chars = []
     for line in lines:
-
+        
         # simplify the input text
-        line = simplify_str(line)
+        if simplify:
+            line = simplify_str(line)
 
         # substitue special characters
-        for c in replacement:
-            line = line.replace(c, replacement[c])
+        line, masked_chars = mask_special_char(line, charset)
         formated_lines.append(line)
-    
+        lines_masked_chars.append(masked_chars)
+
     # FASTA formating
     input_text = ""
     for i in range(len(formated_lines)):
@@ -616,9 +642,9 @@ def simplified_text_alignment(lines):
     aligned_formated = regex.findall(r"(?<=>.+\n)[^>]+", o, flags=regex.M)
 
     # convert back the special characters
-    replacement = dict( (value, key) for key, value in replacement.items() )
     aligned = []
-    for line in aligned_formated:
+    for line, masked_chars in zip(aligned_formated,
+                                   lines_masked_chars):
         
         # remove newline characters
         line = line.replace("\n", "")
@@ -626,19 +652,25 @@ def simplified_text_alignment(lines):
         # convert gaps to _
         line = line.replace("-", "_")
 
-        # substitue special characters
-        for c in replacement:
-            line = line.replace(c, replacement[c])
+        # unmask special characters
+        line = unmask_special_char(line, masked_chars)
         aligned.append(line)
 
     return aligned
 
-def consensus_text(aligned, remove_gaps=True):
+def text_alignment_consensus(lines, simplify=False, remove_gaps=True):
     '''
-    Returns a single string corresponding to the most frequent character finds
-    at each position of the alignment.
+    Simplifies the input strings, align with MAFFT, then returns a 
+    single string corresponding to the most frequent character finds
+    at each position of the alignment. Gaps created by the alignement
+    are removed when they are consensus at a given position.
     '''
 
+    # align the text using MAFFT, which requires the MAFFT program to be 
+    # installed and located by the PATH variable. 
+    aligned = text_alignment(lines, simplify=simplify)
+
+    # build the consensus
     consensus = ""
     for column in zip(*aligned):
         freq = [ (c, column.count(c)) for c in set(column) ]
@@ -648,3 +680,16 @@ def consensus_text(aligned, remove_gaps=True):
         consensus = consensus.replace("_", "")
     return consensus
 
+def text_pick_consensus(lines, simplify=False):
+    '''
+    Simplifies the input strings, calculate the Levenshtein pairwise 
+    distance and pick the string that have the lowest median distance 
+    with other strings.
+    '''
+
+    if simplify:
+        lines = [ simplify_str(line) for line in lines ]
+    dist = get_pairwise_leven_dist(lines)
+    median_dist = get_median_dists(dist)
+    sorted_median_dist = sorted(zip(lines, median_dist), key=lambda x: x[1])
+    return sorted_median_dist[-1][0]
