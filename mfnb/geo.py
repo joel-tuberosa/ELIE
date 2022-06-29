@@ -366,7 +366,7 @@ def parse_geo_from_ngrams(geocoder, tokens):
         # if no hits were found, continue with smaller n-grams
         if not hits:
             continue
-
+            
         # group the hits by country
         groups = GeoNames_group_by_country(hits)
 
@@ -374,10 +374,20 @@ def parse_geo_from_ngrams(geocoder, tokens):
         for country in groups:
             groups[country].sort(key=GeoNames_feature_rank)
 
-        # keep the group that countains the highest information level
-        # (i.e country over city)
-        hits = sorted(groups.values(), 
-                      key=lambda group: GeoNames_feature_rank(group[0]))[0]
+        # unless this is the only group, do not keep location that are above 
+        # country level
+        if list(groups.keys()) == ["no_country"]:
+            hits = groups["no_country"]
+
+        # otherwise, keep the group that countains the highest information 
+        # level (i.e country over city)
+        else:
+            try:
+                del groups["no_country"]
+            except KeyError:
+                pass
+            hits = sorted(groups.values(), 
+                          key=lambda group: GeoNames_feature_rank(group[0]))[0]
         
         # keep the hit with the most precise information level
         hit = hits[-1]
@@ -413,10 +423,19 @@ def GeoNames_group_by_country(hits):
 
     groups = dict()
     for hit in hits:
+
+        # try to retrieve the country name, if the location is affiliated to a
+        # country
         try:
-            groups[hit.raw["countryCode"]].append(hit)
+            country = hit.raw["countryCode"]
         except KeyError:
-            groups[hit.raw["countryCode"]] = [hit]
+            country = "no_country"
+
+        # regroup hits by country
+        try:
+            groups[country].append(hit)
+        except KeyError:
+            groups[country] = [hit]
     return groups
 
 def GeoNames_iscountry(hit):
