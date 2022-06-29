@@ -633,10 +633,10 @@ def text_alignment(lines, simplify=False):
         input_text += f">{i}\n{formated_lines[i]}\n"
     
     # run MAFFT as a subprocess
-    cmd = ["mafft", "--text", "--maxiterate", "1000", "--globalpair", "-"]
+    cmd = ["mafft", "--text", "--maxiterate", "1000", "--globalpair", "--quiet", "-"]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE, text=True)
-    o, e = p.communicate(input_text)
+    o, _ = p.communicate(input_text)
 
     # retrieve aligned lines
     aligned_formated = regex.findall(r"(?<=>.+\n)[^>]+", o, flags=regex.M)
