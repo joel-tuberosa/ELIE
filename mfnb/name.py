@@ -62,7 +62,7 @@ class Collector(object):
         return format.format(f=f,
                              q=q,
                              F=F,
-                             N=self.name)
+                             N=self.name).strip()
     
     def all_formats(self):
         '''
