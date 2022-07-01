@@ -8,6 +8,7 @@
 import regex, json
 from mfnb.utils import mismatch_rule, overlap, simplify_str, strip_accents
 from nltk import regexp_tokenize
+from functools import partial
 
 # =============================================================================
 # CLASSES
@@ -22,7 +23,9 @@ class Collector(object):
             "ID": ID,
             "name": name,
             "firstname": firstname,
-            "metadata": metadata
+            "metadata": metadata,
+            "simplified_name": simplify_str(name),
+            "simplified_firstname": simplify_str(firstname)
         }
 
     @property
@@ -34,6 +37,10 @@ class Collector(object):
         return self._data["name"]
 
     @property
+    def simple_name(self):
+        return self._data["simplified_name"]
+
+    @property
     def firstname(self):
         if self._data["firstname"]:
             return self._data["firstname"]
@@ -41,10 +48,17 @@ class Collector(object):
             return None
 
     @property
+    def simple_firstname(self):
+        if self._data["simplified_firstname"]:
+            return self._data["simplified_firstname"]
+        else:
+            return None
+
+    @property
     def text(self):
         return self.formats("{F} {N}")
 
-    def formats(self, format):
+    def formats(self, format, lowercase=False, simplified_str=False):
         '''
         Write the name in the desired format. Format specification:
             {f}     first letter(s) of the first name(s)
@@ -53,29 +67,43 @@ class Collector(object):
             {N}     full last name
         '''
         
-        if self.firstname is None:
+        # preprocess fields
+        if simplified_str:
+            name, firstname = self.simple_name, self.simple_firstname
+        elif lowercase:
+            name, firstname = self.name.lower(), self.firstname.lower()
+        else:
+            name, firstname = self.name, self.firstname
+
+        if firstname is None:
             F = f = q = ""
         else:
-            f = abbreviate_name(self.firstname)
-            q = abbreviate_name(self.firstname, dots=True)
-            F = self.firstname
-        return format.format(f=f,
+            f = abbreviate_name(firstname)
+            q = abbreviate_name(firstname, dots=True)
+            F = firstname
+        text = format.format(f=f,
                              q=q,
                              F=F,
-                             N=self.name).strip()
+                             N=name).strip()
+        return text
     
-    def all_formats(self):
+    def all_formats(self, lowercase=False, simplified_str=False):
         '''
         Returns a list of the names in all possible formats along with 
         the corresponding format expression.
         '''
 
         # surname only
-        formats = [(self.formats(r"{N}"), r"{N}")]
+        formats = [(self.formats(r"{N}", lowercase=lowercase,
+                                 simplified_str=simplified_str),
+                    r"{N}")]
 
         # first name + surname
         if self.firstname is not None:
-            formats += [ (self.formats(" ".join(format)), " ".join(format))
+            formats += [ (self.formats(" ".join(format), 
+                                       lowercase=lowercase,
+                                       simplified_str=simplified_str), 
+                          " ".join(format))
                           for firstname in [r"{f}", r"{q}", r"{F}"]
                           for format in ([firstname, r"{N}"],
                                          [r"{N}", firstname]) ]
@@ -120,20 +148,30 @@ def abbreviate_name(s, dots=False):
     names += s[span[1]:span[1]+1].upper() + dot
     return names
 
-def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule):
+def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule, 
+                            ignore_case=False, simplified_str=False):
     '''
     Parse the input string s to identify any name from the provided 
     list of Collector object.
     '''
+    
+    # preprocess the target input
+    if simplified_str:
+        target = strip_accents(s).lower()
+    elif ignore_case:
+        target = s.lower()
 
     # try to find surname only
-    surname_matches = []
+    surname_matches = []    
     for collector in collectors:
-        name_regex = r"\b" + collector.name + r"\b"
-        name = collector.name
+        if simplified_str:
+            name = collector.simple_name
+        else:
+            name = collector.name
+        name_regex = r"\b" + name + r"\b"
         p = regex.compile(name_regex + mismatch_rule(name), 
-                          regex.BESTMATCH | regex.V1)
-        m = p.search(s)
+                          regex.BESTMATCH | regex.V1 | regex.M)
+        m = p.search(target)
         if m is not None:
             mismatches = sum(m.fuzzy_counts)
             score = (len(name)-mismatches)/len(name)
@@ -143,11 +181,11 @@ def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule):
     fullname_matches = []
     for m, collector, score in surname_matches:
         matches = []
-        for name, format in collector.all_formats():
+        for name, format in collector.all_formats(ignore_case, simplified_str):
             name_regex = r"\b" + name.replace(".", r"\.") + r"\b"
             p = regex.compile(name_regex + mismatch_rule(name), 
-                              regex.BESTMATCH | regex.V1)
-            m = p.search(s)
+                              regex.BESTMATCH | regex.V1 | regex.M)
+            m = p.search(target)
             if m is not None:
                 mismatches = sum(m.fuzzy_counts)
                 score = (len(name)-mismatches)/len(name)
@@ -175,10 +213,21 @@ def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule):
              else (collector, span, score*0.9) 
               for collector, span, first_name_matched, score in results ]
 
-def search_collectors_abbr(s, collectors):
+def search_collectors_abbr(s, collectors, ignore_case=False,
+                           simplified_str=False):
+    
+    # preprocess the query
+    if simplified_str:
+        
+        # do not use simplify_str function to preserve the query length
+        s = strip_accents(s).lower()
+
+    elif ignore_case:
+        s = s.lower()
+
     results = []
     for collector in collectors:
-        for name, format in collector.all_formats():
+        for name, format in collector.all_formats(ignore_case, simplified_str):
             hit, span = abbreviation_search(name, s, get_span=True)
             if hit is None:
                 continue
@@ -186,14 +235,20 @@ def search_collectors_abbr(s, collectors):
                 results.append((collector, span, 1))
     return results
 
+default_search_methods = {
+        "person": partial(search_collectors_regex, simplified_str=True),
+        "other": partial(search_collectors_abbr, simplified_str=True)
+        }
+
 def default_search_method_selector(collector):
+    global default_search_methods
     try:
         if collector.metadata["entity_type"] == "person":
-            return search_collectors_regex
+            return default_search_methods["person"]
         else:
-            return search_collectors_abbr
+            return default_search_methods["entity"]
     except (AttributeError, KeyError):
-        return search_collectors_regex
+        return default_search_methods["person"]
 
 def search_collectors(s, collectors,
                       search_rule=default_search_method_selector):
@@ -243,7 +298,8 @@ def load_collectors(f):
 
     return [ Collector(**data) for data in json.load(f) ]
 
-def fullname_search(abbreviation, target, get_span=False):
+def fullname_search(abbreviation, target, get_span=False, ignore_case=False, 
+                    simplified_str=False):
     '''
     Tokenize the abbreviation and the target, then try to match a
     similar token sequence with the same starts.
@@ -253,7 +309,9 @@ def fullname_search(abbreviation, target, get_span=False):
     target_tokens = regexp_tokenize(target.lower(), "\w+")
     start, i = -1, 0
     for j in range(len(target_tokens)):
-        if fullname_match(abbreviation_tokens[i], target_tokens[j]):
+        if fullname_match(abbreviation_tokens[i], target_tokens[j],
+                          ignore_case=ignore_case, 
+                          simplified_str=simplified_str):
             if start == -1: start = j
             i += 1
         else:
@@ -270,14 +328,20 @@ def fullname_search(abbreviation, target, get_span=False):
     else:
         return (None, None) if get_span else None
 
-def fullname_match(abbreviation, target):
+def fullname_match(abbreviation, target, ignore_case=False, 
+                   simplified_str=False):
     '''
     Return True if the provided string is an abbreviation of the
     target, namely, having matching first letters with optional dots.
     '''
 
-    abbreviation, target = simplify_str(abbreviation), simplify_str(target)
+    # pre-processes input strings
+    if ignore_case:
+        abbreviation, target = abbreviation.lower(), target.lower()
+    if simplified_str:   
+        abbreviation, target = simplify_str(abbreviation), simplify_str(target)
     abbreviation = abbreviation.rstrip(".")
+    
     if not abbreviation: return False
     try:
         return all( abbreviation[i] == target[i] 
@@ -285,14 +349,23 @@ def fullname_match(abbreviation, target):
     except IndexError:
         return False
 
-def abbreviation_search(fullname, target, get_span=False):
+def abbreviation_search(fullname, target, get_span=False, ignore_case=False,
+                        simplified_str=False):
     '''
     Search abbreviation in the target string that could correspond to
     the query text.
     '''
 
-    fullname_tokens = regexp_tokenize(fullname.lower(), "\w+")
-    target_tokens = regexp_tokenize(target.lower(), "\w+")
+    # pre-processes input strings
+    original_target = target
+    if simplified_str:
+        fullname, target = simplify_str(fullname), simplify_str(target)
+    elif ignore_case:
+        fullname, target = fullname.lower(), target.lower()
+
+    fullname_tokens = regexp_tokenize(fullname, "\w+")
+    target_tokens = regexp_tokenize(target, "\w+")
+    
     start, i = -1, 0
     for j in range(len(target_tokens)):
         if fullname_match(target_tokens[j], fullname_tokens[i]):
@@ -303,8 +376,14 @@ def abbreviation_search(fullname, target, get_span=False):
             i = 0
         if i == len(fullname_tokens): break  
     if i == len(fullname_tokens) and start > -1:
-        p = regex.compile(r"\W+".join(target_tokens[start:start+i]), regex.I)
-        m = p.search(strip_accents(target))
+        if ignore_case:
+            p = regex.compile(r"\W+".join(target_tokens[start:start+i]), regex.I)
+        else:
+            p = regex.compile(r"\W+".join(target_tokens[start:start+i]))
+        if simplified_str:
+            m = p.search(strip_accents(original_target))
+        else:
+            m = p.search(original_target)
         if m is None:
             raise AssertionError("Problem while retrieving the original text")
         hit = target[slice(*m.span())]
