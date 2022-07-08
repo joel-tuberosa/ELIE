@@ -10,7 +10,11 @@ Welcome to mfnb's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   date
+   geo
+   labeldata
+   name
+   utils
 
 Indices and tables
 ==================
