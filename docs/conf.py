@@ -5,15 +5,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+import os, sys
+sys.path.insert(0, os.path.abspath("../mfnb/"))
 
 # -- Project information -----------------------------------------------------
 
@@ -27,6 +20,18 @@ release = '0.1'
 
 # -- General configuration ---------------------------------------------------
 
+# Sort members by type
+autodoc_member_order = 'groupwise'
+
+# Ensure that the __init__ method gets documented.
+def skip(app, what, name, obj, skip, options):
+    if name == "__init__":
+        return False
+    return skip
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -39,7 +44,8 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'desktop.ini', 
+                    '__init__.py']
 
 
 # -- Options for HTML output -------------------------------------------------
