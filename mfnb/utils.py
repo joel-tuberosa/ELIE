@@ -603,14 +603,12 @@ def unmask_special_char(masked_text, masked_chars, mask="~"):
             text += c
     return text    
 
-def text_alignment(lines, simplify=False):
+def text_alignment(lines, simplify=False, mask="~"):
     '''
     Align multiple text lines with MAFFT aligner.
     '''
 
-    # some characters must be replaced, accent characters are used here as 
-    # replacement for special characters that are not processed by the aligner
-    # program. this implies that the input must not contains these characters.
+    # these characters are forbidden in MAFFT input.
     charset = "<>=- "
 
     # format the text to be aligned
@@ -622,8 +620,12 @@ def text_alignment(lines, simplify=False):
         if simplify:
             line = simplify_str(line)
 
-        # substitue special characters
-        line, masked_chars = mask_special_char(line, charset)
+        # Substitue special characters using a single compatible character as a
+        # replacement (~). If special characters are frequent, this could 
+        # affect the alignment quality, because all special character would be 
+        # considered equivalent! Similarly, the alignment could be perturbed if
+        # this original string already contains the replacement character.
+        line, masked_chars = mask_special_char(line, charset, mask)
         formated_lines.append(line)
         lines_masked_chars.append(masked_chars)
 
