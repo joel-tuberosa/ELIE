@@ -36,8 +36,6 @@ DESCRIPTION
     information within the label, such as collector names, dates or
     geographical localisation.
     
-    /!\ still under development /!\ 
-
 OPTIONS
     -c, --collector=FILE
         Attempt to identifiy collector names from the provided FILE, in 
@@ -431,10 +429,6 @@ def main(argv=sys.argv):
         if options[option]: header += f"\t{option}.v\t{option}.i"
     header += "\n"
     sys.stdout.write(header)
-    
-    # remove newlines from text
-    p = regex.compile("\n\r?")
-    #remove_newlines = lambda x: p.sub(" // ", x)
     
     # label group number
     i = 0
