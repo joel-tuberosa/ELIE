@@ -21,7 +21,7 @@ OPTIONS
 
     -f, --text-fields=STR[,...]
         Limit text search in the collecting events to the provided 
-        fields.
+        fields. By default, search only in the field "text".
 
     -m, --method=METHOD
         Provide with the search method to use.
@@ -213,6 +213,7 @@ def main(argv=sys.argv):
                 filtering = lambda ce: ce.ID in ids
         else:
             filtering = lambda ce: True
+            date = None
         
         # - by text
         if options["text_search"]:
