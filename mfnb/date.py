@@ -576,12 +576,15 @@ class Date(object):
         return self._parseddata["century"] == "known"
     
     def get_isoformat(self, century=None):
+        '''
+        Return the date as a ISO8601 formatted string.
+        '''
         
         # year
         if century:
             datestr = f"{century}{self.year[:-2]}"
         else:
-            datestr = f"{self.year}"
+            datestr = f"-{self.year}"
         
         # month
         if self.month:
@@ -798,7 +801,7 @@ class DateRange(object):
         return self.start.century_known
     
     def get_isoformat(self):
-        return f"{self.start.get_isoformat()} - {self.end.get_isoformat()}"
+        return f"{self.start.get_isoformat()}/{self.end.get_isoformat()}"
     
     def is_one_date(self):
         '''
