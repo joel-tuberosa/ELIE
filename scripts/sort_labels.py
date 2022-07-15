@@ -28,6 +28,10 @@ DESCRIPTION
     K-medoids method based on pairwise Levenshtein distance. To avoid 
     overclustering, it is therefore advised to use a low similarity 
     threshold value when using this protocol.
+
+    With option -p, parsing is performed prior to label clustering, 
+    and label are aggregated afterwards, based on the parsed 
+    information. 
     
     Parsing
     -------
@@ -42,7 +46,7 @@ OPTIONS
         the labels.
         
     -d, --date
-        Try to identify a date pattern.
+        Attempt to identify a date pattern.
         
     -f, --id-format=FORMAT
         Define the format of the identifiers attributed to each group 
@@ -54,7 +58,7 @@ OPTIONS
             <n>         a positive integer giving the number of digits      
    
     -g, --geo
-        Try to identify a geolocalization.
+        Attempt to identify a geolocalization.
     
     -m, --min-length=INT
         Minimum word length to be included in the search index. 
