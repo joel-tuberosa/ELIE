@@ -583,6 +583,8 @@ class Date(object):
         # year
         if century:
             datestr = f"{century}{self.year[:-2]}"
+        elif self.century_known:
+            datestr = f"{self.year}"
         else:
             datestr = f"-{self.year}"
         
