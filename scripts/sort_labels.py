@@ -60,6 +60,15 @@ OPTIONS
         Minimum word length to be included in the search index. 
         Default = 3.
     
+    -p, --parse-and-sort
+        Instead of performing text search to aggregate similar labels 
+        together, parse information first, then aggregate labels with
+        the same parsed information.
+
+    -q, --consensus-quorum=INT
+        Apply the consensus method only if the number of label in the 
+        analyzed cluster is greater than the provided value. Default=2.
+
     -r, --refine
         Use the K-medoids method, based on pairwise Levenshtein 
         distances, to find clusters within groups.
@@ -87,10 +96,6 @@ OPTIONS
 
         Default is "pick".
 
-    -q, --consensus-quorum=INT
-        Apply the consensus method only if the number of label in the 
-        analyzed cluster is greater than the provided value. Default=2.
-
     --help
         Display this message
 '''
@@ -112,10 +117,10 @@ class Options(dict):
         # handle options with getopt
         try:
             opts, args = getopt.getopt(argv[1:], 
-                                       "c:df:gm:rs:v:q", 
+                                       "c:df:gm:rs:v:qp", 
                                        ['collector=', 'date', 'id-format=', 
                                         'geo', 'min-length=', 'min-score=', 
-                                        'refine', 'consensus=', 
+                                        'refine', 'consensus=', 'parse-and-sort=',
                                         'consensus-quorum=', 'help'])
         except getopt.GetoptError as e:
             sys.stderr.write(str(e) + '\n' + __doc__)
@@ -143,6 +148,8 @@ class Options(dict):
                 self["consensus"] = read_consensus(a)
             elif o in ('-q', '--consensus-quorum'):
                 self["quorum"] = int(a)
+            elif o in ('-p', '--parse-and-sort'):
+                self["sort_by"] = "parsed_info"
 
         self.args = args
 
@@ -158,6 +165,7 @@ class Options(dict):
         self["refine"] = False
         self["consensus"] = None
         self["quorum"] = 2
+        self["sort_by"] = "text_similarity"
 
 def read_consensus(a):
     a = mfnb.utils.simplify_str(a)
@@ -358,6 +366,15 @@ def parse_info(text, geo=False, date=False, collectors=[]):
     
     return found_info
 
+def get_interpreted_data(found_info):
+    '''
+    Returns a tuple containing intepreted parsed data contained in the 
+    result of the parse_info function.
+    '''
+
+    return tuple( found_info[field]["interpreted"] 
+                   for field in ("date", "collectors", "geo") )
+        
 def format_result_line(label, group_id, found_info, 
                        fields=("geo", "date", "collectors")):
 
@@ -367,6 +384,104 @@ def format_result_line(label, group_id, found_info,
             line += (f'\t{found_info[field]["verbatim"]}'
                      f'\t{found_info[field]["interpreted"]}')
     return line + "\n"
+
+def sort_by_text_similarity(db, parse_info, format_result_line, consensus=None,
+                            min_score=0.8, refine_clustering=False, 
+                            id_formatter=mfnb.utils.get_id_formatter("label:5"),
+                            quorum=2):
+    '''
+    Aggregate labels by text similarity, then parse information within 
+    label groups.
+    '''
+    
+    # consensus method to be used
+    if consensus == "alignment":
+        consensus = True
+        get_consensus = mfnb.utils.text_alignment_consensus
+    elif consensus == "pick":
+        consensus = True
+        get_consensus = mfnb.utils.text_pick_consensus
+    else:
+        consensus = False
+
+    # label to be classified
+    to_be_sorted = [ label.ID for label in db ]
+
+    # label group number
+    i = 0
+    
+    # Successively, sample a label, finds matching labels in the database, 
+    # attribute these labels to a group and remove these labels from the labels
+    # to be sorted
+    while to_be_sorted:
+        seed_id = to_be_sorted.pop(randrange(len(to_be_sorted)))
+        seed_label = db.get(seed_id)
+        seed_text = seed_label.text
+        filtering = lambda x: x.ID in to_be_sorted
+        matches = [ label 
+                     for label, score in db.search(seed_text, 
+                                                   filtering=filtering) 
+                     if score >= min_score ]
+        matches.append(seed_label)
+        
+        # find K-medoids within the matched labels
+        if refine_clustering:
+            clusters = refine(matches)
+        else:
+            clusters = [matches]
+        
+        # print the result
+        for cluster in clusters:
+            i += 1
+            group_id = id_formatter(i)
+
+            # if the consensus option is selected and the cluster reaches the 
+            # quorum, information is parsed within the consensus text instead
+            # of within each individual label
+            if consensus and len(cluster) >= quorum:
+                text = get_consensus([ label.text for label in cluster ], 
+                                     simplify=True)
+                found_info = parse_info(text)
+            else:
+                found_info = None
+
+            for label in cluster:
+                
+                # parse info from individual label if needed
+                if found_info is None:
+                    found_info = parse_info(label.text)
+                
+                # write label info
+                result_line = format_result_line(label, group_id, found_info)
+                sys.stdout.write(result_line)
+            
+        # remove matched IDs from the list of elements to be sorted
+        match_ids = { label.ID for label in matches }
+        to_be_sorted = [ ID 
+                          for ID in to_be_sorted 
+                          if ID not in match_ids ]
+
+def sort_by_parsed_info(db, parse_info, format_result_line, 
+                        id_formatter=mfnb.utils.get_id_formatter("label:5")):
+
+    # store group_ids in a dictionnary, whose keys are parsed information data
+    group_ids = dict()
+    for label in db:
+        found_info = parse_info(label.text)
+        interpeted_data = get_interpreted_data(found_info)
+
+        # try to get an existing group_id (identical parsed information was 
+        # already identified in another label), otherwise create a new group.
+        try:
+            group_id = group_ids[interpeted_data]
+        except KeyError:
+            group_id = id_formatter(len(group_ids))
+            group_ids[interpeted_data] = group_id
+
+        # format the result line and print it, this results in an output where
+        # label not ordered by group.
+        result_line = format_result_line(label, group_id, found_info)
+        sys.stdout.write(result_line)
 
 def main(argv=sys.argv):
     
@@ -390,19 +505,6 @@ def main(argv=sys.argv):
             collectors = mfnb.name.load_collectors(f)
     else:
         collectors = []
-
-    # label to be classified
-    to_be_sorted = [ label.ID for label in db ]
-    
-    # consensus method to be used
-    if options["consensus"] == "alignment":
-        consensus = True
-        get_consensus = mfnb.utils.text_alignment_consensus
-    elif options["consensus"] == "pick":
-        consensus = True
-        get_consensus = mfnb.utils.text_pick_consensus
-    else:
-        consensus = False
 
     # parser function
     global parse_info
@@ -430,59 +532,21 @@ def main(argv=sys.argv):
     header += "\n"
     sys.stdout.write(header)
     
-    # label group number
-    i = 0
-    
-    # Successively, sample a label, finds matching labels in the database, 
-    # attribute these labels to a group and remove these labels from the labels
-    # to be sorted
-    while to_be_sorted:
-        seed_id = to_be_sorted.pop(randrange(len(to_be_sorted)))
-        seed_label = db.get(seed_id)
-        seed_text = seed_label.text
-        filtering = lambda x: x.ID in to_be_sorted
-        matches = [ label 
-                     for label, score in db.search(seed_text, 
-                                                   filtering=filtering) 
-                     if score >= options["min_score"] ]
-        matches.append(seed_label)
-        
-        # find K-medoids within the matched labels
-        if options["refine"]:
-            clusters = refine(matches)
-        else:
-            clusters = [matches]
-        
-        # print the result
-        for cluster in clusters:
-            i += 1
-            group_id = options["id_formatter"](i)
+    # sort by using text similarity, then parse info
+    if options["sort_by"] == "text_similarity":
+        sort_by_text_similarity(db, parse_info, format_result_line, 
+                                consensus=options["consensus"], 
+                                min_score=options["min_score"],
+                                refine_clustering=options["refine"], 
+                                id_formatter=options["id_formatter"],
+                                quorum=options["quorum"])
 
-            # if the consensus option is selected and the cluster reaches the 
-            # quorum, information is parsed within the consensus text instead
-            # of within each individual label
-            if consensus and len(cluster) >= options["quorum"]:
-                text = get_consensus([ label.text for label in cluster ], 
-                                     simplify=True)
-                found_info = parse_info(text)
-            else:
-                found_info = None
+    # parse info within label, then aggregate labels containing the same info
+    elif options["sort_by"] == "parsed_info":
+        sort_by_parsed_info(db, parse_info, format_result_line, 
+                            id_formatter=options["id_formatter"])
 
-            for label in cluster:
-                
-                # parse info from individual label if needed
-                if found_info is None:
-                    found_info = parse_info(label.text)
-                
-                # write label info
-                result_line = format_result_line(label, group_id, found_info)
-                sys.stdout.write(result_line)
-            
-        # remove matched IDs from the list of elements to be sorted
-        match_ids = { label.ID for label in matches }
-        to_be_sorted = [ ID 
-                          for ID in to_be_sorted 
-                          if ID not in match_ids ]
+    # returns 0 if everything succeeded
     return 0
     
 if __name__ == "__main__":
