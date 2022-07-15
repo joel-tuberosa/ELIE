@@ -150,12 +150,13 @@ You can convert a dataset in tabular format, for instance, a TSV file containing
 **Collectors**
 
 These are people or collecting entities. They are stored in a JSON file containing a list of dictionary object with the following keys:
+
 * “ID”, a unique identifier for the collecting event.
 * “name”, the surname of the collector or the name of the entity.
 * “firstname”, for humans, the firstname of the collectors.
 * “metadata”, a dictionary object with other information attached to the person.
 
-Example
+Example:
 
 ::
     [
