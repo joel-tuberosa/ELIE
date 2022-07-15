@@ -135,6 +135,7 @@ These are individual collecting events, a unique combination of a location, a da
 Example:
 
 ::
+
     [
         {
             "ID": "BeesNbytes00001",
@@ -159,6 +160,7 @@ These are people or collecting entities. They are stored in a JSON file containi
 Example:
 
 ::
+    
     [
         {
             "ID": "collector00001",
