@@ -376,13 +376,16 @@ def get_interpreted_data(found_info):
                    for field in ("date", "collectors", "geo") )
         
 def format_result_line(label, group_id, found_info, 
-                       fields=("geo", "date", "collectors")):
+                       fields=("geo", "date", "collectors"),
+                       consensus_text=None):
 
     line = f'{label.ID}\t{repr(label.text)}\t{group_id}'
     for field in fields:
         if found_info[field]["interpreted"]:
             line += (f'\t{found_info[field]["verbatim"]}'
                      f'\t{found_info[field]["interpreted"]}')
+    if consensus_text is not None:
+        line += f'\t{consensus_text}'
     return line + "\n"
 
 def sort_by_text_similarity(db, parse_info, format_result_line, consensus=None,
@@ -393,7 +396,7 @@ def sort_by_text_similarity(db, parse_info, format_result_line, consensus=None,
     Aggregate labels by text similarity, then parse information within 
     label groups.
     '''
-    
+
     # consensus method to be used
     if consensus == "alignment":
         consensus = True
@@ -438,21 +441,23 @@ def sort_by_text_similarity(db, parse_info, format_result_line, consensus=None,
             # if the consensus option is selected and the cluster reaches the 
             # quorum, information is parsed within the consensus text instead
             # of within each individual label
+            consensus_text = None
             if consensus and len(cluster) >= quorum:
-                text = get_consensus([ label.text for label in cluster ], 
-                                     simplify=True)
-                found_info = parse_info(text)
-            else:
-                found_info = None
+                consensus_text = get_consensus([ label.text
+                                                  for label in cluster ], 
+                                               simplify=True)
+                found_info = parse_info(consensus_text)
 
+            # write information for each label
             for label in cluster:
                 
                 # parse info from individual label if needed
-                if found_info is None:
+                if consensus_text is None:
                     found_info = parse_info(label.text)
                 
                 # write label info
-                result_line = format_result_line(label, group_id, found_info)
+                result_line = format_result_line(label, group_id, found_info,
+                                                 consensus_text=consensus_text)
                 sys.stdout.write(result_line)
             
         # remove matched IDs from the list of elements to be sorted
@@ -529,6 +534,8 @@ def main(argv=sys.argv):
     header = "label.ID\tlabel.v\tgroup.ID"
     for option in ["geo", "date", "collector"]:
         if options[option]: header += f"\t{option}.v\t{option}.i"
+    if options["sort_by"] != "parsed_info" and options["consensus"] is not None:
+        header += "\tconsensus.text"
     header += "\n"
     sys.stdout.write(header)
     
