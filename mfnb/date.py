@@ -569,7 +569,6 @@ class Date(object):
         else:
             raise ValueError("offending value for self.precision:"
                             f" {repr(self.precision)}")
-        return {"year": 0, "month": 1, "day": 2}[self.precision]
     
     @property
     def century_known(self):
