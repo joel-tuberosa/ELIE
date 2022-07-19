@@ -207,6 +207,8 @@ With the output of this program, you should be able to identify clear correspond
 * Option `-s 0.3` lower the similarity threshold for aggregation (default is 0.8).
 * Option `-r` orders to compute pairwise Levenshtein distances within the aggregated group and to attempt to find subcluster using a K-medoid clustering approach.
 
+In addition, if parsing is impaired by transcription errors, you try the option -v alignment to align the transcripts and generate a character frequency based consensus transcript on which data will be parsed.
+
     `match_collecting_events.py -d -p col_ev.json transcripts.json -s l >matched_col_ev.txt`
 
 * Option `-s l` indicates to use levenshtein distance instead of token-based scoring to find the best hits.
