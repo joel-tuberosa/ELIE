@@ -173,7 +173,7 @@ Example of usage
 
 **Step 1)** Cluster transcripts by similarity to regroup labels pertaining to the same collecting events. In the same time, parse the transcripts to identify collecting event information:
 
-    `$ sort_labels.py -d -c collectors.json -g transcripts.json >sorted_transcripts.txt`
+    `sort_labels.py -d -c collectors.json -g transcripts.json >sorted_transcripts.txt`
 
 * Option `-d` will activate date string parsing and add two output fields with the identified verbatim and the interpreted colleting event date.
 * Option `-c` collectors.json will search names of collectors or collecting entities from the database collectors.json in the transcripts and add two output fields with the identified verbatim and the interpreted collector names.
