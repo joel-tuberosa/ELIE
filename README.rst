@@ -177,7 +177,7 @@ Example of usage
 
 * Option `-d` will activate date string parsing and add two output fields with the identified verbatim and the interpreted colleting event date.
 * Option `-c` collectors.json will search names of collectors or collecting entities from the database collectors.json in the transcripts and add two output fields with the identified verbatim and the interpreted collector names.
-* Option `-g` will try to guess the collecting event location from the remaining text by searching the terms in the GeoNames database via the online API. Beware that the current default setting uses a free account (login: joel.tuberosa) which is limited to 1000 requests per days.
+* Option `-g` will try to guess the collecting event location from the remaining text by searching the terms in the GeoNames database via the online API. Beware that the current default setting uses a free account (login: joel.tuberosa) which is limited to 1000 requests per days. If transcripts within the groups are mostly identical, you can use the option `-v pick`, which will select a representative transcript amongst each group, on which parsing will be performed.
 
 Parsing is optional here, it is only meant to help later collecting event determination.
 
@@ -187,6 +187,8 @@ Parsing is optional here, it is only meant to help later collecting event determ
 
 * Option `-d` will activate date string parsing and for each transcript where a date was identified, limit the search to collecting event with an overlapping date.
 * Option `-p` will allow transcripts with an identified date but no matching collecting event in that date range to be search against the rest of the collecting events anyway. This allows to have a matching score anyway for later evaluation, and sometimes also allows to save some matches when the date parsing is faulty.
+
+In addition, if parsing is impaired by transcription errors, you try the option `-v alignment` to align the transcripts and generate a character frequency based consensus transcript on which data will be parsed.
 
 This will return a table showing input transcripts along with matching collecting events and a hit score that represent the hit accuracy. This score takes a value between 0 and 1, with higher value indicating higher accuracy.
 
