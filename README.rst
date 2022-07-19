@@ -188,8 +188,6 @@ Parsing is optional here, it is only meant to help later collecting event determ
 * Option `-d` will activate date string parsing and for each transcript where a date was identified, limit the search to collecting event with an overlapping date.
 * Option `-p` will allow transcripts with an identified date but no matching collecting event in that date range to be search against the rest of the collecting events anyway. This allows to have a matching score anyway for later evaluation, and sometimes also allows to save some matches when the date parsing is faulty.
 
-In addition, if parsing is impaired by transcription errors, you try the option `-v alignment` to align the transcripts and generate a character frequency based consensus transcript on which data will be parsed.
-
 This will return a table showing input transcripts along with matching collecting events and a hit score that represent the hit accuracy. This score takes a value between 0 and 1, with higher value indicating higher accuracy.
 
 **Step 3)**	Evaluate the correspondence between identified transcripts clusters and existing collecting events. This is done by computing a confidence score for each cluster, representing how much the cluster correspond to the most frequently matched collecting event among its transcripts. This confidence score is calculated as a product of the frequency of the most matched collecting events and its average hit score.
@@ -207,7 +205,7 @@ With the output of this program, you should be able to identify clear correspond
 * Option `-s 0.3` lower the similarity threshold for aggregation (default is 0.8).
 * Option `-r` orders to compute pairwise Levenshtein distances within the aggregated group and to attempt to find subcluster using a K-medoid clustering approach.
 
-In addition, if parsing is impaired by transcription errors, you try the option -v alignment to align the transcripts and generate a character frequency based consensus transcript on which data will be parsed.
+In addition, if parsing is impaired by transcription errors, you try the option `-v alignment` to align the transcripts and generate a character frequency based consensus transcript on which data will be parsed.
 
     `match_collecting_events.py -d -p col_ev.json transcripts.json -s l >matched_col_ev.txt`
 
