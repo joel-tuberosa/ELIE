@@ -14,22 +14,16 @@ Installation
 ------------
 1. Clone python-mfnb from https://code.naturkundemuseum.berlin/collection-mining/python-mfnb.
 
-::
-
-    git clone https://code.naturkundemuseum.berlin/collection-mining/python-mfnb
+`git clone https://code.naturkundemuseum.berlin/collection-mining/python-mfnb`
 
 2. cd in python-mfnb/
 
-::
-
-   cd python-mfnb
+`cd python-mfnb`
    
 3. Install with pip, which will automatically fetch the requirements if
    you don't have it already.
 
-::
-
-   pip install .
+`pip install .`
 
 Modules
 -------
@@ -171,3 +165,52 @@ Example:
             }
         }, …
     ]
+
+Example of usage
+----------------
+
+**Problem:** You dispose of a set of collecting event label transcripts (transcripts.json) on the one side and have already identified a few collecting events corresponding to this collection (col_ev.json). You want to attribute the new labels to the existing collecting events and identify the labels for which a new collecting event must be written. 
+
+**Step 1)** Cluster transcripts by similarity to regroup labels pertaining to the same collecting events. In the same time, parse the transcripts to identify collecting event information:
+
+    `$ sort_labels.py -d -c collectors.json -g transcripts.json >sorted_transcripts.txt`
+
+* Option `-d` will activate date string parsing and add two output fields with the identified verbatim and the interpreted colleting event date.
+* Option `-c` collectors.json will search names of collectors or collecting entities from the database collectors.json in the transcripts and add two output fields with the identified verbatim and the interpreted collector names.
+* Option `-g` will try to guess the collecting event location from the remaining text by searching the terms in the GeoNames database via the online API. Beware that the current default setting uses a free account (login: joel.tuberosa) which is limited to 1000 requests per days.
+
+Parsing is optional here, it is only meant to help later collecting event determination.
+
+**Step 2)** Identify the closest collecting event for each transcript using full-text search on the representative transcript attached to each collecting event.
+
+    `match_collecting_events.py -d -p col_ev.json transcripts.json >matched_col_ev.txt`
+
+* Option `-d` will activate date string parsing and for each transcript where a date was identified, limit the search to collecting event with an overlapping date.
+* Option `-p` will allow transcripts with an identified date but no matching collecting event in that date range to be search against the rest of the collecting events anyway. This allows to have a matching score anyway for later evaluation, and sometimes also allows to save some matches when the date parsing is faulty.
+
+This will return a table showing input transcripts along with matching collecting events and a hit score that represent the hit accuracy. This score takes a value between 0 and 1, with higher value indicating higher accuracy.
+
+**Step 3)**	Evaluate the correspondence between identified transcripts clusters and existing collecting events. This is done by computing a confidence score for each cluster, representing how much the cluster correspond to the most frequently matched collecting event among its transcripts. This confidence score is calculated as a product of the frequency of the most matched collecting events and its average hit score.
+
+    `checkout_collecting_events.py sorted_transcripts.txt matched_col_ev.txt >checkout.txt`
+
+With the output of this program, you should be able to identify clear correspondences between transcripts clusters and collecting event. For example, if you spot a cluster of 20 transcripts that correspond to a given collecting event with a confidence score close to 1, you can trustfully annotate the corresponding labels as pertaining to that collecting event. On the contrary, if these 20 transcripts are assigned to a given collecting event with a lower confidence score, it would be worth to go back to individual transcripts best matches to figure out whether they all pertain to the same collecting event or not, and whether you need to create a new collecting event for any of them. Finally, this program also gives you the collecting event that were not matched with any transcripts, and inversely.
+
+**Refinment:** The above example would work well with a set of faithful transcripts and with easily differentiable transcript groups. In other cases, you could face the following issues:
+
+**Case 1)** Transcripts typographic errors or misinterpreted text makes the whole dataset noisy. The default full-text search scoring method relies on near-exact token matches and can be too stringent. Depending on your clustering results, you can alternatively run the following command, which resort on Levenshtein distances to aggregate similar label together.
+
+    `sort_labels.py -d -c collectors.json -g transcripts.json -s 0.3 -r >sorted_transcripts.txt`
+
+* Option `-s 0.3` lower the similarity threshold for aggregation (default is 0.8).
+* Option `-r` orders to compute pairwise Levenshtein distances within the aggregated group and to attempt to find subcluster using a K-medoid clustering approach.
+
+    `match_collecting_events.py -d -p col_ev.json transcripts.json -s l >matched_col_ev.txt`
+
+* Option `-s l` indicates to use levenshtein distance instead of token-based scoring to find the best hits.
+
+**Case 2)** Very similar transcripts, that just differ from a single number (for instance a different day), that could nevertheless be very relevant, could be seen as more similar than they actually are with the default search method. To overcome this, the above method, using levenshtein distance, could be a solution. If the transcripts are faithfull enough, you could also try a different aggregation method, based on the parsed information using the following command.
+
+    `sort_labels.py -d -c collectors.json -g transcripts.json -p >sorted_transcripts.txt`
+
+* Option `-p` orders to parse the required information (here: dates, collectors and locations) and aggregate labels that contain the same information.
