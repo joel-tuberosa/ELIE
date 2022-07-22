@@ -19,6 +19,27 @@ class Collector(object):
     '''
 
     def __init__(self, ID, name, firstname="", metadata={}):
+        '''
+        Instanciate a Collector object by providing with attribute 
+        data.
+
+        Parameters
+        ----------
+            ID : str
+                A unique identifier, for database registry.
+
+            name : str
+                The surname, or the name of the entity if not a 
+                person.
+            
+            firstname : str
+                For persons, the firstname, if known. Default = "".
+
+            metadate : dict
+                Any metadata to be attached to the collecting entity.
+        '''
+        
+        # store internal data
         self._data = {
             "ID": ID,
             "name": name,
@@ -60,11 +81,27 @@ class Collector(object):
 
     def formats(self, format, lowercase=False, simplified_str=False):
         '''
-        Write the name in the desired format. Format specification:
-            {f}     first letter(s) of the first name(s)
-            {q}     first letter(s) of the first name(s), with dots
-            {F}     full first name
-            {N}     full last name
+        Write the name in the desired format. 
+        
+        Parameters
+        ----------
+            format : str
+                Fields to be replaced by corresponding values in 
+                specific formats.
+
+                Format specification:
+                {f}     first letter(s) of the first name(s)
+                {q}     first letter(s) of the first name(s), with dots
+                {F}     full first name
+                {N}     full last name
+
+            lowercase : bool
+                Convert the values in lowercases. Default = False.
+
+            simplified_str : bool
+                Simplifies the output character string (remove accents, 
+                convert to lowercase and replace consecutive white 
+                spaces by single space characters). Default = False. 
         '''
         
         # preprocess fields
@@ -91,6 +128,16 @@ class Collector(object):
         '''
         Returns a list of the names in all possible formats along with 
         the corresponding format expression.
+
+        Parameters
+        ----------
+            lowercase : bool
+                Convert the values in lowercases. Default = False.
+
+            simplified_str : bool
+                Simplifies the output character string (remove accents, 
+                convert to lowercase and replace consecutive white 
+                spaces by single space characters). Default = False. 
         '''
 
         # surname only
@@ -129,6 +176,15 @@ class Collector(object):
 def abbreviate_name(s, dots=False):
     '''
     Returns the first letter of each element of the input name. 
+
+    Parameters
+    ----------
+        s : str
+            Any text.
+        
+        dots : bool
+            If set True, adds a dot after each abbreviation letter.
+            Default = False.
     '''
 
     sep = regex.compile(r"(?P<ws>\s+)|(?P<dash>-)")
@@ -153,6 +209,25 @@ def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule,
     '''
     Parse the input string s to identify any name from the provided 
     list of Collector object.
+
+    Parameters
+    ----------
+        s : str
+            Any text.
+        
+        collectors : list
+            A list of Collector objects.
+        
+        mismatch_rule : function
+            A function that takes the query value as unique argument
+            and returns the regular expression part parametring a fuzzy
+            match. Default = mfnb.utils.mismatch_rule (see module doc).
+    
+        ignore_case : bool
+            Sets the search method to ignore case. Default = False.
+
+        simplify_str : bool
+            Discard case and accents from the queries and the subject.
     '''
     
     # preprocess the target input
@@ -215,6 +290,23 @@ def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule,
 
 def search_collectors_abbr(s, collectors, ignore_case=False,
                            simplified_str=False):
+    '''
+    Search the input text for abbreviations that match collector names 
+    from the provided list.
+
+    Parameters
+    ----------
+        s : Any text.
+
+        collectors : list
+            A list of Collector objects.
+        
+        ignore_case : bool
+            Sets the search method to ignore case. Default = False.
+
+        simplify_str : bool
+            Discard case and accents from the queries and the subject.
+    '''
     
     # preprocess the query
     if simplified_str:
@@ -241,6 +333,12 @@ default_search_methods = {
         }
 
 def default_search_method_selector(collector):
+    '''
+    Assign the default search method to a collector object according to
+    the metadata entry "entity_type". This instructs to use pattern 
+    search if the entity is a person and abbreviation search otherwise.
+    '''
+    
     global default_search_methods
     try:
         if collector.metadata["entity_type"] == "person":
@@ -252,7 +350,26 @@ def default_search_method_selector(collector):
 
 def search_collectors(s, collectors,
                       search_rule=default_search_method_selector):
+    '''
+    Searches individual occurences of collector's name in the input 
+    text.
 
+    Parameters
+    ----------
+        s : str
+            Any text.
+        
+        collectors : list
+            A list of Collector objects.
+        
+        search_rule : function
+            A function that takes a collector object as argument and 
+            return the search method to use. 
+            Default = default_search_method_selector (uses pattern 
+            search for people and abbreviation search for any other 
+            kinds of entity).
+    '''
+    
     # sort collectors with different search methods
     searches = dict()
     for collector in collectors:
@@ -273,6 +390,21 @@ def find_collectors(s, collectors,
     '''
     Search collector names in the input string and return the highest scoring 
     and non-overlapping matches. 
+
+    Parameters
+    ----------
+        s : str
+            Any text.
+        
+        collectors : list
+            A list of Collector objects.
+        
+        search_rule : function
+            A function that takes a collector object as argument and 
+            return the search method to use. 
+            Default = default_search_method_selector (uses pattern 
+            search for people and abbreviation search for any other 
+            kinds of entity).
     '''
 
     # aggregate overlapping matches, always keep the highest scoring match
@@ -303,6 +435,24 @@ def fullname_search(abbreviation, target, get_span=False, ignore_case=False,
     '''
     Tokenize the abbreviation and the target, then try to match a
     similar token sequence with the same starts.
+
+    Parameters
+    ----------
+        abbreviation : str
+            Any text.
+
+        target : str
+            Any text.
+        
+        get_span : bool
+            Returns the span of the match in the abbreviation text.
+            Default = False.
+        
+        ignore_case : bool
+            Sets the search method to ignore case. Default = False.
+
+        simplify_str : bool
+            Discard case and accents from the queries and the subject.
     '''
 
     abbreviation_tokens = regexp_tokenize(abbreviation.lower(), "\w+")
@@ -333,6 +483,20 @@ def fullname_match(abbreviation, target, ignore_case=False,
     '''
     Return True if the provided string is an abbreviation of the
     target, namely, having matching first letters with optional dots.
+
+    Parameters
+    ----------
+        abbreviation : str
+            Any text.
+
+        target : str
+            Any text.
+        
+        ignore_case : bool
+            Sets the search method to ignore case. Default = False.
+
+        simplify_str : bool
+            Discard case and accents from the queries and the subject.
     '''
 
     # pre-processes input strings
@@ -354,6 +518,24 @@ def abbreviation_search(fullname, target, get_span=False, ignore_case=False,
     '''
     Search abbreviation in the target string that could correspond to
     the query text.
+
+    Parameters
+    ----------
+        fullname : str
+            Any text.
+
+        target : str
+            Any text.
+        
+        get_span : bool
+            Returns the span of the match in the fullname text.
+            Default = False.
+        
+        ignore_case : bool
+            Sets the search method to ignore case. Default = False.
+
+        simplify_str : bool
+            Discard case and accents from the queries and the subject.
     '''
 
     # pre-processes input strings

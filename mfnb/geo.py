@@ -5,13 +5,6 @@
    http://www.geonames.org. 
 '''
 
-# known conventions
-# 40° 31' 21" North by 105° 5' 39" West
-# 40 31 21 N, 105 5 39 W
-# 403121N, 1050539W
-# 403121, 1050539
-# 
-
 import regex, sys
 import xml.etree.ElementTree as ET
 from nltk import regexp_tokenize
@@ -21,6 +14,9 @@ from urllib.request import urlopen
 
 GEONAMES_USERNAME = "joel.tuberosa"
 
+# =============================================================================
+# CLASSES
+# -----------------------------------------------------------------------------
 class Distance(object):
     '''
     Store a distance value.
@@ -29,6 +25,24 @@ class Distance(object):
     pattern = regex.compile(r"(?P<value>[0-9]+)\s?(?P<unit>k?m|ft)", regex.I)
 
     def __init__(self, value, unit=None):
+        '''
+        Instanciate a Distance object from a provided value of a 
+        provided unit. The value is stored internally as meters.
+
+        Parameters
+        ----------
+            value : float | str
+                A distance value, either in a numerical type or in a 
+                string. The string can contain the unit specification.
+        
+            unit : str
+                The unit, can reflect different unit systems. Possible
+                values:
+                    "m"  (meter)
+                    "km" (kilometer)
+                    "ft" (feet)
+                If not provided, the unit must feature in the value.
+        '''
 
         if type(value) is str:
 
@@ -94,6 +108,21 @@ class Degree(object):
     '''
 
     def __init__(self, degrees=0, minutes=0, seconds=.0):
+        '''
+        Instanciate a Degree object using the provided input values.
+
+        Parameters
+        ----------
+            degrees : float
+                Numerical value representing degrees.
+
+            minutes : float
+                Numerical value representig minutes (1/60th degree).
+
+            seconds : float
+                Numerical value representig seconds (1/60th minutes).
+                
+        '''
 
         # degrees
         value, degrees = degrees, int(degrees)
@@ -135,6 +164,9 @@ class Degree(object):
         return f'{self}'
         
 class LatLng(object):
+    '''
+    Store a geographic coordinate (latitude and longitude).
+    '''
 
     pattern = regex.compile(r"""
         \b(?<lat>
@@ -157,7 +189,7 @@ class LatLng(object):
     def __init__(self, value):
         '''
         Parse the input str to identify latitude and longitude 
-        coordinates.
+        notations.
         '''
 
         # initiate from an str containing a latitude/longitude notation
@@ -179,7 +211,7 @@ class LatLng(object):
     @property
     def lat(self):
         '''
-        Returns decimal latitude value.
+        Decimal latitude value.
         '''
         
         value = self._data[0][0].value
@@ -191,7 +223,7 @@ class LatLng(object):
     @property
     def lng(self):
         '''
-        Returns decimal longitude value.
+        Decimal longitude value.
         '''
         
         value = self._data[0][0].value
@@ -202,6 +234,10 @@ class LatLng(object):
 
     @property
     def latlng(self):
+        '''
+        Tuple with decimal latitude and longitude values. 
+        '''
+        
         return (self.lat, self.lng)
 
     def __str__(self):
@@ -211,7 +247,14 @@ class LatLng(object):
     def __repr__(self):
         return f"LatLng({self})"
 
+# =============================================================================
+# FUNCTIONS
+# -----------------------------------------------------------------------------
 def read_latlng(s):
+    '''
+    Parse latitude and longitude coordinate notation in the input str.
+    '''
+    
     m = LatLng.pattern.fullmatch(s)
     if m is None:
         raise ValueError(f'Expression "{s}" does not match a known'
@@ -268,6 +311,14 @@ def degree_decomp(value):
 def guess_cardinal(value, restrict="NSEW"):
     '''
     Guess the cardinal according to the first letter of 'value'.
+
+    Parameters
+    ----------
+        value : str
+            The putative cardinal notation.
+
+        restrict : str
+            A character set restricting the search to given cardinals.
     '''
     
     if value[0] in "CN" and "N" in restrict:
@@ -284,6 +335,15 @@ def guess_cardinal(value, restrict="NSEW"):
 def find_lat_lng(s, get_span=True):
     '''
     Find latitude and longitude str in a text.
+
+    Parameters
+    ----------
+        s : str
+            The text to be parsed.
+
+        get_span : bool
+            If set True, the function returns the span of the match in
+            the input text along with the match, in a tuple.
     '''
     
     m = LatLng.pattern.search(s)
@@ -297,6 +357,15 @@ def find_lat_lng(s, get_span=True):
 def find_distance(s, get_span=True):
     '''
     Find a distance in a text.
+    
+    Parameters
+    ----------
+        s : str
+            The text to be parsed.
+
+        get_span : bool
+            If set True, the function returns the span of the match in
+            the input text along with the match, in a tuple.
     '''
 
     m = Distance.pattern.search(s)
@@ -309,7 +378,16 @@ def find_distance(s, get_span=True):
 
 def parse_geo(s, username=GEONAMES_USERNAME):
     '''
-    Attempt to find a location in the provided string
+    Attempt to find a location in the provided string by sending 
+    queries to GeoNames using a registered account.
+
+    Parameters
+    ----------
+        s : str
+            Text to be parsed.
+        
+        username : str
+            GeoNames user account name.
     '''
 
     geocoder = GeoNames(username=username)
@@ -349,6 +427,15 @@ def parse_geo_from_ngrams(geocoder, tokens):
     Attempts to find a geolocation with the provided tokens, by using 
     queries constituted of all possible n-grams formed with successive 
     tokens.
+
+    Parameters
+    ----------
+        geocoder : pygeo.geocoders.GeoNames
+            Geocoder instance for GeoNames.
+
+        tokens : list
+            List of tokens (str) that will be use to build the queries 
+            for GeoNames. 
     '''
 
     for l in range(len(tokens), 0, -1):
