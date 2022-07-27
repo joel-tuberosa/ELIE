@@ -1,6 +1,6 @@
-''' Utils module
+'''Utils module
 
-This module gathers generic functions for text data handling, 
+This module gathers generic functions for text data handling,
 manipulation and formatting.
 '''
 
