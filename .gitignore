@@ -133,3 +133,5 @@ dmypy.json
 desktop.ini
 */desktop.ini
 
+# VS Code
+.vscode/*
