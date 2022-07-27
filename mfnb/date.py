@@ -1,11 +1,11 @@
-
-'''
-    This module contains classes and functions related to time data. It
-    uses fuzzy regular expressions from the third party package regex to
-    find dates within OCR extracted text and the dateparser package to 
-    interpret the diversity of date formats. The Date and DateRange
-    classes allow to store dates with various precision levels, 
-    reflecting the data status collected among labels.
+'''Date module
+    
+This module contains classes and functions related to time data. It
+uses fuzzy regular expressions from the third party package regex to
+find dates within OCR extracted text and the dateparser package to 
+interpret the diversity of date formats. The Date and DateRange classes
+allow to store dates with various precision levels, reflecting the data
+status collected among labels.
 '''
 
 import json, regex, dateparser, sys

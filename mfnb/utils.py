@@ -1,8 +1,17 @@
+''' Utils module
 
+This module gathers generic functions for text data handling, 
+manipulation and formatting.
 '''
-    This module gathers generic functions for text data handling, 
-    manipulation and formatting.
-'''
+
+def f():
+    '''bla
+    
+    blablab
+    
+    '''
+
+    print("a")
 
 import subprocess
 import regex, unicodedata

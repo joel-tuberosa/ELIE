@@ -1,10 +1,9 @@
+'''Label Data module
 
-'''
-    This module contains classes and functions to handle and integrate
-    information extracted from specimen labels. It allows to build 
-    searchable text databases using token extraction and text feature 
-    scoring. This module uses the packages regex, sklearn, nltk and
-    leven.
+This module contains classes and functions to handle and integrate 
+information extracted from specimen labels. It allows to build 
+searchable text databases using token extraction and text feature 
+scoring. This module uses the packages regex, sklearn, nltk and leven.
 '''
 
 import json, mfnb.date, regex
