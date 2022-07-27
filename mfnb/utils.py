@@ -4,15 +4,6 @@ This module gathers generic functions for text data handling,
 manipulation and formatting.
 '''
 
-def f():
-    '''bla
-    
-    blablab
-    
-    '''
-
-    print("a")
-
 import subprocess
 import regex, unicodedata
 import numpy as np
