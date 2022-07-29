@@ -26,12 +26,38 @@ class Label(object):
     keys = ("ID", "text")
     
     def __init__(self, ID=None, text=None):
+        '''
+        Instantiate a new Label object from a unique identifier and a 
+        transcript.
+
+        Parameters
+        ----------
+            ID : str
+                A unique identifier.
+            
+            text : str
+                Any text, ideally a label transcript.
+        '''
+        
         self._data = {"ID": ID, "text": text}
     
     def export(self):
+        '''
+        Returns a dict object with the attribute data.
+        '''
+        
         return dict(**self._data)
     
     def get_tuple(self, keys=None):
+        '''
+        Returns a tuple with the attributes values.
+
+        Parameters
+        ----------
+            key : list
+                The list of attributes to be put in the tuple.
+        '''
+        
         if keys is None: keys=self.keys
         return tuple( self._data[key] for key in keys ) 
     
@@ -51,8 +77,9 @@ class Label(object):
     
 class CollectingEvent(Label):
     '''
-    Store collecting event data, which include a label raw data and extracted
-    information.
+    Store collecting event data, which include a unique identifier, a 
+    location, a date, a collecting entity and representative label
+    transcript.
     '''
     
     ### implement a function to identity the different elements of a label text
@@ -63,7 +90,30 @@ class CollectingEvent(Label):
     def __init__(self, ID=None, location=None, date=None, collector=None, 
                  text=None):
         '''
-        Load collecting event data.
+        Instanciate a CollectingEvent object with the provided 
+        attribute values.
+
+        Parameters
+        ----------
+            ID : str
+                A unique identifier.
+
+            location : str
+                Any text, ideally a standardized address referring to 
+                the collecting event location. 
+            
+            date : str
+                Any text, ideally a date or a date range referring to 
+                the collecting event time.
+            
+            collector : str
+                Any text, ideally the name of the person (or people) or
+                the entity responsible for this collecting event.
+            
+            text : str
+                Any text, ideally the reference label transcript for 
+                this collecting event.
+
         '''
         
         self._data = {"ID": ID, 
@@ -99,7 +149,18 @@ class Mask(object):
     '''
     
     def __init__(self, **kwargs):
-    
+        '''
+        Build the Mask object from linked attribute names and regular 
+        expressions.
+
+        Parameters
+        ----------
+            * : str
+                A regular expression pattern to be compiled and linked
+                to the attribute of the same name as the provided 
+                keyword argument. 
+        '''
+
         # compile regular expression and build property
         self._data = dict()
         for key in kwargs:
@@ -109,12 +170,39 @@ class Mask(object):
             self._data[key] = expr
     
     def get_masked_str(self, target, attr):
+        '''
+        Get the text corresponding to the provided attribute in the 
+        provided target object. Remove the characters matching the 
+        corresponding regular expression and returns the cleaned text. 
+        
+        Parameters
+        ----------
+            target : Label
+                A Label object or alike.
+
+            attr : str
+                The name of an attribute of the provided target.
+        '''
+        
         try:
             return self._data[attr].sub("", getattr(target, attr))
         except KeyError:
             return getattr(target, attr)
     
     def mask(self, key, value):
+        '''
+        Mask the provided text using the regular expression 
+        corresponding to the provided key.
+
+        Parameters
+        ----------
+            key : str
+                The key referring to one recorded regular expression.
+            
+            value : str
+                Any text to be masked.
+        '''
+        
         try:
             return self._data[key].sub("", value)
         except KeyError:
@@ -127,7 +215,18 @@ class DB(object):
         
     def __init__(self, values, dbtype=None):
         '''
-        Load a list of object.
+        Build the database object from a list of object of the same 
+        type.
+
+        Parameters
+        ----------
+            values : list
+                A list of Label objects (or child classes). All object
+                of this list has to be of the same type.
+
+            dbtype : type
+                The type of the object collection. If None, this is 
+                guessed from the first object in the values list. 
         '''
         
         # dbtype check
@@ -172,9 +271,17 @@ class DB(object):
         json.dump(obj, f, ensure_ascii=False, indent=4)
 
     def get(self, value):
+        '''
+        Get an object of the database by providing with its ID.
+        '''
+
         return self._dict[value]
     
     def is_indexed(self):
+        '''
+        Returns True if the class method make_index was called.
+        '''
+        
         return hasattr(self, "_index")
     
     def make_index(self, method=1, min_len=1, keys=None, masks=None, ignore_ids=True):
@@ -184,7 +291,6 @@ class DB(object):
         
         Parameters
         ----------
-            
             method : int
                 Select to the method with which to build the index.
                 Available methods:    
@@ -422,7 +528,6 @@ class DB(object):
         
         Parameters
         ----------
-        
             value : str
                 The token to be searched.
             
@@ -467,7 +572,27 @@ class DB(object):
         return result
     
     def get_corpus(self, keys=None, masks=None, join="\n"):
-    
+        '''
+        Returns a generator function that yields text values of the 
+        database objects.
+
+        Parameters
+        ----------
+            keys : str|list
+                One or a list of attribute names referring to the text 
+                values that have to be retrieved from each object of 
+                the database. Default: None.
+            
+            masks : Mask
+                One or a list of masks that can be used on retrieved 
+                values to remove specific parts of the text. Default: 
+                None.
+            
+            join : str
+                If multiple keys were provided, concatenate the 
+                corresponding text values with this character string.
+        '''
+        
         # make a list of keys
         if keys is None:
             keys = self.element_type.keys
@@ -525,7 +650,7 @@ class LabelDB(DB):
     
     def __init__(self, values):
         '''
-        Load a list of labels.
+        Build a DB object using exclusively Label objects.
         '''
                 
         # type check and DB build
@@ -538,13 +663,18 @@ class CollectingEventDB(DB):
     
     def __init__(self, values):
         '''
-        Load a list of collecting events.
+        Build a DB object using exclusively CollectingEvent objects.
         '''
         
         # type check and DB build
         DB.__init__(self, values, dbtype=CollectingEvent)
     
     def has_date_index(self):
+        '''
+        Returns True if the class method make_date_index has been 
+        called.
+        '''
+        
         return hasattr(self, "_date_index")
     
     def make_date_index(self, **allow_tags):
@@ -552,7 +682,15 @@ class CollectingEventDB(DB):
         Intepret the date fields of the collecting events to make them 
         searchable with types from the library datetime and the 
         mfnb.date.DateRange type.
+
+        Parameters
+        ----------
+            **allow_tags
+                Keyword arguments correspondig to valid DatePatternTag 
+                can be used here to limit date parsing to specific 
+                format or precision level.
         '''
+
         parser = mfnb.date.DatePatterns(**allow_tags)
         self._date_index = []
         for x in self:
@@ -625,11 +763,6 @@ class CollectingEventDB(DB):
 def load_labels(f):
     '''
     Build a label database from data stored in a JSON file.
-    
-    Parameters
-    ----------
-        f : file
-            File object to access JSON data with the json.load method.
     '''
     
     return LabelDB([ Label(**x) for x in json.load(f) ])
@@ -637,11 +770,6 @@ def load_labels(f):
 def load_collecting_events(f):
     '''
     Build a collecting event database from data stored in a JSON file.
-    
-    Parameters
-    ----------
-        f : file
-            File object to access JSON data with the json.load method.
     '''
 
     return CollectingEventDB([ CollectingEvent(**x) for x in json.load(f) ])
@@ -649,15 +777,32 @@ def load_collecting_events(f):
 def read_googlevision_output(f):
     '''
     Read a Google Vision JSON output and return the full text.
-    
-    Parameter
-    ---------
-        f : 
     '''
+
     for response in json.load(f)["responses"]:
         yield response["fullTextAnnotation"]["text"]
 
 def data_from_googlevision(f, identifier, start=1):
+    '''
+    Reads transcript from Google Vision JSON output and returns a list
+    of dict object with a unique identifier and the associated
+    transcript.
+
+    Parameters
+    ----------
+        f : file
+            A file object open in read mode and pointing towards a
+            Google Vision JSON output.
+
+        identifier : function
+            A function that takes in argument the index of the 
+            transcript in the JSON input and returns a str that will be
+            used as a unique identifier.
+        
+        start : int
+            Starting index for the identifier function. Default: 1.
+    '''
+    
     data_list = []
     for text in read_googlevision_output(f):
         data_list.append({

@@ -72,7 +72,14 @@ class DatePatterns(object):
     
     def __init__(self, **allow_tags):
         '''
-        Compile regular expressions.
+        Compile regular expressions for date parsing.
+
+        Parameters
+        ----------
+            **allow_tags
+                Keyword arguments correspondig to valid DatePatternTag 
+                can be used here to limit date parsing to specific 
+                format or precision level.
         '''
         
         # initialize the data container variable
@@ -111,6 +118,18 @@ class DatePatterns(object):
                                                "tags": tags})
                             
     def get_patterns(self, **allow_tags):
+        '''
+        Returns all compiled patterns, with the possibility of 
+        filtering out given formats or precision levels.
+
+        Parameters
+        ----------
+            **allow_tags
+                Keyword arguments correspondig to valid DatePatternTag 
+                can be used here to limit date parsing to specific 
+                format or precision level.
+        '''
+        
         allow_tags = DatePatternTags(**allow_tags)
         return [ (element["pattern"], element["tags"]) 
                   for element in self._data
@@ -118,8 +137,18 @@ class DatePatterns(object):
         
     def search(self, value, **allow_tags):
         '''
-        Searches all possible date patterns in a text. Returns a list of hits
-        (DateMatch objects) ranked by accuracy level.
+        Searches all possible date patterns in a text. Returns a list 
+        of hits (DateMatch objects) ranked by accuracy level.
+
+        Parameters
+        ----------
+            value : str
+                Any text.
+
+            **allow_tags
+                Keyword arguments correspondig to valid DatePatternTag 
+                can be used here to limit date parsing to specific 
+                format or precision level.
         '''
         
         hits = []
@@ -160,9 +189,24 @@ class DatePatterns(object):
         hits.sort(key = lambda x: x.get_scores(), reverse=True)
         return hits
     
-    def find_date(self, value, get_span=False, verbose=False, **allow_tags):
+    def find_date(self, value, get_span=False, **allow_tags):
         '''
-        Finds a date in a text.
+        Finds a date in a text. Returns the date as a Date object, 
+        optionnally with the span of the match in the parsed text.
+
+        Parameters
+        ----------
+            value : str
+                Any text.
+
+            get_span : bool
+                Returns the Date object along with the span of the 
+                match in the parsed text.
+            
+            **allow_tags
+                Keyword arguments correspondig to valid DatePatternTag 
+                can be used here to limit date parsing to specific 
+                format or precision level.
         '''
         
         for hit in self.search(value, **allow_tags):
@@ -182,12 +226,6 @@ class DatePatterns(object):
                     break
             if skip: continue
             
-            if verbose:
-                pattern = hit.get_value("pattern")
-                tags = hit.get_value("tags")
-                sys.stderr.write(f"[I] Matched pattern: {pattern.pattern}\n"
-                                 f"[I] Tags: {repr(tags)}\n")
-            
             if date1 == date2: 
                 if get_span:
                     return date1, hit.get_value("match").span()
@@ -202,7 +240,7 @@ class DatePatterns(object):
 
 class DatePatternTag(object):
     '''
-    A serie of tags for date pattern filtering.
+    A serie of tags that characterize a date pattern.
     '''
     
     _allowed_values = { "fields": set(["year1", "year2", "month1", "month2", "day1", "day2"]),
@@ -214,6 +252,42 @@ class DatePatternTag(object):
                         "is_range": set([False, True, None]) }
     
     def __init__(self, name, value):
+        '''
+        Build the DatePatternTag object from a tag name and a 
+        corresponding value.
+
+        Parameters
+        ----------
+            name : str
+                A tag name from the known tags.
+
+            value : str
+                A value for the tag, in the range of possible tag value.
+        
+        Tags and possible values
+        ------------------------
+            fields
+                "year1", "year2", "month1", "month2", "day1", "day2"
+            
+            precision_level
+                -1 (none), 0 (year), 1 (month), 2 (day)
+
+            day_pattern
+                "digit"
+
+            month_pattern
+                "digit", "roman", "literal"
+            
+            year_pattern
+                "two-digit", "four-digit"
+            
+            is_us
+                True, False
+
+            is_range
+                True, False
+        '''
+        
         if name not in DatePatternTag._allowed_values.keys():
             raise ValueError(f'Unknown tag name: "{name}"')
         if name == "fields":
@@ -226,7 +300,21 @@ class DatePatternTag(object):
     
     def match(self, other):
         '''
-        Tag filtering rules.
+        Returns True if the other DatePatternTag is compatible with the 
+        value of the object.
+
+        Rules for given tags
+        --------------------
+            fields
+                For the "fields" tag, check that all field values from
+                this tag is included in the other tag.
+            
+            precision_level
+                Check that the precision level of the other tag is 
+                equal or lower than this tag.
+            
+            (all other tags)
+                Check that the values are equivalent.
         '''
         
         # Type and value checking
@@ -277,27 +365,81 @@ class DatePatternTags(object):
     '''
     
     def __init__(self, **tags):
+        '''
+        Build the tag collection from a provided series of tags to 
+        build individual DatePatternTag object.
+
+        Parameters
+        ----------
+            fields : str
+                Which fields were found in the matching text.
+                Possible values: "year1", "year2", "month1", "month2", 
+                                 "day1", "day2"
+            
+            precision_level : int
+                The precision level of the date.
+                Possible values: -1 (none), 0 (year), 1 (month), 
+                                 2 (day)
+
+            day_pattern : str
+                The day format.
+                Possible value: "digit"
+
+            month_pattern : str
+                The month format.
+                Possible values: "digit", "roman", "literal"
+            
+            year_pattern : str
+                The year format.
+                Possible values: "two-digit", "four-digit"
+            
+            is_us : bool
+                Set True if the date is in US format, namely, with the 
+                month before the day.
+
+            is_range : bool
+                Set true if the match is a date range.    
+        '''
+        
         self._data = set()
         for name, value in tags.items():
             tag = DatePatternTag(name, value)
             self.add(tag)
     
     def contains(self, tag):
+        '''
+        Returns True if an equivalent of the provided DatePatternTag 
+        is in the collection.
+        '''
+        
         return tag in self._data
     
     def add(self, tag):
+        '''
+        Add a new DatePatternTag to the collection.
+        '''
+        
         if type(tag) is not DatePatternTag:
             raise TypeError("Value is not a DatePatternTag object,"
                            f" '{type(tag)}' found instead")
         self._data.add(tag)    
     
     def get(self, name):
+        '''
+        Get the DatePatternTag corresponding to the provided name.
+        '''
+        
         for tag in self:
             if tag.name == name:
                 return tag
         raise KeyError(f"Tag '{name}' not found")
     
     def get_value(self, name):
+        '''
+        Get the value of the DatePatternTag corresponding to the 
+        provided name.
+        '''
+        
         return self.get(name).value
     
     def match(self, other):
@@ -327,10 +469,98 @@ class DateMatch(object):
               "tags": DatePatternTags}
     
     def __init__(self, **kwargs):
+        '''
+        Build the object from a series of keywords arguments that 
+        describe the parsed information and the regular expression that
+        was used.
+
+        Parameters
+        ----------
+            year1 : str
+                Interpreted year value. If the match is a date ranges, 
+                this would store the earliest date.
+            
+            year2 : str
+                Interpreted latest year value in a date range.
+
+            month1 : str
+                Interpreted month value. If the match is a date ranges, 
+                this would store the earliest date.
+
+            month2 : str
+                Interpreted latest month value in a date range.
+
+            day1 : str
+                Interpreted day value. If the match is a date ranges, 
+                this would store the earliest date.
+
+            day2 : str
+                Interpreted latest day value in a date range.
+
+            pattern : regex.Pattern
+                Compiled regular expression pattern (from the regex 
+                module), that was used to parse the date value.
+
+            match : regex.Match
+                Match object from the regex module, corresponding to 
+                the parsed date.
+
+            score : int
+                Match score, representing the information level. A 
+                higher score indicates a higher information level.
+
+            tags : DatePatternTags
+                A series of tags describing the date format and its
+                precision level.
+        '''
+
         self._data = dict( (key, None) for key in DateMatch._types )
         self.update(**kwargs)
     
     def update(self, **kwargs):
+        '''
+        Updates the object internal data.
+
+        Parameters
+        ----------
+            year1 : str
+                Interpreted year value. If the match is a date ranges, 
+                this would store the earliest date.
+            
+            year2 : str
+                Interpreted latest year value in a date range.
+
+            month1 : str
+                Interpreted month value. If the match is a date ranges, 
+                this would store the earliest date.
+
+            month2 : str
+                Interpreted latest month value in a date range.
+
+            day1 : str
+                Interpreted day value. If the match is a date ranges, 
+                this would store the earliest date.
+
+            day2 : str
+                Interpreted latest day value in a date range.
+
+            pattern : regex.Pattern
+                Compiled regular expression pattern (from the regex 
+                module), that was used to parse the date value.
+
+            match : regex.Match
+                Match object from the regex module, corresponding to 
+                the parsed date.
+
+            score : int
+                Match score, representing the information level. A 
+                higher score indicates a higher information level.
+
+            tags : DatePatternTags
+                A series of tags describing the date format and its
+                precision level.
+        '''
+        
         for (key, value) in kwargs.items():
             if value is not None and type(value) is not DateMatch._types[key]:
                 raise TypeError(f"Wrong type when updating the '{key}' variable"
@@ -357,11 +587,18 @@ class DateMatch(object):
         return (precision_level, int(month_pattern != "literal"), score)    
     
     def get_value(self, name):
+        '''
+        Returns the value of a specific feature.
+        '''
+        
         return self._data[name]
     
     def get_dates(self):
         '''
-        Return the date objects corresponding to the match.
+        Returns a tuple with two Date objects. If the match is a single 
+        date, the two dates are identical. If the match is a date 
+        range, the tuple will contain the dates corresponding to the 
+        limits of this range.
         '''
         
         # report year data of date1 on date2 when missing
@@ -577,6 +814,11 @@ class Date(object):
     def get_isoformat(self, century=None):
         '''
         Return the date as a ISO8601 formatted string.
+
+        Parameters
+        ----------
+            century : int
+                Override or add the century value.
         '''
         
         # year
@@ -598,16 +840,25 @@ class Date(object):
         return datestr
         
     def set_century(self, value):
+        '''
+        Changes the century value of the date.
+        '''
+        
         decades = self.year % 100
         year = value*100 + decades
         self.__init__(year, self.month, self.day)
     
     def is_empty(self):
+        '''
+        Returns True if the Date object does not contain any 
+        information.
+        '''
+        
         return self.precision is None
     
     def is_in(self, daterange, assume_same_century=False):
         '''
-        Evaluate whether the date is within a provided daterange.
+        Evaluates whether the date is within a provided daterange.
         
         Parameters
         ----------
@@ -665,8 +916,8 @@ class Date(object):
     
     def _is_in(self, daterange):
         '''
-        Returns True if the date is in the range. Both date and the range
-        needs the same precision level.
+        Returns True if the date is in the provided range. Both date 
+        and the range needs the same precision level.
         '''
 
         # year
@@ -688,8 +939,17 @@ class Date(object):
     
     def overlap_with(self, other, assume_same_century=False):
         '''
-        Test whether the Date has an overlap with the other Date or DateRange 
-        object.
+        Test whether the Date has an overlap with the other Date or 
+        DateRange object.
+
+        Parameters
+        ----------
+            other : Date
+                Any Date object.
+            
+            assume_same_century : bool
+                If set True, trims the century value before comparing 
+                the provided dates and assumes they are the same.
         '''
         
         if type(other) is Date:
@@ -701,7 +961,6 @@ class Date(object):
         return DateRange(self, self).overlap_with(other, assume_same_century)
         
     def __str__(self):
-        
         res = ""
         
         # year
@@ -761,10 +1020,15 @@ class Date(object):
 
 class DateRange(object):
     '''
-    Store a date range, based on two Date objects.
+    Store a date range, based on two Date objects defining a closed 
+    interval.
     '''
     
     def __init__(self, a, b):
+        '''
+        Builds the object from two Date objects setting the limits of 
+        the range, which is considered as a closed interval.
+        '''
         
         if a.is_empty() or b.is_empty():
             raise ValueError("cannot make a range with an 'empty' Date object")
@@ -896,7 +1160,50 @@ class DateRange(object):
 # -----------------------------------------------------------------------------
 def tag_date_pattern(pattern, **other_tags):
     '''
-    Add a serie of tags to a date regular expression pattern.
+    Analyse the features of a date regular expression pattern (one 
+    included by the class DatePatterns) and build DatePatternTags 
+    including these features as different DatePatternTag objects.
+    Keywords arguments can be use to complete the pattern description
+    or override values.
+    
+    Parameters
+    ----------
+        year1 : str
+            Interpreted year value. If the match is a date ranges, 
+            this would store the earliest date.
+        
+        year2 : str
+            Interpreted latest year value in a date range.
+
+        month1 : str
+            Interpreted month value. If the match is a date ranges, 
+            this would store the earliest date.
+
+        month2 : str
+            Interpreted latest month value in a date range.
+
+        day1 : str
+            Interpreted day value. If the match is a date ranges, 
+            this would store the earliest date.
+
+        day2 : str
+            Interpreted latest day value in a date range.
+
+        pattern : regex.Pattern
+            Compiled regular expression pattern (from the regex 
+            module), that was used to parse the date value.
+
+        match : regex.Match
+            Match object from the regex module, corresponding to the 
+            parsed date.
+
+        score : int
+            Match score, representing the information level. A higher 
+            score indicates a higher information level.
+
+        tags : DatePatternTags
+            A series of tags describing the date format and its 
+            precision level.
     '''
     
     # will be used to construct the DatePatternTags object
@@ -932,5 +1239,38 @@ def tag_date_pattern(pattern, **other_tags):
     return DatePatternTags(**tags)
 
 def find_date(text, **allow_tags):
+    '''
+    Attempts to find a date in a given text.
+
+    Parameters
+    ----------
+        fields : str
+            Which fields should be found in the matching text.
+            Possible values: "year1", "year2", "month1", "month2", 
+                             "day1", "day2"
+        
+        precision_level : int
+            The minimum precision level of the date.
+            Possible values: -1 (none), 0 (year), 1 (month), 2 (day)
+
+        day_pattern : str
+            Restrict the match to include the given day format.
+            Possible value: "digit"
+
+        month_pattern : str
+            Restrict the match to include the given month format.
+            Possible values: "digit", "roman", "literal"
+        
+        year_pattern : str
+            Restrict the match to include the given year format.
+            Possible values: "two-digit", "four-digit"
+        
+        is_us : bool
+            Restrict the match to either US or non-US format.
+
+        is_range : bool
+            Restrict the match to either a single date or a date range.
+    '''
+    
     date_parser = DatePatterns(**allow_tags)
     return date_parser.find_date(text, get_span=True)
