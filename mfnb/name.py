@@ -1,8 +1,7 @@
-
 '''
-    This module contains classes and functions designed to store people
-    names or entity information as well as matching abbreviated text
-    with full text. It uses the packages nltk and regex.
+This module contains classes and functions designed to store people 
+names or entity information as well as matching abbreviated text with 
+full text. It uses the packages nltk and regex.
 '''
 
 import regex, json

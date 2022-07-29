@@ -1,5 +1,4 @@
-'''Date module
-    
+''' 
 This module contains classes and functions related to time data. It
 uses fuzzy regular expressions from the third party package regex to
 find dates within OCR extracted text and the dateparser package to 
@@ -1270,6 +1269,7 @@ def find_date(text, **allow_tags):
 
         is_range : bool
             Restrict the match to either a single date or a date range.
+
     '''
     
     date_parser = DatePatterns(**allow_tags)

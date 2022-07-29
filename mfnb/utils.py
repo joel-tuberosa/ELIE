@@ -1,6 +1,5 @@
-'''Utils module
-
-This module gathers generic functions for text data handling,
+'''
+This module gathers generic functions for text data handling, 
 manipulation and formatting.
 '''
 
@@ -92,7 +91,6 @@ def table_to_dicts(f, skip_first=False, sep="\t", data_sep=", ",
             parameter is a list of int, data from the corresponding 
             columns will be retrieved and concatenated with the value
             of data_sep as separators.
-            
     '''
     
     ### could add an option "use header" to use the header names instead of the
@@ -138,6 +136,7 @@ def overlap(a, b):
     ----------
         a, b : list|tuple of int
             Intervals, defined by int bounds.
+
     '''
     
     return min(a[1], b[1]) >= max(a[0], b[0])
@@ -146,10 +145,11 @@ def roman_to_int(value):
   '''
   Convert a Roman number into an integer.
   
-  Arguments
-  ---------
+  Parameters
+  ----------
     value : str
         A roman number.
+
   '''
   
   roman = {'I':1,'V':5,'X':10,'L':50,'C':100,'D':500,'M':1000,
@@ -179,6 +179,19 @@ def get_id_formatter(s):
     return f
 
 def clear_text(text, ranges, sub=" "):
+    '''
+    Replace interval of text by a given character.
+
+    Parameters
+    ----------
+        ranges : list
+            Either a single range, defined by a list of two integer 
+            values (indexes) defining the text interval to be replaced.
+        
+        sub : str
+            The replacement character.
+    '''
+    
     if is_range(ranges):
         ranges = [ranges]
     for r in ranges:
@@ -194,8 +207,8 @@ def clear_text(text, ranges, sub=" "):
 
 def is_range(r):
     '''
-    Return True if the provided value is either an single integer or an array
-    containing two integers.
+    Return True if the provided value is either an single integer or an 
+    array containing two integers.
     '''
         
     try:
@@ -204,6 +217,11 @@ def is_range(r):
         return type(r) is int
 
 def write_ranges(ranges):
+    '''
+    Convert ranges (start and stop indexes in a list) in a text 
+    representing the interval. 
+    '''
+    
     result = ""
     if is_range(ranges):
         ranges = [ranges]
@@ -219,6 +237,11 @@ def write_ranges(ranges):
     return result[2:]
 
 def find_pattern(text, pattern):
+    '''
+    Search a pattern in the provided text. In case of a match, returns
+    the matching string and its coordinates in the input text.
+    '''
+    
     m = pattern.search(text)
     if m is not None:
         return m.group(), m.span()
@@ -237,6 +260,11 @@ def is_float(value):
     return True
 
 def get_word_tokenize_pattern(min_len=1):
+    '''
+    Returns a regular expression pattern matching alphanumeric tokens 
+    of a minimum length.
+    '''
+    
     min_char = "".join( "\w" for i in range(min_len-1) )
     return fr'\b{min_char}\w+\b'
                                         
@@ -262,6 +290,7 @@ def tokenize(value, min_len=1, method="words"):
                             package.
                 "all"       Split with white spaces, keep every character
                             string.
+
     '''
     
     if method == "words":
@@ -279,6 +308,34 @@ def tokenize(value, min_len=1, method="words"):
     return [ token.lower() for token in tokens ]
 
 def get_ngrams(text, n, tokenize_method="words", ordered=True):
+    '''
+    Returns all possible sequences of a given number of contiguous 
+    tokens (i.e. n-grams) from the input text.
+
+    Parameters
+    ----------
+        text : str
+            Any text.
+        
+        n : int
+            Number of contiguous tokens in the n-gram.
+        
+        tokenize_method : str
+            Set the method for tokenization. Can take one of the 
+            following values:
+                "words"     Split with white space characters and special
+                            characters, ignore numbers.
+                "standard"  Use the word_tokenize method from the NLTK 
+                            package.
+                "all"       Split with white spaces, keep every character
+                            string.
+
+        ordered : bool
+            If True, returns all sequences found in the text. 
+            Otherwise, returns the unique n-grams, regardless of the 
+            token order.
+    '''
+    
     tokens = tokenize(text, min_len=1, method=tokenize_method)
     if ordered:
         return [ tuple(tokens[i:i+n]) for i in range(len(tokens)-n+1) ]
@@ -286,6 +343,24 @@ def get_ngrams(text, n, tokenize_method="words", ordered=True):
         return { tuple(sorted(tokens[i:i+n])) for i in range(len(tokens)-n) }
      
 def get_text_segments(text, segments, get_intervals=False):
+    '''
+    Split the input text in several text segments provided with the 
+    split indexes.
+
+    Parameters
+    ----------
+        text : str
+            Any text.
+        
+        segments : list
+            A list of split indexes, which should be integer values.
+
+        get_intervals : bool
+            Returns the ranges corresponding to each segment along with 
+            their corresponding text segments.
+
+    '''
+    
     if not segments: return [text]
     intervals = [(0, segments[0])]
     text_segments = [text[slice(*intervals[-1])]]
@@ -298,6 +373,10 @@ def get_text_segments(text, segments, get_intervals=False):
     return zip(text_segments, intervals) if get_intervals else text_segments
 
 def ngram_dist(a, b):
+    '''
+    Compute a Levenshtein distance between two n-grams.
+    '''
+    
     if len(a) > len(b):
         a, b = b, a
     a = list(a) + [""]*(len(b)-len(a))
@@ -309,6 +388,26 @@ def ngram_dist(a, b):
     return dists[0]
 
 def ngram_search(a, ngrams, mismatch_rule=mismatch_rule):
+    '''
+    Search matching n-gram in a provided token list. Mismatch is 
+    permited and a scoring scheme allows to select the best match.
+    
+    Parameters
+    ----------
+        a : list
+            A list of tokens.
+        
+        ngrams : list
+            A list of n-grams.
+        
+        mismatch_rule : function
+            If defined as a function, this function will take a 
+            single argument, the token, and return a fuzzy regular 
+            expression. If defined as None, it will look for exact 
+            matches.
+
+    '''
+    
     matching_ngrams = ngrams
     for token in a:
         p = regex.compile(f"(?:{token}{mismatch_rule(token)}")
@@ -323,6 +422,14 @@ def smoothen_white_spaces(s, pattern=WS_pattern):
     '''
     Strip white spaces from the input string and convert other 
     consecutive white spaces into single space characters.
+
+    Parameters
+    ----------
+        s : str
+            Any text.
+
+        pattern : regex.Pattern
+            A regular expression pattern that matches white spaces.
     '''
 
     return pattern.sub(" ", s.strip())
@@ -363,6 +470,7 @@ def get_norm_leven_dist(a, b, simplify=False):
             If set True, convert any consecutive white spaces into
             single space characters, convert to lowercase and strip
             accents.
+
     '''
     if simplify:
         a, b = simplify_str(a), simplify_str(b)
@@ -383,6 +491,7 @@ def get_pairwise_leven_dist(lines, simplify=False):
             If set True, convert any consecutive white spaces into
             single space characters, convert to lowercase and strip
             accents.
+
     '''
     
     # calculate all possible pairwise distance (avoid diagonal and duplicate 
@@ -410,6 +519,7 @@ def get_median_dists(dist):
             A pairwise distance matrix embedded in a 2D array. The 
             diagonal of this matrix is supposed to go from top left to
             bottom right and is ignored during median extraction.
+
     '''
     
     # check matrix
@@ -445,6 +555,7 @@ def get_levenKMedoids(x, n_clusters=8, simplify=False, random_state=12345):
 
         random_state : int
             A random seed
+
     '''
     
     # check x
@@ -498,6 +609,7 @@ def find_levenKMedoids(lines, max_cluster=8, method="elbow",
 
         random_state : int
             A random seed
+
     '''
     
     # check max_cluster value

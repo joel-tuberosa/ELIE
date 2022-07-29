@@ -1,5 +1,4 @@
-'''Label Data module
-
+'''
 This module contains classes and functions to handle and integrate 
 information extracted from specimen labels. It allows to build 
 searchable text databases using token extraction and text feature 
@@ -309,6 +308,7 @@ class DB(object):
                 Only fetch tokens from the provided key list. By 
                 default, build a database from the value stored in 
                 the "text" field.
+
         '''
         
         # by default, search in all elements of the database items except the 
@@ -433,6 +433,7 @@ class DB(object):
                     
                     "w+l" The score is calculated as the product of the 
                     two previous methods' results.
+                    
         '''
                 
         if not self.is_indexed():

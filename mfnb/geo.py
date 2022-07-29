@@ -1,5 +1,4 @@
-'''Geo module
-
+'''
 This module contains classes and function related to geocoding. It 
 uses the package geopy package to search location in 
 http://www.geonames.org.

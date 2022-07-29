@@ -5,4 +5,3 @@ python-mfnb
    :maxdepth: 4
 
    mfnb
-   setup
