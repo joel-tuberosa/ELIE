@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mfnb"]
+
+[project]
+name = "mfnb"
+version = "1.0a1"
+authors = [
+  { name="Joël Tuberosa", email="joel.tuberosa@unige.ch" },
+  { name="Théo Léger", email="theo.leger@mfn.berlin" }
+]
+description = "A Python package from the Natural History Museum of Berlin for digitalized collecting event label classification."
+readme = "README.rst"
+requires-python = ">=3.7"
+dependencies = [
+  "nltk",
+  "dateparser",
+  "scikit-learn",
+  "regex",
+  "levenshtein",
+  "scikit-learn-extra",
+  "kneed",
+  "geopy"
+]
+classifiers = [
+  "Development Status :: 1 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Natural Language :: English",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: >=3.7",
+  "Topic :: Scientific/Engineering :: Bio-Informatics"
+]
+
+# These copy the actual .py files into the wheel and create
+# executable wrappers that call the script’s own main().
+[tool.hatch.build.targets.wheel.scripts]
+make_collecting_events     = "scripts/make_collecting_events.py"
+match_collecting_events    = "scripts/match_collecting_events.py"
+make_labels                = "scripts/make_labels.py"
+search_labels              = "scripts/search_labels.py"
+sort_labels                = "scripts/sort_labels.py"
+checkout_collecting_events = "scripts/checkout_collecting_events.py"
+subset_db                  = "scripts/subset_db.py"
+table_export               = "scripts/table_export.py"
+make_collectordb           = "scripts/make_collectordb.py"

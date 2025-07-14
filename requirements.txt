@@ -1,9 +1,0 @@
-nltk
-dateparser
-scikit-learn
-regex
-leven
-geopy
-sphinx
-kneed
-scikit-learn-extra
