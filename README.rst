@@ -12,9 +12,9 @@ scripts designed for collecting event label parsing and classification.
 
 Installation
 ------------
-1. Clone python-mfnb from https://code.naturkundemuseum.berlin/collection-mining/python-mfnb.
+1. Clone python-mfnb from this github.
 
-`git clone https://code.naturkundemuseum.berlin/collection-mining/python-mfnb`
+`git clone https://github.com/joel-tuberosa/python-mfnb`
 
 2. cd in python-mfnb/
 
