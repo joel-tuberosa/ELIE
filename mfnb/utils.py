@@ -806,4 +806,4 @@ def text_pick_consensus(lines, simplify=False):
     dist = get_pairwise_leven_dist(lines)
     median_dist = get_median_dists(dist)
     sorted_median_dist = sorted(zip(lines, median_dist), key=lambda x: x[1])
-    return sorted_median_dist[-1][0]
+    return sorted_median_dist[0][0]
