@@ -346,18 +346,14 @@ class DB(object):
         # items and scores.
         corpus = self.get_corpus(keys=keys, masks=masks)
         score_matrix = vectorizer.fit_transform(corpus)
-        j = 0
-        for token in vectorizer.get_feature_names_out().tolist():
-            i = 0
-            for x in self:
+        for j, token in enumerate(vectorizer.get_feature_names_out().tolist()):
+            for i, x in enumerate(self):
                 score = score_matrix[i,j]
                 if score:
                     try:
                         self._index[token].append((x, score))
                     except KeyError:
                         self._index[token] = [(x, score)]
-                i += 1
-            j += 1
         
         # compute rowsums for scoring normalization
         self._max_scores = dict( (x.ID, score_matrix[self._ids.index(x.ID)].sum())
@@ -449,6 +445,13 @@ class DB(object):
         
         # search database tokens with regular expression and score the possible 
         # matches
+        
+        # the results is a list of tuples containing:
+        #   q: a query token
+        #   x: a matched in the database
+        #   matched_token: the matched token in object x
+        #   identity: the Levenshtein identity score of q vs matched_token
+        #   score: the TF-IDF of q vs matched_token
         results = [ (q, x, matched_token, identity, score)
                      for q in query_tokens
                      for x, matched_token, identity, score 
@@ -456,7 +459,13 @@ class DB(object):
                                                 mismatch_rule, 
                                                 filtering) ]
         
-        # for the same token, keep only the best match in each collecting event
+        # for the same token, keep only the best match(es) in each collecting 
+        # event. This can be multiple matches if the same word appears multiple
+        # times in the matched object (to be corrected!)
+        #   by database object,
+        #   by matched_token,
+        #   by identity score,
+        #   by TF-IDF score
         results.sort(key=lambda x: (x[1].ID, x[2], x[3], x[4]), reverse=True)
         results = [ results[i] 
                      for i in range(len(results)) 

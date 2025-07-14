@@ -13,7 +13,7 @@ setup(
     install_requires=[
           'nltk',
           'dateparser',
-          'sklearn',
+          'scikit-learn',
           'regex',
           'leven',
           'scikit-learn-extra',
