@@ -1,6 +1,6 @@
 nltk
 dateparser
-sklearn
+scikit-learn
 regex
 leven
 geopy
