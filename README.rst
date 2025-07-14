@@ -60,36 +60,36 @@ Scripts
 -------
 For usage information, run any of these scripts with the option --help.
 
-* checkout_collecting_events.py
-   Identify inconsistensies between the outputs of sort_labels.py and 
-   match_collecting_events.py in order to validate collecting event 
+* checkout_collecting_events
+   Identify inconsistensies between the outputs of sort_labels and 
+   match_collecting_events in order to validate collecting event 
    attributions.
 
-* make_collecting_events.py
-   Build collecting event objects from an input table and store the 
-   data in a JSON file for usage with match_collecting_events.py.
+* make_collecting_events
+   Build collecting event objects from an input table and store the data
+   in a JSON file for usage with match_collecting_events.
 
-* make_labels.py
+* make_labels
    Build label objects from an input table and store the data in a JSON 
-   file for usage with sort_labels.py, search_labels.py and
-   match_collecting_events.py.
+   file for usage with sort_labels, search_labels and
+   match_collecting_events.
    
-* match_collecting_events.py
+* match_collecting_events
    Match labels with collecting events using full-text search and 
    similarity scoring. Dates can be parsed in the label data to limit
    the search to collecting event with overlapping dates.
 
-* search_labels.py
+* search_labels
    Full-text search in a collection of labels.
 
-* sort_labels.py
+* sort_labels
    Cluster label based on text similarity and parse localisation, date
    and collector's names in the raw text.
 
-* subset_db.py
+* subset_db
    Subset a label or a collecting event database in JSON format.
 
-* table_export.py
+* table_export
    Make a TSV file from a JSON file containing a label or a collecting
    event database.
 
@@ -114,7 +114,7 @@ Example:
         }, …
     ]
 
-You can convert a dataset in tabular format, for instance, a TSV file with two columns containing respectively the ID and the text of each transcript, into this JSON format using the script make_labels.py.
+You can convert a dataset in tabular format, for instance, a TSV file with two columns containing respectively the ID and the text of each transcript, into this JSON format using the script make_labels.
 
 **Collecting Events**
 
@@ -140,7 +140,7 @@ Example:
         }, …
     ]
 
-You can convert a dataset in tabular format, for instance, a TSV file containing each of these different fields into this JSON format using the script make_collecting_event.py.
+You can convert a dataset in tabular format, for instance, a TSV file containing each of these different fields into this JSON format using the script make_collecting_event.
 
 **Collectors**
 
@@ -173,7 +173,7 @@ Example of usage
 
 **Step 1)** Cluster transcripts by similarity to regroup labels pertaining to the same collecting events. In the same time, parse the transcripts to identify collecting event information:
 
-    `sort_labels.py -d -c collectors.json -g transcripts.json >sorted_transcripts.txt`
+    `sort_labels -d -c collectors.json -g transcripts.json >sorted_transcripts.txt`
 
 * Option `-d` will activate date string parsing and add two output fields with the identified verbatim and the interpreted colleting event date.
 * Option `-c` collectors.json will search names of collectors or collecting entities from the database collectors.json in the transcripts and add two output fields with the identified verbatim and the interpreted collector names.
@@ -183,7 +183,7 @@ Parsing is optional here, it is only meant to help later collecting event determ
 
 **Step 2)** Identify the closest collecting event for each transcript using full-text search on the representative transcript attached to each collecting event.
 
-    `match_collecting_events.py -d -p col_ev.json transcripts.json >matched_col_ev.txt`
+    `match_collecting_events -d -p col_ev.json transcripts.json >matched_col_ev.txt`
 
 * Option `-d` will activate date string parsing and for each transcript where a date was identified, limit the search to collecting event with an overlapping date.
 * Option `-p` will allow transcripts with an identified date but no matching collecting event in that date range to be search against the rest of the collecting events anyway. This allows to have a matching score anyway for later evaluation, and sometimes also allows to save some matches when the date parsing is faulty.
@@ -192,7 +192,7 @@ This will return a table showing input transcripts along with matching collectin
 
 **Step 3)**	Evaluate the correspondence between identified transcripts clusters and existing collecting events. This is done by computing a confidence score for each cluster, representing how much the cluster correspond to the most frequently matched collecting event among its transcripts. This confidence score is calculated as a product of the frequency of the most matched collecting events and its average hit score.
 
-    `checkout_collecting_events.py sorted_transcripts.txt matched_col_ev.txt >checkout.txt`
+    `checkout_collecting_events sorted_transcripts.txt matched_col_ev.txt >checkout.txt`
 
 With the output of this program, you should be able to identify clear correspondences between transcripts clusters and collecting event. For example, if you spot a cluster of 20 transcripts that correspond to a given collecting event with a confidence score close to 1, you can trustfully annotate the corresponding labels as pertaining to that collecting event. On the contrary, if these 20 transcripts are assigned to a given collecting event with a lower confidence score, it would be worth to go back to individual transcripts best matches to figure out whether they all pertain to the same collecting event or not, and whether you need to create a new collecting event for any of them. Finally, this program also gives you the collecting event that were not matched with any transcripts, and inversely.
 
@@ -200,19 +200,19 @@ With the output of this program, you should be able to identify clear correspond
 
 **Case 1)** Transcripts typographic errors or misinterpreted text makes the whole dataset noisy. The default full-text search scoring method relies on near-exact token matches and can be too stringent. Depending on your clustering results, you can alternatively run the following command, which resort on Levenshtein distances to aggregate similar label together.
 
-    `sort_labels.py -d -c collectors.json -g transcripts.json -s 0.3 -r >sorted_transcripts.txt`
+    `sort_labels -d -c collectors.json -g transcripts.json -s 0.3 -r >sorted_transcripts.txt`
 
 * Option `-s 0.3` lower the similarity threshold for aggregation (default is 0.8).
 * Option `-r` orders to compute pairwise Levenshtein distances within the aggregated group and to attempt to find subcluster using a K-medoid clustering approach.
 
 In addition, if parsing is impaired by transcription errors, you try the option `-v alignment` to align the transcripts and generate a character frequency based consensus transcript on which data will be parsed.
 
-    `match_collecting_events.py -d -p col_ev.json transcripts.json -s l >matched_col_ev.txt`
+    `match_collecting_events -d -p col_ev.json transcripts.json -s l >matched_col_ev.txt`
 
 * Option `-s l` indicates to use levenshtein distance instead of token-based scoring to find the best hits.
 
 **Case 2)** Very similar transcripts, that just differ from a single number (for instance a different day), that could nevertheless be very relevant, could be seen as more similar than they actually are with the default search method. To overcome this, the above method, using levenshtein distance, could be a solution. If the transcripts are faithfull enough, you could also try a different aggregation method, based on the parsed information using the following command.
 
-    `sort_labels.py -d -c collectors.json -g transcripts.json -p >sorted_transcripts.txt`
+    `sort_labels -d -c collectors.json -g transcripts.json -p >sorted_transcripts.txt`
 
 * Option `-p` orders to parse the required information (here: dates, collectors and locations) and aggregate labels that contain the same information.

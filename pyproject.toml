@@ -5,6 +5,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["mfnb"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project]
 name = "mfnb"
 version = "1.0a1"
@@ -21,12 +24,12 @@ dependencies = [
   "scikit-learn",
   "regex",
   "levenshtein",
-  "scikit-learn-extra",
+  "scikit-learn-extra @ git+https://github.com/TimotheeMathieu/scikit-learn-extra@main#egg=scikit-learn-extra",
   "kneed",
   "geopy"
 ]
 classifiers = [
-  "Development Status :: 1 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -34,19 +37,17 @@ classifiers = [
   "Operating System :: MacOS :: MacOS X",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
-  "Programming Language :: Python :: >=3.7",
+  "Programming Language :: Python :: 3.7",
   "Topic :: Scientific/Engineering :: Bio-Informatics"
 ]
 
-# These copy the actual .py files into the wheel and create
-# executable wrappers that call the script’s own main().
-[tool.hatch.build.targets.wheel.scripts]
-make_collecting_events     = "scripts/make_collecting_events.py"
-match_collecting_events    = "scripts/match_collecting_events.py"
-make_labels                = "scripts/make_labels.py"
-search_labels              = "scripts/search_labels.py"
-sort_labels                = "scripts/sort_labels.py"
-checkout_collecting_events = "scripts/checkout_collecting_events.py"
-subset_db                  = "scripts/subset_db.py"
-table_export               = "scripts/table_export.py"
-make_collectordb           = "scripts/make_collectordb.py"
+[project.scripts]
+make_collecting_events     = "mfnb.scripts.make_collecting_events:main"
+match_collecting_events    = "mfnb.scripts.match_collecting_events:main"
+make_labels                = "mfnb.scripts.make_labels:main"
+search_labels              = "mfnb.scripts.search_labels:main"
+sort_labels                = "mfnb.scripts.sort_labels:main"
+checkout_collecting_events = "mfnb.scripts.checkout_collecting_events:main"
+subset_db                  = "mfnb.scripts.subset_db:main"
+table_export               = "mfnb.scripts.table_export:main"
+make_collectordb           = "mfnb.scripts.make_collectordb:main"
