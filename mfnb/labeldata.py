@@ -13,6 +13,7 @@ from mfnb.utils import (mismatch_rule,
                         get_norm_leven_dist)
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from leven import levenshtein
+from collections import defaultdict
 
 # =============================================================================
 # CLASSES
@@ -440,60 +441,31 @@ class DB(object):
         query_tokens = regexp_tokenize(strip_accents(query.lower()), 
                                        self._parameters["token_pattern"])
         
-        # with method #2, unique token?
-        # query_tokens = set(query_tokens)
-        
         # search database tokens with regular expression and score the possible 
         # matches
-        
-        # the results is a list of tuples containing:
-        #   q: a query token
-        #   x: a matched in the database
-        #   matched_token: the matched token in object x
-        #   identity: the Levenshtein identity score of q vs matched_token
-        #   score: the TF-IDF of q vs matched_token
-        results = [ (q, x, matched_token, identity, score)
-                     for q in query_tokens
-                     for x, matched_token, identity, score 
-                      in self.get_token_matches(q, 
-                                                mismatch_rule, 
-                                                filtering) ]
-        
-        # for the same token, keep only the best match(es) in each collecting 
-        # event. This can be multiple matches if the same word appears multiple
-        # times in the matched object (to be corrected!)
-        #   by database object,
-        #   by matched_token,
-        #   by identity score,
-        #   by TF-IDF score
-        results.sort(key=lambda x: (x[1].ID, x[2], x[3], x[4]), reverse=True)
-        results = [ results[i] 
-                     for i in range(len(results)) 
-                      if i==0 or 
-                         results[i-1][1] != results[i][1] or
-                        (results[i-1][1] == results[i][1] and 
-                         results[i-1][2] != results[i][2]) ]
+        hit_scoring = defaultdict(lambda: [0, 0])
+        for q in query_tokens:
+            args = (q, mismatch_rule, filtering)
 
-        # calculate the final score
-        hit_scoring = dict()
-        for q, x, matched_token, identity, score in results:
-            
-            # with the scoring method implying Levenshtein distance, do not 
-            # account for the identity as mismatches will be evaluated further
-            if scoring != "w":
-                identity = 1
+            # x:        matched element of the database
+            # _:        matched token in this element (not used)
+            # identity: similarity score (Levenshtein)
+            # score:    TD-IDF score
+            for x, _, identity, score in self.get_token_matches(*args):
+                
+                # with the scoring method implying Levenshtein distance, do not 
+                # account for the identity as mismatches will be evaluated further
+                if scoring != "w":
+                    identity = 1
 
-            # the hit score of a given collecting event is the sum of the 
-            # normalized TFIDF scores matched in this collecting event any
-            # of the query tokens
-            try:
+                # the hit score of a given collecting event is the sum of the 
+                # normalized TFIDF scores matched in this collecting event any
+                # of the query tokens
                 hit_scoring[x.ID][0] += score*identity
-            except KeyError:
-                hit_scoring[x.ID] = [score*identity, 0]
-            
-            # count the number of token that matched this collecting event
-            hit_scoring[x.ID][1] += 1
-        
+                
+                # count the number of token that matched this collecting event
+                hit_scoring[x.ID][1] += 1
+                
         # return a list of the matches ordered by normalized score (high to low)
         result = []
 
@@ -571,8 +543,7 @@ class DB(object):
                     if not filtering(x): continue
                     result.append((x, token, identity, score))
         
-        # when one token in the query matches multiple token of the same 
-        # collecting event, only the best match is kept.
+        # for each database item, only the best matched token is kept.
         if result:
             result.sort(key=lambda x: (x[0].ID, x[2], x[3]),
                         reverse = True)
