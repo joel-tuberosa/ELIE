@@ -438,7 +438,7 @@ def strip_accents(s):
     '''
     Strip accent from a unicode character string.
     '''
-    return ''.join(c for c in unicodedata.normalize('NFD', s)
+    return ''.join(c for c in unicodedata.normalize('NFKD', s)
                    if unicodedata.category(c) != 'Mn')
 
 def simplify_str(s):

@@ -5,7 +5,7 @@ searchable text databases using token extraction and text feature
 scoring. This module uses the packages regex, sklearn, nltk and leven.
 '''
 
-import json, mfnb.date, regex
+import json, mfnb.date, regex, sys
 from nltk import regexp_tokenize
 from mfnb.utils import (mismatch_rule, 
                         get_word_tokenize_pattern, 
@@ -323,8 +323,9 @@ class DB(object):
         token_pattern = get_word_tokenize_pattern(min_len)
         
         # index and stored parameters
-        self._index = dict()
-        self._parameters = {"method": method, "token_pattern": token_pattern}
+        self._index = defaultdict(list)
+        self._parameters = {"method": method, "token_pattern": token_pattern,
+                            "keys": keys, "masks": masks}
         
         # - method 1
         # Associate each unique token with every database item that contains 
@@ -347,18 +348,19 @@ class DB(object):
         # items and scores.
         corpus = self.get_corpus(keys=keys, masks=masks)
         score_matrix = vectorizer.fit_transform(corpus)
+        item_scores = defaultdict(dict)
         for j, token in enumerate(vectorizer.get_feature_names_out().tolist()):
             for i, x in enumerate(self):
                 score = score_matrix[i,j]
                 if score:
-                    try:
-                        self._index[token].append((x, score))
-                    except KeyError:
-                        self._index[token] = [(x, score)]
+                    self._index[token].append((x, score))
+                    item_scores[x.ID][token] = score
         
-        # compute rowsums for scoring normalization
-        self._max_scores = dict( (x.ID, score_matrix[self._ids.index(x.ID)].sum())
-                                  for x in self )
+        # compute maximum scores
+        self._max_scores = defaultdict(lambda: 0)
+        for x in self:
+            for token in self.get_item_tokens(x.ID):
+                self._max_scores[x.ID] += item_scores[x.ID][token]
         
     def dump_index(self, fout):
         '''
@@ -392,7 +394,43 @@ class DB(object):
                              for token in data["index"] )
         self._parameters = data["parameters"]
         self._max_scores = data["max_scores"]
+
+    def get_item_tokens(self, ID):
+        '''
+        Uses the parameters of the index to generate tokens for a given
+        item.
+
+        Parameters
+        ----------
+            ID : str
+                Database item identifier
+        '''
+
+        # make a list of keys (use index parameters)
+        keys = self._parameters["keys"]
+        if keys is None:
+            keys = self.element_type.keys
+        elif type(keys) is str:
+            keys = [keys]
+            
+        # make a list of masks (use index parameters)
+        masks = self._parameters["masks"]
+        if masks is None:
+            masks = []
+        elif type(masks) is Mask:
+            masks = [masks]
         
+        # identify the tokens
+        x = self._dict[ID]
+        tokens = []
+        pattern = self._parameters["token_pattern"]
+        for key in keys:
+            s = getattr(x, key)
+            for mask in masks:
+                s = mask.mask(key, s)
+            tokens += regexp_tokenize(strip_accents(s.lower()), pattern)
+        return tokens
+
     def search(self, query, mismatch_rule=mismatch_rule, 
                filtering=lambda x: True, scoring="w"):
         '''
@@ -443,16 +481,43 @@ class DB(object):
         
         # search database tokens with regular expression and score the possible 
         # matches
-        hit_scoring = defaultdict(lambda: [0, 0])
-        for q in query_tokens:
-            args = (q, mismatch_rule, filtering)
+        matched_tokens = defaultdict(list)
 
-            # x:        matched element of the database
-            # _:        matched token in this element (not used)
-            # identity: similarity score (Levenshtein)
-            # score:    TD-IDF score
-            for x, _, identity, score in self.get_token_matches(*args):
+        # build the token search function
+        def search_tokens(q, mismatch_rule=mismatch_rule, filtering=filtering):
+            return self.get_token_matches(q, mismatch_rule, filtering).items()
+
+        # search every token onto the database index
+        for q in query_tokens:
+
+            # x_ID:     ID of the matched element in the database
+            # match:
+            #   (token:     matched token in this element (not used)
+            #    identity:  similarity score (Levenshtein)
+            #    score:     TD-IDF score)
+
+            # order matched tokens by matched database item
+            for x_ID, match in search_tokens(q):
+                matched_tokens[x_ID].append(match)
                 
+        # score matches while tracking tokens that were matched multiple times
+        hit_scoring = defaultdict(lambda: [0, 0])
+        for x_ID in matched_tokens:
+            subject_tokens = self.get_item_tokens(x_ID)
+            
+            # debug
+            for token, identity, score in matched_tokens[x_ID]:
+
+                # consume matched tokens while scoring
+                try:
+                    subject_tokens.remove(token)
+
+                # if a subject token has already been scored, it means that it
+                # was matched by multiple query tokens and therefore needs to be
+                # ignored
+                except ValueError:
+                    continue
+
                 # with the scoring method implying Levenshtein distance, do not 
                 # account for the identity as mismatches will be evaluated further
                 if scoring != "w":
@@ -461,10 +526,10 @@ class DB(object):
                 # the hit score of a given collecting event is the sum of the 
                 # normalized TFIDF scores matched in this collecting event any
                 # of the query tokens
-                hit_scoring[x.ID][0] += score*identity
+                hit_scoring[x_ID][0] += score*identity
                 
                 # count the number of token that matched this collecting event
-                hit_scoring[x.ID][1] += 1
+                hit_scoring[x_ID][1] += 1
                 
         # return a list of the matches ordered by normalized score (high to low)
         result = []
@@ -472,13 +537,14 @@ class DB(object):
         # scoring methods w and w+l includes token scores
         if scoring in ("w", "w+l"):
             for ID, scores in hit_scoring.items():
+
                 score, n = scores
                 
-                # the score is normalized by the maximum score (i.e. if all token 
-                # are matched in the collecting event
+                # The score is normalized by the maximum score (i.e. if all 
+                # token are matched in the collecting event.
                 score /= self._max_scores[ID]
                 
-                # ...and weighted by the number of matching token
+                # ...and weighted by the number of matching token.
                 score *= (n/len(query_tokens))
                 
                 # ...and with method w+l, weighted by the normalized 
@@ -520,19 +586,23 @@ class DB(object):
                 matches.
         '''
         
+        # matched tokens are listed for each database item
+        result = defaultdict(list)
+
         # retrieve matching tokens
         if mismatch_rule is None:
             try:
-                result = [ (x, value, 1, score) 
-                            for x, score in self._index[value] 
-                            if filtering(x) ]
+                for x, score in self._index[value]:
+                    if not filtering(x):
+                        continue
+                    result[x.ID].append((value, 1, score))
             except KeyError:
-                result = []
+                pass
         else:
             pattern = regex.compile(fr"(?:{value}){mismatch_rule(value)}")
             
-            # list matching collecting events and associated scores
-            result = []
+            # list matching tokens in each database item x and associated 
+            # scores
             for token, hits in self._index.items():
                 m = pattern.fullmatch(token)
                 if m is None: continue
@@ -541,17 +611,17 @@ class DB(object):
                 identity = 0 if d > l else (1 - d/l)
                 for x, score in hits:
                     if not filtering(x): continue
-                    result.append((x, token, identity, score))
+                    result[x.ID].append((token, identity, score))
         
-        # for each database item, only the best matched token is kept.
-        if result:
-            result.sort(key=lambda x: (x[0].ID, x[2], x[3]),
-                        reverse = True)
-            result = [ result[i] 
-                        for i in range(len(result)) 
-                        if i==0 or result[i-1][0] != result[i][0] ]
-        return result
-    
+        # for each database item, only the best matched token is kept, ranked
+        # by identity, then by TF-IDF score
+        return dict(
+            (x_ID, sorted(matched_tokens, 
+                          key=lambda x: (x[1], x[2]), 
+                          reverse=True)[0])
+            
+            for x_ID, matched_tokens in result.items() )
+
     def get_corpus(self, keys=None, masks=None, join="\n"):
         '''
         Returns a generator function that yields text values of the 
