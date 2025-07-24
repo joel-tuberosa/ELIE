@@ -504,8 +504,6 @@ class DB(object):
         hit_scoring = defaultdict(lambda: [0, 0])
         for x_ID in matched_tokens:
             subject_tokens = self.get_item_tokens(x_ID)
-            
-            # debug
             for token, identity, score in matched_tokens[x_ID]:
 
                 # consume matched tokens while scoring
