@@ -1,5 +1,5 @@
-ELIE - Diagnosis scripts
+Diagnosis scripts
 ========================================================================
-*Script for label clustering quality control*
+*Scripts for label clustering quality control*
 
 .. contents ::
