@@ -113,8 +113,11 @@ def main():
     # Rename for consistency
     df = df.rename(columns={
         'ID': 'label_ID',
+        'label.ID': 'label_ID',
         'Transcript': 'label_v',
-        'Cluster_ID': 'group_ID'
+        'label.v': 'label_v',
+        'Cluster_ID': 'group_ID',
+        'group.ID': 'group_ID'
     })
 
     # Check required columns
