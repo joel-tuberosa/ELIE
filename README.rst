@@ -93,6 +93,22 @@ For usage information, run any of these scripts with the option --help.
    Make a TSV file from a JSON file containing a label or a collecting
    event database.
 
+Diagnosis Scripts
+-----------------
+The ``diagnosis_scripts/`` directory contains additional scripts for analyzing and evaluating the quality of label clustering results. These tools help identify potential issues in clustering algorithms and provide insights into cluster characteristics.
+
+Key scripts include:
+
+* **merge_cluster_ids.py** - Script 1/4: Merge OCR transcripts with cluster IDs
+* **format_comparison_table.py** - Script 2/4: Format clustered data into side-by-side comparison tables  
+* **validate_clusters_levenshtein.py** - Script 3/4: Validate clusters using Levenshtein distance analysis
+* **generate_distance_boxplot.py** - Script 4/4: Generate boxplot visualizations of Levenshtein distances
+* **find_distant_pairs.py** - Identify most distant label pairs within clusters
+* **clustering_evaluation_metrics.py** - Evaluate clustering quality with multiple metrics
+* **clustering_elbow_method.py** - Find optimal clustering thresholds using elbow method
+
+For detailed usage information and examples, see ``diagnosis_scripts/README.rst``.
+
 Dataset preparation
 -------------------
 
