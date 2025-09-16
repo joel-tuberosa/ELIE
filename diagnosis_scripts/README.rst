@@ -65,6 +65,7 @@ Key features:
 
 - **Input file** must contain both ID/cluster data and transcript data
 - **Automatic column detection** supports various naming patterns:
+
   - ID columns: ``ID``, ``label.ID``, ``label_ID``
   - Cluster columns: ``Cluster_ID``, ``group.ID``, ``group_ID``  
   - Transcript columns: ``TranscriptOCR``, ``TranscriptManual``, ``label.v``
@@ -94,6 +95,7 @@ The output CSV contains standardized columns:
     ./merge_cluster_ids.py -i /path/to/clustered_results.txt -o standardized_output.csv
 
 **Dependencies**: 
+
 - Built-in Python modules only (csv, sys, os, getopt)
 
 
@@ -126,6 +128,7 @@ Key features:
 **Input format**:
 
 The input CSV file must contain (typically from merge_cluster_ids.py):
+
 - ``ID``: Unique identifier for each label
 - ``Cluster_ID``: Cluster identifier grouping related labels
 - ``TranscriptOCR``: OCR-generated transcript text
@@ -134,6 +137,7 @@ The input CSV file must contain (typically from merge_cluster_ids.py):
 **Output format**:
 
 The output CSV contains one row per cluster with the following columns:
+
 - ``Cluster ID``: The cluster identifier
 - ``Label 1 ID``: ID of the first label in the cluster
 - ``Label 1 OCR Transcript``: OCR transcript of the first label
@@ -150,7 +154,8 @@ The output CSV contains one row per cluster with the following columns:
     # Specify delimiter explicitly
     ./format_comparison_table.py -i data.csv -o table.csv -s ";"
 
-**Dependencies**: 
+**Dependencies**:
+
 - Built-in Python modules only (csv, sys, os, getopt)
 
 
@@ -171,6 +176,7 @@ This script performs cluster validation using Levenshtein distance analysis betw
 This is the third script in a 4-script pipeline for clustering data analysis. The input should be the output from script 2/4 (formatted comparison table).
 
 **Key Features**:
+
 - Text normalization with stop word removal and word sorting for consistent comparison
 - Multiple Levenshtein distance calculations for analysis
 - Automatic cluster validation based on manual transcript comparison
@@ -180,6 +186,7 @@ This is the third script in a 4-script pipeline for clustering data analysis. Th
 
 **Input**:
 A CSV file containing formatted comparison data with columns:
+
 - ``Label 1 OCR Transcript``: OCR transcript of the first label
 - ``Label 1 Manual Transcript``: Manual transcript of the first label  
 - ``Label 2 OCR Transcript``: OCR transcript of the second label
@@ -187,6 +194,7 @@ A CSV file containing formatted comparison data with columns:
 
 **Output**:
 - A CSV file with original data plus new columns:
+
   - ``L1 OCR vs L2 OCR Levenshtein``: Distance between OCR transcripts
   - ``L1 Manual vs L2 Manual Levenshtein``: Distance between manual transcripts
   - ``L1 OCR vs L1 Manual Levenshtein``: Distance between OCR and manual for label 1
@@ -206,7 +214,8 @@ A CSV file containing formatted comparison data with columns:
     # Use specific CSV separator
     ./validate_clusters_levenshtein.py -i data.csv -o results.csv -s ";"
 
-**Dependencies**: 
+**Dependencies**:
+
 - ``leven``: For fast Levenshtein distance calculations
 - ``matplotlib``: For pie chart generation and visualization
 - Built-in Python modules (csv, sys, os, getopt, re)
@@ -328,6 +337,7 @@ For clusters containing only one label, the second label fields will be empty.
     ./find_distant_pairs.py -i data.csv -o results.csv -s ","
 
 **Dependencies**: 
+
 - ``pandas``: For CSV processing
 - ``leven``: For Levenshtein distance calculation (same as used in mfnb.utils)
 
