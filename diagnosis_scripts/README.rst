@@ -10,6 +10,7 @@ Overview
 This directory contains diagnostic scripts designed to analyze and evaluate the quality of label clustering results. These tools help identify potential issues in clustering algorithms and provide insights into cluster characteristics.
 
 The scripts are organized into two main categories:
+
 - **Data Processing Pipeline**: Scripts 1/4 through 4/4 for complete clustering analysis workflow
 - **Quality Analysis Tools**: Additional scripts for evaluating clustering performance and identifying issues
 
