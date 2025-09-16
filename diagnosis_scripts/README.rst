@@ -29,6 +29,7 @@ merge_cluster_ids.py
 This script can either merge two separate CSV files or reformat a single file that already contains both transcript and cluster data. It features automatic column detection and mapping to handle various input formats flexibly. This is typically the first step in a data processing pipeline for clustering analysis.
 
 Key features:
+
 - **Dual-mode operation**: Two-file merge OR single-file reformatting
 - **Automatic column detection**: Detects and maps various column name patterns (label.ID, group.ID, label.v, etc.)
 - **Flexible input formats**: Handles different CSV structures and naming conventions
@@ -56,10 +57,12 @@ Key features:
 **Input format**:
 
 **Two-file mode**:
+
 - **Transcripts file** must contain at minimum an ID column and transcript data
 - **Clusters file** must contain ID and Cluster_ID columns
 
 **Single-file mode**:
+
 - **Input file** must contain both ID/cluster data and transcript data
 - **Automatic column detection** supports various naming patterns:
   - ID columns: ``ID``, ``label.ID``, ``label_ID``
@@ -67,7 +70,9 @@ Key features:
   - Transcript columns: ``TranscriptOCR``, ``TranscriptManual``, ``label.v``
 
 **Output format**:
+
 The output CSV contains standardized columns:
+
 - ``ID``: Unique identifier for each label
 - ``Cluster_ID``: Cluster identifier (positioned as second column)
 - ``TranscriptOCR``: OCR-generated transcript text
@@ -101,6 +106,7 @@ format_comparison_table.py
 This script takes a CSV file with clustered data and reformats it into a comparison table where each row represents one cluster with up to 2 labels side by side for easy comparison. The input should be the output from script 1/4 (merged transcripts with cluster IDs). This facilitates manual review and quality assessment of clustering results.
 
 Key features:
+
 - Creates side-by-side comparison layout for easy manual review
 - Handles clusters with 1 or 2 labels appropriately
 - Warns about clusters with more than 2 labels (uses only first 2)
@@ -118,6 +124,7 @@ Key features:
 - ``--help``: Display help message
 
 **Input format**:
+
 The input CSV file must contain (typically from merge_cluster_ids.py):
 - ``ID``: Unique identifier for each label
 - ``Cluster_ID``: Cluster identifier grouping related labels
@@ -125,6 +132,7 @@ The input CSV file must contain (typically from merge_cluster_ids.py):
 - ``TranscriptManual``: Manually corrected transcript text
 
 **Output format**:
+
 The output CSV contains one row per cluster with the following columns:
 - ``Cluster ID``: The cluster identifier
 - ``Label 1 ID``: ID of the first label in the cluster
@@ -221,6 +229,7 @@ This script creates boxplot visualizations of Levenshtein distances from cluster
 This is the fourth and final script in the 4-script pipeline for clustering data analysis, providing visual insights into the distribution and spread of edit distances.
 
 **Key Features**:
+
 - Customizable column selection for flexible analysis
 - Multiple built-in color palettes (Set2, Set1, Dark2, Pastel1, viridis, plasma)
 - Statistical reporting (quartiles, outliers, mean, std dev)
@@ -229,7 +238,9 @@ This is the fourth and final script in the 4-script pipeline for clustering data
 - Automatic outlier detection and visualization
 
 **Input**:
+
 A CSV file containing validation results with Levenshtein distance columns:
+
 - ``L1 OCR vs L2 OCR Levenshtein``: Distance between OCR transcripts
 - ``L1 Manual vs L2 Manual Levenshtein``: Distance between manual transcripts
 - ``L1 OCR vs L1 Manual Levenshtein``: Distance between OCR and manual for label 1
@@ -237,6 +248,7 @@ A CSV file containing validation results with Levenshtein distance columns:
 - Any other numeric columns can also be visualized
 
 **Output**:
+
 - A PNG boxplot visualization showing distance distributions
 - Console output with detailed statistics for each column (count, quartiles, outliers, etc.)
 - Visual representation of data spread, central tendency, and outliers
@@ -255,7 +267,8 @@ A CSV file containing validation results with Levenshtein distance columns:
     # Use specific CSV separator
     ./generate_distance_boxplot.py -i data.csv -o plot.png -s ";"
 
-**Dependencies**: 
+**Dependencies**:
+
 - ``numpy``: For statistical calculations and array operations
 - ``matplotlib``: For boxplot generation and visualization
 - Built-in Python modules (csv, sys, os, getopt)
@@ -269,7 +282,7 @@ find_distant_pairs.py
 
 **Purpose**: Identifies the most distant label pairs within each cluster based on Levenshtein edit distance.
 
-**Description**: 
+**Description**:
 This script analyzes clusters of labels to find the two labels with the maximum edit distance within each cluster. This is useful for quality control of clustering algorithms, as it helps identify:
 
 - Clusters that may be too permissive (containing very different labels)
@@ -328,6 +341,7 @@ clustering_elbow_method.py
 This script implements the elbow method to find the optimal similarity threshold for clustering algorithms. It analyzes multiple clustering CSV files (each representing results with different thresholds) and identifies the threshold that provides the best balance between cluster cohesion and number of clusters.
 
 Key features:
+
 - Uses TF-IDF vectorization with mfnb package tokenization patterns
 - Calculates within-cluster sum of squares (inertia) for each threshold
 - Employs the kneed package for elbow point detection
@@ -346,12 +360,13 @@ Key features:
 - ``--help``: Display help message
 
 **Input format**:
-The input directory must contain CSV files with naming pattern ``clustering_<threshold>.csv`` where ``<threshold>`` represents the similarity threshold used for clustering. Each CSV file must contain:
+The input directory must contain CSV files with a naming pattern ``clustering_<threshold>.csv`` where ``<threshold>`` represents the similarity threshold used for clustering. Each CSV file must contain:
 
 - ``Transcript``: The text content of labels
 - ``Cluster_ID``: Cluster identifier for each label
 
 **Output**:
+
 - A PNG plot showing the elbow curve with the detected optimal threshold highlighted
 - Console output indicating the recommended threshold value
 
@@ -363,7 +378,8 @@ The input directory must contain CSV files with naming pattern ``clustering_<thr
     # With custom plot title
     ./clustering_elbow_method.py -i results/ -o plot.png -p "Label Clustering Analysis"
 
-**Dependencies**: 
+**Dependencies**:
+
 - ``pandas``: For CSV processing and data handling
 - ``numpy``: For numerical computations and array operations
 - ``matplotlib``: For plot generation and visualization
@@ -377,9 +393,10 @@ clustering_evaluation_metrics.py
 **Purpose**: Evaluates clustering quality metrics across multiple threshold values to assess clustering performance and identify optimal thresholds.
 
 **Description**: 
-This script calculates clustering quality metrics (Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index) for multiple clustering results with different thresholds. It provides quantitative assessment of clustering quality and helps identify the threshold that produces the best clustering performance.
+This script calculates clustering quality metrics (Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index) for multiple clustering results with different thresholds. It provides a quantitative assessment of clustering quality and helps identify the threshold that produces the best clustering performance.
 
 Key features:
+
 - Uses TF-IDF vectorization
 - Calculates three complementary clustering quality metrics
 - Processes multiple threshold files sequentially
@@ -407,6 +424,7 @@ The input directory must contain CSV files with naming pattern ``clustering_<thr
 
 **Output**:
 A PNG file containing three heatmap visualizations:
+
 - Silhouette Score heatmap (higher values indicate better clustering)
 - Davies-Bouldin Index heatmap (lower values indicate better clustering)
 - Calinski-Harabasz Index heatmap (higher values indicate better clustering)
@@ -420,7 +438,8 @@ A PNG file containing three heatmap visualizations:
     # With custom dataset prefix
     ./clustering_evaluation_metrics.py -i results/ -t "0.3,0.4,0.5" -o metrics.png -p "Museum Labels"
 
-**Dependencies**: 
+**Dependencies**:
+
 - ``numpy``: For numerical computations and array operations
 - ``matplotlib``: For plot generation and visualization
 - ``seaborn``: For heatmap creation and styling
