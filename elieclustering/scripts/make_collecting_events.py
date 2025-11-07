@@ -57,7 +57,7 @@ OPTIONS
 '''
 
 import getopt, sys, fileinput, json
-from mfnb.utils import table_to_dicts, range_reader, get_id_formatter
+from elieclustering.utils import table_to_dicts, range_reader, get_id_formatter
 
 class Options(dict):
 

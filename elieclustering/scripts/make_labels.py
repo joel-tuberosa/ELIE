@@ -62,8 +62,8 @@ OPTIONS
 '''
 
 import getopt, sys, fileinput, json, os, regex
-from mfnb.utils import table_to_dicts, range_reader, get_id_formatter
-from mfnb.labeldata import data_from_googlevision
+from elieclustering.utils import table_to_dicts, range_reader, get_id_formatter
+from elieclustering.labeldata import data_from_googlevision
 from io import StringIO
 from functools import reduce
 

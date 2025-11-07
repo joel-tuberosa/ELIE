@@ -55,8 +55,8 @@ OPTIONS
 
 
 import sys, getopt, fileinput
-from mfnb.labeldata import load_labels
-from mfnb.utils import clean_str
+from elieclustering.labeldata import load_labels
+from elieclustering.utils import clean_str
 
 class Options(dict):
 

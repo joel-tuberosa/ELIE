@@ -7,7 +7,7 @@ http://www.geonames.org.
 import regex, sys
 import xml.etree.ElementTree as ET
 from nltk import regexp_tokenize
-from mfnb.utils import simplify_str, strip_accents
+from elieclustering.utils import simplify_str, strip_accents
 from geopy.geocoders import GeoNames
 from urllib.request import urlopen
 

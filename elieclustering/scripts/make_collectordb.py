@@ -20,7 +20,7 @@ OPTIONS
 
 import getopt, sys, fileinput, json
 from multiprocessing.sharedctypes import Value
-from mfnb.name import Collector, read_metadata
+from elieclustering.name import Collector, read_metadata
 
 class Options(dict):
 

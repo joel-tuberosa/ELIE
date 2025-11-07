@@ -5,9 +5,9 @@ searchable text databases using token extraction and text feature
 scoring. This module uses the packages regex, sklearn, nltk and leven.
 '''
 
-import json, mfnb.date, regex, sys
+import json, elieclustering.date, regex, sys
 from nltk import regexp_tokenize
-from mfnb.utils import (mismatch_rule, 
+from elieclustering.utils import (mismatch_rule, 
                         get_word_tokenize_pattern, 
                         strip_accents, 
                         get_norm_leven_dist)
@@ -740,7 +740,7 @@ class CollectingEventDB(DB):
                 format or precision level.
         '''
 
-        parser = mfnb.date.DatePatterns(**allow_tags)
+        parser = elieclustering.date.DatePatterns(**allow_tags)
         self._date_index = []
         for x in self:
             date = parser.find_date(x.date)
@@ -751,8 +751,8 @@ class CollectingEventDB(DB):
                 continue
             
             # Otherwise, it is always added as a daterange
-            elif type(date) is mfnb.date.Date:
-                daterange = mfnb.date.DateRange(date, date)
+            elif type(date) is elieclustering.date.Date:
+                daterange = elieclustering.date.DateRange(date, date)
             else:
                 daterange = date
             self._date_index.append([daterange, x.ID])
@@ -777,8 +777,8 @@ class CollectingEventDB(DB):
             for date in dates:
                 date = date.split("-")
                 if len(date[0]) == 2: date[0] = f"'{date[0]}"
-                daterange.append(mfnb.date.Date(*date))
-            self._date_index.append([mfnb.date.DateRange(*daterange), ID])
+                daterange.append(elieclustering.date.Date(*date))
+            self._date_index.append([elieclustering.date.DateRange(*daterange), ID])
         
     def search_by_date(self, query, assume_same_century=False, **allow_tags):
         '''
@@ -792,12 +792,12 @@ class CollectingEventDB(DB):
                              " search_by_date method")
         
         if type(query) is str:
-            parser = mfnb.date.DatePatterns(**allow_tags)
+            parser = elieclustering.date.DatePatterns(**allow_tags)
             date = parser.find_date(query)
             if date is None:
                 raise ValueError(f"{query} was not recognized as a date")
             query = date
-        elif type(query) not in (mfnb.date.Date, mfnb.date.DateRange):
+        elif type(query) not in (elieclustering.date.Date, elieclustering.date.DateRange):
             raise TypeError(f"Invalid type for the query ({type(query)}),"
                              " should be str, mfnb.date.Date or"
                              " mfnb.date.DateRange")

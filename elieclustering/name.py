@@ -5,7 +5,7 @@ full text. It uses the packages nltk and regex.
 '''
 
 import regex, json
-from mfnb.utils import mismatch_rule, overlap, simplify_str, strip_accents
+from elieclustering.utils import mismatch_rule, overlap, simplify_str, strip_accents
 from nltk import regexp_tokenize
 from functools import partial
 

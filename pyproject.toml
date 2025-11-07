@@ -3,19 +3,19 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["mfnb"]
+packages = ["elieclustering"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [project]
-name = "mfnb"
+name = "elieclustering"
 version = "1.0a1"
 authors = [
   { name="Joël Tuberosa", email="joel.tuberosa@unige.ch" },
   { name="Théo Léger", email="theo.leger@mfn.berlin" }
 ]
-description = "A Python package from the Natural History Museum of Berlin for digitalized collecting event label classification."
+description = "Entomological label clustering by text similarity."
 readme = "README.rst"
 requires-python = ">=3.7"
 dependencies = [
@@ -42,12 +42,12 @@ classifiers = [
 ]
 
 [project.scripts]
-make_collecting_events     = "mfnb.scripts.make_collecting_events:main"
-match_collecting_events    = "mfnb.scripts.match_collecting_events:main"
-make_labels                = "mfnb.scripts.make_labels:main"
-search_labels              = "mfnb.scripts.search_labels:main"
-sort_labels                = "mfnb.scripts.sort_labels:main"
-checkout_collecting_events = "mfnb.scripts.checkout_collecting_events:main"
-subset_db                  = "mfnb.scripts.subset_db:main"
-table_export               = "mfnb.scripts.table_export:main"
-make_collectordb           = "mfnb.scripts.make_collectordb:main"
+make_collecting_events     = "elieclustering.scripts.make_collecting_events:main"
+match_collecting_events    = "elieclustering.scripts.match_collecting_events:main"
+make_labels                = "elieclustering.scripts.make_labels:main"
+search_labels              = "elieclustering.scripts.search_labels:main"
+sort_labels                = "elieclustering.scripts.sort_labels:main"
+checkout_collecting_events = "elieclustering.scripts.checkout_collecting_events:main"
+subset_db                  = "elieclustering.scripts.subset_db:main"
+table_export               = "elieclustering.scripts.table_export:main"
+make_collectordb           = "elieclustering.scripts.make_collectordb:main"

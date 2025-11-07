@@ -15,7 +15,7 @@ OPTIONS
 '''
 
 import getopt, sys, fileinput
-from mfnb.labeldata import parse_json_db
+from elieclustering.labeldata import parse_json_db
 
 class Options(dict):
 

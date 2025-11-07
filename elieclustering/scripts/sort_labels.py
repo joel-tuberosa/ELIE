@@ -105,7 +105,7 @@ OPTIONS
 '''
 
 import getopt, sys, json, fileinput, regex
-import mfnb.date, mfnb.labeldata, mfnb.geo, mfnb.name, mfnb.utils
+import elieclustering.date, elieclustering.labeldata, elieclustering.geo, elieclustering.name, elieclustering.utils
 import numpy as np
 from io import StringIO
 from random import randrange
@@ -139,7 +139,7 @@ class Options(dict):
             elif o in ('-d', '--date'):
                 self["date"] = True
             elif o in ('-f', '--id-format'):
-                self["id_formatter"] = mfnb.utils.get_id_formatter(a)
+                self["id_formatter"] = elieclustering.utils.get_id_formatter(a)
             elif o in ('-g', '--geo'):
                 self["geo"] = True
             elif o in ('-m', '--min-length'):
@@ -162,7 +162,7 @@ class Options(dict):
         # default parameter value
         self["collector"] = None
         self['date'] = False
-        self["id_formatter"] = mfnb.utils.get_id_formatter("label:5")
+        self["id_formatter"] = elieclustering.utils.get_id_formatter("label:5")
         self["geo"] = False   
         self["min_word_length"] = 3
         self["min_score"] = 0.8
@@ -172,10 +172,10 @@ class Options(dict):
         self["sort_by"] = "text_similarity"
 
 def read_consensus(a):
-    a = mfnb.utils.simplify_str(a)
-    if mfnb.name.fullname_match(a, "alignment"):
+    a = elieclustering.utils.simplify_str(a)
+    if elieclustering.name.fullname_match(a, "alignment"):
         return "alignment"
-    elif mfnb.name.fullname_match(a, "pick"):
+    elif elieclustering.name.fullname_match(a, "pick"):
         return "pick"
     else:
         raise ValueError(f"unrecognized consensus method: {repr(a)}")
@@ -186,21 +186,21 @@ def parse_date(text):
     string, the span of the matched string and the interpreted value.
     '''
     
-    date, span = mfnb.date.find_date(text)
+    date, span = elieclustering.date.find_date(text)
     if span is None:
         return ("", -1, "")
     matched_str = text[slice(*span)]
     datestr = date.get_isoformat()
     return (matched_str, span, datestr)
 
-def parse_geo(text, username=mfnb.geo.GEONAMES_USERNAME):
+def parse_geo(text, username=elieclustering.geo.GEONAMES_USERNAME):
     '''
     Tries to identify a geolocalization in the input text and returns
     the matched string, the span of the matched string and the 
     interpreted value.
     '''
     
-    latlng, address, span = mfnb.geo.parse_geo(text, username)
+    latlng, address, span = elieclustering.geo.parse_geo(text, username)
     if span is None:
         return ("", -1, "")
     matched_str = text[slice(*span)]
@@ -213,7 +213,7 @@ def parse_names(text, collectors):
     string, the span of the matched string and the intepreted value.
     '''
     
-    names, spans, scores = zip(*mfnb.name.find_collectors(text, collectors))
+    names, spans, scores = zip(*elieclustering.name.find_collectors(text, collectors))
     if not names:
         return [("", -1, "")]
     results = []
@@ -254,14 +254,14 @@ def refine(labels, dist=None, get_median_dist=False):
 
     # calculates the pairwise distance matrix
     if dist is None:
-        dist = mfnb.utils.get_pairwise_leven_dist(lines, simplify=True)
+        dist = elieclustering.utils.get_pairwise_leven_dist(lines, simplify=True)
 
     # does not attempt anything for less than 8 elements
     if n < 8:
 
         # get median distance for each point
         if get_median_dist:
-            margin_medians = mfnb.utils.get_median_dists(dist)
+            margin_medians = elieclustering.utils.get_median_dists(dist)
             labels = list(zip(labels, margin_medians))
         return [labels]
         
@@ -274,14 +274,14 @@ def refine(labels, dist=None, get_median_dist=False):
     
     # attempt to optimise clustering using the knee selection method on the SSE 
     # values
-    kmedoids = mfnb.utils.find_levenKMedoids(dist, max_cluster=max_cluster)
+    kmedoids = elieclustering.utils.find_levenKMedoids(dist, max_cluster=max_cluster)
     
     # if the cluster identification failed with this method, do not cluster
     if kmedoids is None:
         
         # get median distance for each point
         if get_median_dist:
-            margin_medians = mfnb.utils.get_median_dists(dist)
+            margin_medians = elieclustering.utils.get_median_dists(dist)
             labels = list(zip(labels, margin_medians))
         return [labels]
     
@@ -303,7 +303,7 @@ def refine(labels, dist=None, get_median_dist=False):
             indexes = np.array(index_map[cluster_index])
             rows, cols = indexes[:,None], indexes[None,:]
             subdist = dist[rows, cols]
-            subdist_median = mfnb.utils.get_median_dists(subdist)
+            subdist_median = elieclustering.utils.get_median_dists(subdist)
             clusters[cluster_index] = list(zip(clusters[cluster_index], 
                                                subdist_median))
 
@@ -338,7 +338,7 @@ def parse_info(text, geo=False, date=False, collectors=[]):
     # the intepreted text.
     if date:
         verbatim, span, interpreted = parse_date(text)
-        if span != -1: text = mfnb.utils.clear_text(text, span)
+        if span != -1: text = elieclustering.utils.clear_text(text, span)
         found_info["date"]["verbatim"] = verbatim
         found_info["date"]["interpreted"] = interpreted
         if span != -1:
@@ -348,11 +348,11 @@ def parse_info(text, geo=False, date=False, collectors=[]):
     if collectors:
         interpreted = []
         verbatim = []
-        hits = mfnb.name.find_collectors(text, collectors)
+        hits = elieclustering.name.find_collectors(text, collectors)
         for collector, span, score in hits:
             interpreted.append(collector.text)
             verbatim.append(text[slice(*span)])
-            text = mfnb.utils.clear_text(text, span)
+            text = elieclustering.utils.clear_text(text, span)
         interpreted = ", ".join(interpreted)
         verbatim = "|".join(verbatim)
         found_info["collectors"]["verbatim"] = verbatim
@@ -362,7 +362,7 @@ def parse_info(text, geo=False, date=False, collectors=[]):
     # then remove the intepreted text.
     if geo:
         verbatim, span, interpreted = parse_geo(text)
-        if span != -1: text = mfnb.utils.clear_text(text, span)
+        if span != -1: text = elieclustering.utils.clear_text(text, span)
         found_info["geo"]["verbatim"] = verbatim
         found_info["geo"]["interpreted"] = interpreted
         if span != -1:
@@ -394,7 +394,7 @@ def format_result_line(label, group_id, found_info,
 
 def sort_by_text_similarity(db, parse_info, format_result_line, consensus=None,
                             min_score=0.8, refine_clustering=False, 
-                            id_formatter=mfnb.utils.get_id_formatter("label:5"),
+                            id_formatter=elieclustering.utils.get_id_formatter("label:5"),
                             quorum=2):
     '''
     Aggregate labels by text similarity, then parse information within 
@@ -404,10 +404,10 @@ def sort_by_text_similarity(db, parse_info, format_result_line, consensus=None,
     # consensus method to be used
     if consensus == "alignment":
         consensus = True
-        get_consensus = mfnb.utils.text_alignment_consensus
+        get_consensus = elieclustering.utils.text_alignment_consensus
     elif consensus == "pick":
         consensus = True
-        get_consensus = mfnb.utils.text_pick_consensus
+        get_consensus = elieclustering.utils.text_pick_consensus
     else:
         consensus = False
 
@@ -471,7 +471,7 @@ def sort_by_text_similarity(db, parse_info, format_result_line, consensus=None,
                           if ID not in match_ids ]
 
 def sort_by_parsed_info(db, parse_info, format_result_line, 
-                        id_formatter=mfnb.utils.get_id_formatter("label:5")):
+                        id_formatter=elieclustering.utils.get_id_formatter("label:5")):
 
     # store group_ids in a dictionnary, whose keys are parsed information data
     group_ids = dict()
@@ -502,7 +502,7 @@ def main(argv=sys.argv):
     
     # load label data
     f = StringIO("".join( line for line in fileinput.input() ))
-    db = mfnb.labeldata.load_labels(f)
+    db = elieclustering.labeldata.load_labels(f)
     
     # build the index
     min_len = options["min_word_length"]
@@ -511,7 +511,7 @@ def main(argv=sys.argv):
     # index the collector DB if required
     if options["collector"] is not None:
         with open(options["collector"]) as f:
-            collectors = mfnb.name.load_collectors(f)
+            collectors = elieclustering.name.load_collectors(f)
     else:
         collectors = []
 

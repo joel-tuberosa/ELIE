@@ -1,6 +1,6 @@
-mfnb
+elieclustering
 ========================================================================
-*A Python package for the Berlin Natural History Museum*
+*Entomological label clustering by text similarity.*
 
 .. contents ::
 
@@ -12,13 +12,13 @@ scripts designed for collecting event label parsing and classification.
 
 Installation
 ------------
-1. Clone python-mfnb from this github.
+1. Clone the repositery from github.
 
-`git clone https://github.com/joel-tuberosa/python-mfnb`
+`git clone https://github.com/joel-tuberosa/ELIE`
 
-2. cd in python-mfnb/
+2. cd in ELIE/
 
-`cd python-mfnb`
+`cd ELIE`
    
 3. Install with pip, which will automatically fetch the requirements if
    you don't have it already.
@@ -27,7 +27,7 @@ Installation
 
 Modules
 -------
-* mfnb.date 
+* elieclustering.date 
     This module contains classes and functions related to time data. It
     uses fuzzy regular expressions from the third party package regex to
     find dates within OCR extracted text and the dateparser package to 
@@ -35,24 +35,24 @@ Modules
     classes allow to store dates with various precision levels, 
     reflecting the data status collected among labels.
 
-* mfnb.geo
+* elieclustering.geo
    This module contains classes and function related to geocoding. It 
    uses the package geopy package to search location in 
    http://www.geonames.org. 
    
-* mfnb.labeldata
+* elieclustering.labeldata
     This module contains classes and functions to handle and integrate
     information extracted from specimen labels. It allows to build 
     searchable text databases using token extraction and text feature 
     scoring. This module uses the packages regex, sklearn, nltk and
     leven.
     
-* mfnb.name
+* elieclustering.name
     This module contains classes and functions designed to store people
     names or entity information as well as matching abbreviated text
     with full text. It uses the packages nltk and regex.
 
-* mfnb.utils
+* elieclustering.utils
     This module gathers generic functions for text data handling, 
     manipulation and formatting.
     

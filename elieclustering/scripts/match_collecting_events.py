@@ -71,7 +71,7 @@ OPTIONS
 
 
 import sys, getopt, fileinput
-import mfnb.date, mfnb.labeldata, mfnb.utils
+import elieclustering.date, elieclustering.labeldata, elieclustering.utils
 from math import log
 
 class Options(dict):
@@ -107,7 +107,7 @@ class Options(dict):
                 self["text_fields"] = a.split(",")
                 notvalid = [ x 
                              for x in self["text_fields"] 
-                             if x not in mfnb.labeldata.CollectingEvent.keys ]
+                             if x not in elieclustering.labeldata.CollectingEvent.keys ]
                 if notvalid:
                     notvalid = ', '.join( repr(x) for x in notvalid )
                     raise ValueError("The following keys are not valid:"
@@ -174,7 +174,7 @@ def main(argv=sys.argv):
 
     # Load the collecting event DB
     with open(db_filename) as f:
-        db = mfnb.labeldata.load_collecting_events(f)
+        db = elieclustering.labeldata.load_collecting_events(f)
     
     # build the token index with words found in location and collector data
     db.make_index(method=options["method"], 
@@ -197,14 +197,14 @@ def main(argv=sys.argv):
     
     # read label text that is stored in one or several JSON input 
     # files
-    for label in mfnb.labeldata.parse_labels(fileinput.input()):
+    for label in elieclustering.labeldata.parse_labels(fileinput.input()):
 
         # search
         hits = []
         
         # - by date
         if options["date_search"]:
-            date, _ = mfnb.date.find_date(label.text)
+            date, _ = elieclustering.date.find_date(label.text)
             if date is None:
                 filtering = lambda ce: True
             else:
@@ -218,7 +218,7 @@ def main(argv=sys.argv):
         # - by text
         if options["text_search"]:
             hits = db.search(label.text, 
-                             mismatch_rule=mfnb.utils.mismatch_rule, 
+                             mismatch_rule=elieclustering.utils.mismatch_rule, 
                              filtering=filtering,
                              scoring=options["scoring"])
 
@@ -226,7 +226,7 @@ def main(argv=sys.argv):
             if all((options["persist"], options["date_search"], 
                     date is not None, not hits)):
                 hits = db.search(label.text, 
-                                 mismatch_rule=mfnb.utils.mismatch_rule, 
+                                 mismatch_rule=elieclustering.utils.mismatch_rule, 
                                  filtering=lambda ce: True,
                                  scoring=options["scoring"])
         

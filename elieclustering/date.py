@@ -8,7 +8,7 @@ status collected among labels.
 '''
 
 import json, regex, dateparser, sys
-from mfnb.utils import overlap, roman_to_int
+from elieclustering.utils import overlap, roman_to_int
 
 # delete the dateparser warning
 if not sys.warnoptions:
