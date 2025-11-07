@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'mfnb'
+project = 'elieclustering'
 copyright = '2022, Joël Tuberosa, Théo Léger'
 author = 'Joël Tuberosa, Théo Léger'
 

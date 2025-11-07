@@ -294,10 +294,9 @@ class DB(object):
             method : int
                 Select to the method with which to build the index.
                 Available methods:    
-                    1- Associate tokens with database elements
-                    
-                    2- Associate tokens with database elements, and
-                       a normalized TF-IDF score.
+                - 1: Associate tokens with database elements
+                - 2: Associate tokens with database elements, and
+                a normalized TF-IDF score.
                        
                 Default: 1
             
@@ -730,7 +729,7 @@ class CollectingEventDB(DB):
         '''
         Intepret the date fields of the collecting events to make them 
         searchable with types from the library datetime and the 
-        mfnb.date.DateRange type.
+        elieclustering.date.DateRange type.
 
         Parameters
         ----------
@@ -799,8 +798,8 @@ class CollectingEventDB(DB):
             query = date
         elif type(query) not in (elieclustering.date.Date, elieclustering.date.DateRange):
             raise TypeError(f"Invalid type for the query ({type(query)}),"
-                             " should be str, mfnb.date.Date or"
-                             " mfnb.date.DateRange")
+                             " should be str, elieclustering.date.Date or"
+                             " elieclustering.date.DateRange")
         return [ self.get(ID) 
                   for daterange, ID in self._date_index 
                   if daterange.overlap_with(query, 

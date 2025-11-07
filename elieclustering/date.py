@@ -218,9 +218,9 @@ class DatePatterns(object):
             for x in (date1, date2):
                 if x.precision_level < hit.get_scores()[0]:
                     # sys.stderr.write("Warning: the date could not be extracted"
-                                     # " with the expected precision level given"
-                                     # " the pattern that was detected! Date"
-                                     # " skipped.")
+                    #                  " with the expected precision level given"
+                    #                  " the pattern that was detected! Date"
+                    #                  " skipped.")
                     skip = True
                     break
             if skip: continue
@@ -1246,7 +1246,7 @@ def find_date(text, **allow_tags):
         fields : str
             Which fields should be found in the matching text.
             Possible values: "year1", "year2", "month1", "month2", 
-                             "day1", "day2"
+            "day1", "day2"
         
         precision_level : int
             The minimum precision level of the date.
@@ -1269,7 +1269,6 @@ def find_date(text, **allow_tags):
 
         is_range : bool
             Restrict the match to either a single date or a date range.
-
     '''
     
     date_parser = DatePatterns(**allow_tags)

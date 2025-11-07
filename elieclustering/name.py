@@ -220,7 +220,7 @@ def search_collectors_regex(s, collectors, mismatch_rule=mismatch_rule,
         mismatch_rule : function
             A function that takes the query value as unique argument
             and returns the regular expression part parametring a fuzzy
-            match. Default = mfnb.utils.mismatch_rule (see module doc).
+            match. Default = elieclustering.utils.mismatch_rule (see module doc).
     
         ignore_case : bool
             Sets the search method to ignore case. Default = False.

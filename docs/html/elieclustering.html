@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>elieclustering package &#8212; elieclustering 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="elieclustering" href="modules.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="elieclustering"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">elieclustering 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">elieclustering</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">elieclustering package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="elieclustering-package">
+<h1>elieclustering package<a class="headerlink" href="#elieclustering-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-elieclustering.date">
+<span id="elieclustering-date-module"></span><h2>elieclustering.date module<a class="headerlink" href="#module-elieclustering.date" title="Link to this heading">¶</a></h2>
+<p>This module contains classes and functions related to time data. It
+uses fuzzy regular expressions from the third party package regex to
+find dates within OCR extracted text and the dateparser package to
+interpret the diversity of date formats. The Date and DateRange classes
+allow to store dates with various precision levels, reflecting the data
+status collected among labels.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.date.Date">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.date.</span></span><span class="sig-name descname"><span class="pre">Date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.Date" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store date data with information on the precision level.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.Date.century">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">century</span></span><a class="headerlink" href="#elieclustering.date.Date.century" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.Date.century_known">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">century_known</span></span><a class="headerlink" href="#elieclustering.date.Date.century_known" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.Date.day">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">day</span></span><a class="headerlink" href="#elieclustering.date.Date.day" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.date.Date.ddp">
+<span class="sig-name descname"><span class="pre">ddp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;dateparser.date.DateDataParser</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#elieclustering.date.Date.ddp" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.Date.get_isoformat">
+<span class="sig-name descname"><span class="pre">get_isoformat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">century</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.Date.get_isoformat" title="Link to this definition">¶</a></dt>
+<dd><p>Return the date as a ISO8601 formatted string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>century</strong> (<em>int</em>) – Override or add the century value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.Date.get_json_data">
+<span class="sig-name descname"><span class="pre">get_json_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.Date.get_json_data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.Date.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.Date.is_empty" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if the Date object does not contain any
+information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.Date.is_in">
+<span class="sig-name descname"><span class="pre">is_in</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_same_century</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.Date.is_in" title="Link to this definition">¶</a></dt>
+<dd><p>Evaluates whether the date is within a provided daterange.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>daterange</strong> (<a class="reference internal" href="#elieclustering.date.DateRange" title="elieclustering.date.DateRange"><em>DateRange</em></a>) – A DateRange object of any precision. If the precision is
+lower than that of the range, it will always return
+False.</p></li>
+<li><p><strong>assume_same_century</strong> (<em>bool</em>) – Assume that the evaluated dates are of the same century
+Does not take effect if both dates have a known century.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.Date.month">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">month</span></span><a class="headerlink" href="#elieclustering.date.Date.month" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.Date.overlap_with">
+<span class="sig-name descname"><span class="pre">overlap_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_same_century</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.Date.overlap_with" title="Link to this definition">¶</a></dt>
+<dd><p>Test whether the Date has an overlap with the other Date or
+DateRange object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#elieclustering.date.Date" title="elieclustering.date.Date"><em>Date</em></a>) – Any Date object.</p></li>
+<li><p><strong>assume_same_century</strong> (<em>bool</em>) – If set True, trims the century value before comparing
+the provided dates and assumes they are the same.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.Date.precision">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">precision</span></span><a class="headerlink" href="#elieclustering.date.Date.precision" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.Date.precision_level">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">precision_level</span></span><a class="headerlink" href="#elieclustering.date.Date.precision_level" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.Date.set_century">
+<span class="sig-name descname"><span class="pre">set_century</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.Date.set_century" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the century value of the date.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.Date.year">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">year</span></span><a class="headerlink" href="#elieclustering.date.Date.year" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.date.Date.year_pattern">
+<span class="sig-name descname"><span class="pre">year_pattern</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">regex.Regex(&quot;[1-9][0-9]{3}|'[0-9][0-9]&quot;,</span> <span class="pre">flags=regex.V0)</span></em><a class="headerlink" href="#elieclustering.date.Date.year_pattern" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.date.DateMatch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.date.</span></span><span class="sig-name descname"><span class="pre">DateMatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateMatch" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Contains data from a match of the DatePatterns.match method.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DateMatch.get_dates">
+<span class="sig-name descname"><span class="pre">get_dates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateMatch.get_dates" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a tuple with two Date objects. If the match is a single
+date, the two dates are identical. If the match is a date
+range, the tuple will contain the dates corresponding to the
+limits of this range.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DateMatch.get_scores">
+<span class="sig-name descname"><span class="pre">get_scores</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateMatch.get_scores" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>The score of a match is defined by:</dt><dd><ol class="arabic simple">
+<li><p>the precision level</p></li>
+<li><p>if applicable, whether the month value was matched by
+the literal pattern (W+), which is very permissive and
+not preferred.</p></li>
+<li><p>the length of the matched string</p></li>
+</ol>
+</dd>
+</dl>
+<p>The higher the score, the better it is.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DateMatch.get_value">
+<span class="sig-name descname"><span class="pre">get_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateMatch.get_value" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the value of a specific feature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DateMatch.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateMatch.update" title="Link to this definition">¶</a></dt>
+<dd><p>Updates the object internal data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year1</strong> (<em>str</em>) – Interpreted year value. If the match is a date ranges,
+this would store the earliest date.</p></li>
+<li><p><strong>year2</strong> (<em>str</em>) – Interpreted latest year value in a date range.</p></li>
+<li><p><strong>month1</strong> (<em>str</em>) – Interpreted month value. If the match is a date ranges,
+this would store the earliest date.</p></li>
+<li><p><strong>month2</strong> (<em>str</em>) – Interpreted latest month value in a date range.</p></li>
+<li><p><strong>day1</strong> (<em>str</em>) – Interpreted day value. If the match is a date ranges,
+this would store the earliest date.</p></li>
+<li><p><strong>day2</strong> (<em>str</em>) – Interpreted latest day value in a date range.</p></li>
+<li><p><strong>pattern</strong> (<em>regex.Pattern</em>) – Compiled regular expression pattern (from the regex
+module), that was used to parse the date value.</p></li>
+<li><p><strong>match</strong> (<em>regex.Match</em>) – Match object from the regex module, corresponding to
+the parsed date.</p></li>
+<li><p><strong>score</strong> (<em>int</em>) – Match score, representing the information level. A
+higher score indicates a higher information level.</p></li>
+<li><p><strong>tags</strong> (<a class="reference internal" href="#elieclustering.date.DatePatternTags" title="elieclustering.date.DatePatternTags"><em>DatePatternTags</em></a>) – A series of tags describing the date format and its
+precision level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTag">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.date.</span></span><span class="sig-name descname"><span class="pre">DatePatternTag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatternTag" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A serie of tags that characterize a date pattern.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTag.match">
+<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatternTag.match" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if the other DatePatternTag is compatible with the
+value of the object.</p>
+<section id="rules-for-given-tags">
+<h3>Rules for given tags<a class="headerlink" href="#rules-for-given-tags" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>fields</dt><dd><p>For the “fields” tag, check that all field values from
+this tag is included in the other tag.</p>
+</dd>
+<dt>precision_level</dt><dd><p>Check that the precision level of the other tag is
+equal or lower than this tag.</p>
+</dd>
+<dt>(all other tags)</dt><dd><p>Check that the values are equivalent.</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTag.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#elieclustering.date.DatePatternTag.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTag.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#elieclustering.date.DatePatternTag.value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.date.</span></span><span class="sig-name descname"><span class="pre">DatePatternTags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatternTags" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A collection of tags to be attached with a date pattern.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTags.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatternTags.add" title="Link to this definition">¶</a></dt>
+<dd><p>Add a new DatePatternTag to the collection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTags.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatternTags.contains" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if an equivalent of the provided DatePatternTag
+is in the collection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTags.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatternTags.get" title="Link to this definition">¶</a></dt>
+<dd><p>Get the DatePatternTag corresponding to the provided name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTags.get_value">
+<span class="sig-name descname"><span class="pre">get_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatternTags.get_value" title="Link to this definition">¶</a></dt>
+<dd><p>Get the value of the DatePatternTag corresponding to the
+provided name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatternTags.match">
+<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatternTags.match" title="Link to this definition">¶</a></dt>
+<dd><p>Check whether all tags match those of the other object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.date.</span></span><span class="sig-name descname"><span class="pre">DatePatterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">allow_tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatterns" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A collection of regular expression patterns to match a broad range
+of date or date range formats.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns.day_patterns">
+<span class="sig-name descname"><span class="pre">day_patterns</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'digit':</span> <span class="pre">'(?P&lt;day2&gt;[0-3]?[0-9])'}</span></em><a class="headerlink" href="#elieclustering.date.DatePatterns.day_patterns" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns.find_date">
+<span class="sig-name descname"><span class="pre">find_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_span</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">allow_tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatterns.find_date" title="Link to this definition">¶</a></dt>
+<dd><p>Finds a date in a text. Returns the date as a Date object,
+optionnally with the span of the match in the parsed text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>get_span</strong> (<em>bool</em>) – Returns the Date object along with the span of the
+match in the parsed text.</p></li>
+<li><p><strong>**allow_tags</strong> – Keyword arguments correspondig to valid DatePatternTag
+can be used here to limit date parsing to specific
+format or precision level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns.get_patterns">
+<span class="sig-name descname"><span class="pre">get_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">allow_tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatterns.get_patterns" title="Link to this definition">¶</a></dt>
+<dd><p>Returns all compiled patterns, with the possibility of
+filtering out given formats or precision levels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**allow_tags</strong> – Keyword arguments correspondig to valid DatePatternTag
+can be used here to limit date parsing to specific
+format or precision level.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns.month_patterns">
+<span class="sig-name descname"><span class="pre">month_patterns</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'digit':</span> <span class="pre">'(?P&lt;month2&gt;1[0-2]|0?[0-9])',</span> <span class="pre">'literal':</span> <span class="pre">'(?P&lt;month2&gt;[[\\w]--[0-9_]]+)',</span> <span class="pre">'roman':</span> <span class="pre">'(?P&lt;month2&gt;[iIvVxX]{1,2}[iI]*)'}</span></em><a class="headerlink" href="#elieclustering.date.DatePatterns.month_patterns" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns.possible_formats">
+<span class="sig-name descname"><span class="pre">possible_formats</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['\\b{year}\\b',</span> <span class="pre">'\\b{month}{sep}{year}\\b',</span> <span class="pre">'\\b{day}{sep}{month}{sep}{year}\\b',</span> <span class="pre">'\\b{month}{sep}{day}{sep}{year}\\b',</span> <span class="pre">'\\b{year}-{year}\\b',</span> <span class="pre">'\\b{month}(?:{sep})?-{month}{sep}{year}\\b',</span> <span class="pre">'\\b{day}(?:{sep})?-{day}{sep}{month}{sep}{year}\\b',</span> <span class="pre">'\\b{month}{sep}{day}(?:{sep})?-{day}{sep}{year}\\b',</span> <span class="pre">'\\b{day}{sep}{month}(?:{sep})?-{day}{sep}{month}{sep}{year}\\b',</span> <span class="pre">'\\b{month}{sep}{day}(?:{sep})?-{month}{sep}{day}{sep}{year}\\b',</span> <span class="pre">'\\b{day}{sep}{month}{sep}{year}-{day}{sep}{month}{sep}{year}\\b']</span></em><a class="headerlink" href="#elieclustering.date.DatePatterns.possible_formats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">allow_tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DatePatterns.search" title="Link to this definition">¶</a></dt>
+<dd><p>Searches all possible date patterns in a text. Returns a list
+of hits (DateMatch objects) ranked by accuracy level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>**allow_tags</strong> – Keyword arguments correspondig to valid DatePatternTag
+can be used here to limit date parsing to specific
+format or precision level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns.separator_patterns">
+<span class="sig-name descname"><span class="pre">separator_patterns</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'set1':</span> <span class="pre">'(?:[:\\|/.,]){i&lt;=1,s&lt;=1:\\s}'}</span></em><a class="headerlink" href="#elieclustering.date.DatePatterns.separator_patterns" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.date.DatePatterns.year_patterns">
+<span class="sig-name descname"><span class="pre">year_patterns</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'four-digit':</span> <span class="pre">'(?P&lt;year2&gt;[12][0-9]{3})',</span> <span class="pre">'two-digit':</span> <span class="pre">'(?P&lt;year2&gt;[0-9]{2})'}</span></em><a class="headerlink" href="#elieclustering.date.DatePatterns.year_patterns" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.date.</span></span><span class="sig-name descname"><span class="pre">DateRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateRange" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store a date range, based on two Date objects defining a closed
+interval.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange.century_known">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">century_known</span></span><a class="headerlink" href="#elieclustering.date.DateRange.century_known" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange.end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end</span></span><a class="headerlink" href="#elieclustering.date.DateRange.end" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange.get_isoformat">
+<span class="sig-name descname"><span class="pre">get_isoformat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateRange.get_isoformat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange.is_one_date">
+<span class="sig-name descname"><span class="pre">is_one_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateRange.is_one_date" title="Link to this definition">¶</a></dt>
+<dd><p>Check if start and end dates designate the same time point.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange.overlap_with">
+<span class="sig-name descname"><span class="pre">overlap_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_same_century</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.DateRange.overlap_with" title="Link to this definition">¶</a></dt>
+<dd><p>Evaluate whether the provided date or date range overlaps with
+the object’s date range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#elieclustering.date.Date" title="elieclustering.date.Date"><em>Date</em></a><em>|</em><a class="reference internal" href="#elieclustering.date.DateRange" title="elieclustering.date.DateRange"><em>DateRange</em></a>) – A Date or a DateRange object of any precision.</p></li>
+<li><p><strong>assume_same_century</strong> (<em>bool</em>) – Assume that the evaluated date or date range is of the
+same century than that of the DateRange object. Does
+not take effect if both of the evaluated date ranges
+have a known century.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange.precision">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">precision</span></span><a class="headerlink" href="#elieclustering.date.DateRange.precision" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange.precision_level">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">precision_level</span></span><a class="headerlink" href="#elieclustering.date.DateRange.precision_level" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.date.DateRange.start">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#elieclustering.date.DateRange.start" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.date.find_date">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.date.</span></span><span class="sig-name descname"><span class="pre">find_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">allow_tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.find_date" title="Link to this definition">¶</a></dt>
+<dd><p>Attempts to find a date in a given text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fields</strong> (<em>str</em>) – Which fields should be found in the matching text.
+Possible values: “year1”, “year2”, “month1”, “month2”,
+“day1”, “day2”</p></li>
+<li><p><strong>precision_level</strong> (<em>int</em>) – The minimum precision level of the date.
+Possible values: -1 (none), 0 (year), 1 (month), 2 (day)</p></li>
+<li><p><strong>day_pattern</strong> (<em>str</em>) – Restrict the match to include the given day format.
+Possible value: “digit”</p></li>
+<li><p><strong>month_pattern</strong> (<em>str</em>) – Restrict the match to include the given month format.
+Possible values: “digit”, “roman”, “literal”</p></li>
+<li><p><strong>year_pattern</strong> (<em>str</em>) – Restrict the match to include the given year format.
+Possible values: “two-digit”, “four-digit”</p></li>
+<li><p><strong>is_us</strong> (<em>bool</em>) – Restrict the match to either US or non-US format.</p></li>
+<li><p><strong>is_range</strong> (<em>bool</em>) – Restrict the match to either a single date or a date range.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.date.tag_date_pattern">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.date.</span></span><span class="sig-name descname"><span class="pre">tag_date_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">other_tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.date.tag_date_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Analyse the features of a date regular expression pattern (one
+included by the class DatePatterns) and build DatePatternTags
+including these features as different DatePatternTag objects.
+Keywords arguments can be use to complete the pattern description
+or override values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year1</strong> (<em>str</em>) – Interpreted year value. If the match is a date ranges,
+this would store the earliest date.</p></li>
+<li><p><strong>year2</strong> (<em>str</em>) – Interpreted latest year value in a date range.</p></li>
+<li><p><strong>month1</strong> (<em>str</em>) – Interpreted month value. If the match is a date ranges,
+this would store the earliest date.</p></li>
+<li><p><strong>month2</strong> (<em>str</em>) – Interpreted latest month value in a date range.</p></li>
+<li><p><strong>day1</strong> (<em>str</em>) – Interpreted day value. If the match is a date ranges,
+this would store the earliest date.</p></li>
+<li><p><strong>day2</strong> (<em>str</em>) – Interpreted latest day value in a date range.</p></li>
+<li><p><strong>pattern</strong> (<em>regex.Pattern</em>) – Compiled regular expression pattern (from the regex
+module), that was used to parse the date value.</p></li>
+<li><p><strong>match</strong> (<em>regex.Match</em>) – Match object from the regex module, corresponding to the
+parsed date.</p></li>
+<li><p><strong>score</strong> (<em>int</em>) – Match score, representing the information level. A higher
+score indicates a higher information level.</p></li>
+<li><p><strong>tags</strong> (<a class="reference internal" href="#elieclustering.date.DatePatternTags" title="elieclustering.date.DatePatternTags"><em>DatePatternTags</em></a>) – A series of tags describing the date format and its
+precision level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-elieclustering.geo">
+<span id="elieclustering-geo-module"></span><h2>elieclustering.geo module<a class="headerlink" href="#module-elieclustering.geo" title="Link to this heading">¶</a></h2>
+<p>This module contains classes and function related to geocoding. It
+uses the package geopy package to search location in
+<a class="reference external" href="http://www.geonames.org">http://www.geonames.org</a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.geo.Degree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">Degree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degrees</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.Degree" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store a degree value, that can be decomposed into minutes and
+seconds.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.Degree.degrees">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">degrees</span></span><a class="headerlink" href="#elieclustering.geo.Degree.degrees" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.Degree.minutes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">minutes</span></span><a class="headerlink" href="#elieclustering.geo.Degree.minutes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.Degree.seconds">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seconds</span></span><a class="headerlink" href="#elieclustering.geo.Degree.seconds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.Degree.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#elieclustering.geo.Degree.value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.geo.Distance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">Distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.Distance" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store a distance value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.Distance.feet">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feet</span></span><a class="headerlink" href="#elieclustering.geo.Distance.feet" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.Distance.meters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meters</span></span><a class="headerlink" href="#elieclustering.geo.Distance.meters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.geo.Distance.pattern">
+<span class="sig-name descname"><span class="pre">pattern</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">regex.Regex('(?P&lt;value&gt;[0-9]+)\\s?(?P&lt;unit&gt;k?m|ft)',</span> <span class="pre">flags=regex.I</span> <span class="pre">|</span> <span class="pre">regex.V0)</span></em><a class="headerlink" href="#elieclustering.geo.Distance.pattern" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.GeoNames_feature_rank">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">GeoNames_feature_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.GeoNames_feature_rank" title="Link to this definition">¶</a></dt>
+<dd><p>Return the ranking of the GeoNames result’s feature.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.GeoNames_group_by_country">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">GeoNames_group_by_country</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.GeoNames_group_by_country" title="Link to this definition">¶</a></dt>
+<dd><p>Groups GeoNames results by country.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.GeoNames_hierarchy">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">GeoNames_hierarchy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'joel.tuberosa'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.GeoNames_hierarchy" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the upper hierarchy of the provided hit.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.GeoNames_iscountry">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">GeoNames_iscountry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.GeoNames_iscountry" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if the evaluated GeoNames result is a country.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.geo.LatLng">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">LatLng</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.LatLng" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store a geographic coordinate (latitude and longitude).</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.LatLng.lat">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lat</span></span><a class="headerlink" href="#elieclustering.geo.LatLng.lat" title="Link to this definition">¶</a></dt>
+<dd><p>Decimal latitude value.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.LatLng.latlng">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">latlng</span></span><a class="headerlink" href="#elieclustering.geo.LatLng.latlng" title="Link to this definition">¶</a></dt>
+<dd><p>Tuple with decimal latitude and longitude values.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.geo.LatLng.lng">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lng</span></span><a class="headerlink" href="#elieclustering.geo.LatLng.lng" title="Link to this definition">¶</a></dt>
+<dd><p>Decimal longitude value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.geo.LatLng.pattern">
+<span class="sig-name descname"><span class="pre">pattern</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">regex.Regex('\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">\\b(?&lt;lat&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;lat_deg&gt;\\d+(?:\\.\\d+)?°)\\s?</span>&#160; <span class="pre">#</span> <span class="pre">degree\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;lat_min&gt;\\d+(?:\\.\\d+)?\')\\s?</span>&#160; <span class="pre">#</span> <span class="pre">minute\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;lat_sec&gt;\\d+(?:\\.\\d+)?&quot;)?\\s?</span> <span class="pre">#</span> <span class="pre">second\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;lat_car&gt;[CNЮS][A-Z]*)</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">north/south\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">){e&lt;=1:[°\'&quot;,.*]}\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;sep&gt;[,.]\\s+|\\s+)</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">separator</span>&#160;&#160;&#160; <span class="pre">\n</span>&#160;&#160;&#160; <span class="pre">\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">\\b(?&lt;lng&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;lng_deg&gt;\\d+(?:\\.\\d+)?°)\\s?</span>&#160; <span class="pre">#</span> <span class="pre">degree\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;lng_min&gt;\\d+(?:\\.\\d+)?\')\\s?</span>&#160; <span class="pre">#</span> <span class="pre">minute\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;lng_sec&gt;\\d+(?:\\.\\d+)?&quot;)?\\s?</span> <span class="pre">#</span> <span class="pre">second\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(?P&lt;lng_car&gt;[ВЗEW][A-Z]*)</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">east/west\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">){e&lt;=1:[°\'&quot;,.*]}\\b\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">',</span> <span class="pre">flags=regex.B</span> <span class="pre">|</span> <span class="pre">regex.I</span> <span class="pre">|</span> <span class="pre">regex.X</span> <span class="pre">|</span> <span class="pre">regex.V0)</span></em><a class="headerlink" href="#elieclustering.geo.LatLng.pattern" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.degree_decomp">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">degree_decomp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.degree_decomp" title="Link to this definition">¶</a></dt>
+<dd><p>Decompose a degree value into degrees, minutes and seconds.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.find_distance">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">find_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_span</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.find_distance" title="Link to this definition">¶</a></dt>
+<dd><p>Find a distance in a text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – The text to be parsed.</p></li>
+<li><p><strong>get_span</strong> (<em>bool</em>) – If set True, the function returns the span of the match in
+the input text along with the match, in a tuple.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.find_lat_lng">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">find_lat_lng</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_span</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.find_lat_lng" title="Link to this definition">¶</a></dt>
+<dd><p>Find latitude and longitude str in a text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – The text to be parsed.</p></li>
+<li><p><strong>get_span</strong> (<em>bool</em>) – If set True, the function returns the span of the match in
+the input text along with the match, in a tuple.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.guess_cardinal">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">guess_cardinal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NSEW'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.guess_cardinal" title="Link to this definition">¶</a></dt>
+<dd><p>Guess the cardinal according to the first letter of ‘value’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>str</em>) – The putative cardinal notation.</p></li>
+<li><p><strong>restrict</strong> (<em>str</em>) – A character set restricting the search to given cardinals.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.parse_geo">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">parse_geo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'joel.tuberosa'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.parse_geo" title="Link to this definition">¶</a></dt>
+<dd><p>Attempt to find a location in the provided string by sending
+queries to GeoNames using a registered account.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – Text to be parsed.</p></li>
+<li><p><strong>username</strong> (<em>str</em>) – GeoNames user account name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.parse_geo_from_ngrams">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">parse_geo_from_ngrams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geocoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.parse_geo_from_ngrams" title="Link to this definition">¶</a></dt>
+<dd><p>Attempts to find a geolocation with the provided tokens, by using
+queries constituted of all possible n-grams formed with successive
+tokens.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geocoder</strong> (<em>pygeo.geocoders.GeoNames</em>) – Geocoder instance for GeoNames.</p></li>
+<li><p><strong>tokens</strong> (<em>list</em>) – List of tokens (str) that will be use to build the queries
+for GeoNames.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.geo.read_latlng">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.geo.</span></span><span class="sig-name descname"><span class="pre">read_latlng</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.geo.read_latlng" title="Link to this definition">¶</a></dt>
+<dd><p>Parse latitude and longitude coordinate notation in the input str.</p>
+</dd></dl>
+
+</section>
+<section id="module-elieclustering.labeldata">
+<span id="elieclustering-labeldata-module"></span><h2>elieclustering.labeldata module<a class="headerlink" href="#module-elieclustering.labeldata" title="Link to this heading">¶</a></h2>
+<p>This module contains classes and functions to handle and integrate
+information extracted from specimen labels. It allows to build
+searchable text databases using token extraction and text feature
+scoring. This module uses the packages regex, sklearn, nltk and leven.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEvent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">CollectingEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.CollectingEvent" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elieclustering.labeldata.Label" title="elieclustering.labeldata.Label"><code class="xref py py-class docutils literal notranslate"><span class="pre">Label</span></code></a></p>
+<p>Store collecting event data, which include a unique identifier, a
+location, a date, a collecting entity and representative label
+transcript.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEvent.collector">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collector</span></span><a class="headerlink" href="#elieclustering.labeldata.CollectingEvent.collector" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEvent.date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">date</span></span><a class="headerlink" href="#elieclustering.labeldata.CollectingEvent.date" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEvent.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('ID',</span> <span class="pre">'location',</span> <span class="pre">'date',</span> <span class="pre">'collector',</span> <span class="pre">'text')</span></em><a class="headerlink" href="#elieclustering.labeldata.CollectingEvent.keys" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEvent.location">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">location</span></span><a class="headerlink" href="#elieclustering.labeldata.CollectingEvent.location" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEventDB">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">CollectingEventDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.CollectingEventDB" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elieclustering.labeldata.DB" title="elieclustering.labeldata.DB"><code class="xref py py-class docutils literal notranslate"><span class="pre">DB</span></code></a></p>
+<p>Store collecting events and allow text-based search.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEventDB.dump_date_index">
+<span class="sig-name descname"><span class="pre">dump_date_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.CollectingEventDB.dump_date_index" title="Link to this definition">¶</a></dt>
+<dd><p>Store the date index in a JSON formatted file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEventDB.has_date_index">
+<span class="sig-name descname"><span class="pre">has_date_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.CollectingEventDB.has_date_index" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if the class method make_date_index has been
+called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEventDB.load_date_index">
+<span class="sig-name descname"><span class="pre">load_date_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.CollectingEventDB.load_date_index" title="Link to this definition">¶</a></dt>
+<dd><p>Load the date index from a JSON formatted file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEventDB.make_date_index">
+<span class="sig-name descname"><span class="pre">make_date_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">allow_tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.CollectingEventDB.make_date_index" title="Link to this definition">¶</a></dt>
+<dd><p>Intepret the date fields of the collecting events to make them
+searchable with types from the library datetime and the
+elieclustering.date.DateRange type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**allow_tags</strong> – Keyword arguments correspondig to valid DatePatternTag
+can be used here to limit date parsing to specific
+format or precision level.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.CollectingEventDB.search_by_date">
+<span class="sig-name descname"><span class="pre">search_by_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_same_century</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">allow_tags</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.CollectingEventDB.search_by_date" title="Link to this definition">¶</a></dt>
+<dd><p>Find collecting events that overlap with the given date or
+daterange.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">DB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store a searchable collection of elements of the same type.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.dump_db">
+<span class="sig-name descname"><span class="pre">dump_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.dump_db" title="Link to this definition">¶</a></dt>
+<dd><p>Save the database in JSON format.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.dump_index">
+<span class="sig-name descname"><span class="pre">dump_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.dump_index" title="Link to this definition">¶</a></dt>
+<dd><p>Save the index in a JSON formatted file.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.element_type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_type</span></span><a class="headerlink" href="#elieclustering.labeldata.DB.element_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.get" title="Link to this definition">¶</a></dt>
+<dd><p>Get an object of the database by providing with its ID.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.get_corpus">
+<span class="sig-name descname"><span class="pre">get_corpus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.get_corpus" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a generator function that yields text values of the
+database objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keys</strong> (<em>str</em><em>|</em><em>list</em>) – One or a list of attribute names referring to the text
+values that have to be retrieved from each object of
+the database. Default: None.</p></li>
+<li><p><strong>masks</strong> (<a class="reference internal" href="#elieclustering.labeldata.Mask" title="elieclustering.labeldata.Mask"><em>Mask</em></a>) – One or a list of masks that can be used on retrieved
+values to remove specific parts of the text. Default:
+None.</p></li>
+<li><p><strong>join</strong> (<em>str</em>) – If multiple keys were provided, concatenate the
+corresponding text values with this character string.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.get_item_tokens">
+<span class="sig-name descname"><span class="pre">get_item_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.get_item_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>Uses the parameters of the index to generate tokens for a given
+item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ID</strong> (<em>str</em>) – Database item identifier</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.get_token_matches">
+<span class="sig-name descname"><span class="pre">get_token_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mismatch_rule=&lt;function</span> <span class="pre">mismatch_rule&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering=&lt;function</span> <span class="pre">DB.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.get_token_matches" title="Link to this definition">¶</a></dt>
+<dd><p>Find elements with matching tokens, return a list of IDs with
+the associated token’s TF-IDF score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>str</em>) – The token to be searched.</p></li>
+<li><p><strong>mismatch_rule</strong> (<em>function</em><em>|</em><em>None</em>) – If defined as a function, this function will take a
+single argument, the token, and return a fuzzy regular
+expression. If defined as None, it will look for exact
+matches.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.is_indexed">
+<span class="sig-name descname"><span class="pre">is_indexed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.is_indexed" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if the class method make_index was called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.load_index">
+<span class="sig-name descname"><span class="pre">load_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.load_index" title="Link to this definition">¶</a></dt>
+<dd><p>Load an index from a JSON file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.make_index">
+<span class="sig-name descname"><span class="pre">make_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.make_index" title="Link to this definition">¶</a></dt>
+<dd><p>Make a database search index out of the tokens collected from
+all elements of the collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method</strong> (<em>int</em>) – <p>Select to the method with which to build the index.
+Available methods:
+- 1: Associate tokens with database elements
+- 2: Associate tokens with database elements, and
+a normalized TF-IDF score.</p>
+<p>Default: 1</p>
+</p></li>
+<li><p><strong>min_len</strong> (<em>int</em>) – Discards tokens with less than the provided character
+number.</p></li>
+<li><p><strong>keys</strong> (<em>list</em>) – Only fetch tokens from the provided key list. By
+default, build a database from the value stored in
+the “text” field.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mismatch_rule=&lt;function</span> <span class="pre">mismatch_rule&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering=&lt;function</span> <span class="pre">DB.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring='w'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.search" title="Link to this definition">¶</a></dt>
+<dd><p>Search elements of the database with the query text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<em>str</em>) – A text that will be tokenized and search over the
+database index.</p></li>
+<li><p><strong>mismatch_rule</strong> (<em>function</em>) – A function that takes the query value as unique
+argument and returns the regular expression part
+parametring a fuzzy match.</p></li>
+<li><p><strong>filtering</strong> (<em>function</em>) – A function that evaluates every matched element and
+returns True or False whether these elements have to be
+kept in the final result of the search.</p></li>
+<li><p><strong>scoring</strong> (<em>str</em>) – <dl>
+<dt>Set up the scoring method.</dt><dd><p>”w” The score is calculated as the product of the
+rates of matching token in the query and in the
+subject, then weighted accounting for mismatches
+and TF-IDF scores (default).</p>
+<p>”l” The score is calculated as the normalized
+Levenshtein similarity between the query and the
+target. This Levenshtein similarity is calculated
+on a simplified version of the text, removing
+accents, case and treating consecutive white spaces
+as single space characters.</p>
+<p>”w+l” The score is calculated as the product of the
+two previous methods’ results.</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.DB.subset">
+<span class="sig-name descname"><span class="pre">subset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filtering</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.DB.subset" title="Link to this definition">¶</a></dt>
+<dd><p>Return a subsetted database. Each element of the current
+database is passed as an argument to the filtering function and
+kept only when the function returns True. Existing indexes are
+removed in the process.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Label">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">Label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.Label" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store raw label data along with an identifier.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Label.ID">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ID</span></span><a class="headerlink" href="#elieclustering.labeldata.Label.ID" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Label.export">
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.Label.export" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dict object with the attribute data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Label.get_tuple">
+<span class="sig-name descname"><span class="pre">get_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.Label.get_tuple" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a tuple with the attributes values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>list</em>) – The list of attributes to be put in the tuple.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Label.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('ID',</span> <span class="pre">'text')</span></em><a class="headerlink" href="#elieclustering.labeldata.Label.keys" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Label.text">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">text</span></span><a class="headerlink" href="#elieclustering.labeldata.Label.text" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.labeldata.LabelDB">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">LabelDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.LabelDB" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elieclustering.labeldata.DB" title="elieclustering.labeldata.DB"><code class="xref py py-class docutils literal notranslate"><span class="pre">DB</span></code></a></p>
+<p>Store label data and allow text search.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Mask">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">Mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.Mask" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store a serie of regular expressions attached to attribute names.
+Mask objects are used to remove matching character strings in the
+corresponding attributes of a given object (i.e. Label or
+CollectingEvent), prior to build a database.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Mask.get_masked_str">
+<span class="sig-name descname"><span class="pre">get_masked_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.Mask.get_masked_str" title="Link to this definition">¶</a></dt>
+<dd><p>Get the text corresponding to the provided attribute in the
+provided target object. Remove the characters matching the
+corresponding regular expression and returns the cleaned text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<a class="reference internal" href="#elieclustering.labeldata.Label" title="elieclustering.labeldata.Label"><em>Label</em></a>) – A Label object or alike.</p></li>
+<li><p><strong>attr</strong> (<em>str</em>) – The name of an attribute of the provided target.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.labeldata.Mask.mask">
+<span class="sig-name descname"><span class="pre">mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.Mask.mask" title="Link to this definition">¶</a></dt>
+<dd><p>Mask the provided text using the regular expression
+corresponding to the provided key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – The key referring to one recorded regular expression.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – Any text to be masked.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.labeldata.data_from_googlevision">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">data_from_googlevision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.data_from_googlevision" title="Link to this definition">¶</a></dt>
+<dd><p>Reads transcript from Google Vision JSON output and returns a list
+of dict object with a unique identifier and the associated
+transcript.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>file</em>) – A file object open in read mode and pointing towards a
+Google Vision JSON output.</p></li>
+<li><p><strong>identifier</strong> (<em>function</em>) – A function that takes in argument the index of the
+transcript in the JSON input and returns a str that will be
+used as a unique identifier.</p></li>
+<li><p><strong>start</strong> (<em>int</em>) – Starting index for the identifier function. Default: 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.labeldata.load_collecting_events">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">load_collecting_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.load_collecting_events" title="Link to this definition">¶</a></dt>
+<dd><p>Build a collecting event database from data stored in a JSON file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.labeldata.load_labels">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">load_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.load_labels" title="Link to this definition">¶</a></dt>
+<dd><p>Build a label database from data stored in a JSON file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.labeldata.parse_collecting_events">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">parse_collecting_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.parse_collecting_events" title="Link to this definition">¶</a></dt>
+<dd><p>Stream labels from the input file object that should contains a
+JSON label database.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.labeldata.parse_json_db">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">parse_json_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.parse_json_db" title="Link to this definition">¶</a></dt>
+<dd><p>Stream dictionnary objects from the input file object that should
+contains a JSON label or collecting event database.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.labeldata.parse_labels">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">parse_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.parse_labels" title="Link to this definition">¶</a></dt>
+<dd><p>Stream labels from the input file object that should contains a
+JSON label database.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.labeldata.read_googlevision_output">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.labeldata.</span></span><span class="sig-name descname"><span class="pre">read_googlevision_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.labeldata.read_googlevision_output" title="Link to this definition">¶</a></dt>
+<dd><p>Read a Google Vision JSON output and return the full text.</p>
+</dd></dl>
+
+</section>
+<section id="module-elieclustering.name">
+<span id="elieclustering-name-module"></span><h2>elieclustering.name module<a class="headerlink" href="#module-elieclustering.name" title="Link to this heading">¶</a></h2>
+<p>This module contains classes and functions designed to store people
+names or entity information as well as matching abbreviated text with
+full text. It uses the packages nltk and regex.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="elieclustering.name.Collector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">Collector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firstname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.Collector" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store the name of a collector or an entity.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.ID">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ID</span></span><a class="headerlink" href="#elieclustering.name.Collector.ID" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.all_formats">
+<span class="sig-name descname"><span class="pre">all_formats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lowercase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.Collector.all_formats" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of the names in all possible formats along with
+the corresponding format expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lowercase</strong> (<em>bool</em>) – Convert the values in lowercases. Default = False.</p></li>
+<li><p><strong>simplified_str</strong> (<em>bool</em>) – Simplifies the output character string (remove accents,
+convert to lowercase and replace consecutive white
+spaces by single space characters). Default = False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.export">
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.Collector.export" title="Link to this definition">¶</a></dt>
+<dd><p>Export object data to a dictionnary object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.firstname">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">firstname</span></span><a class="headerlink" href="#elieclustering.name.Collector.firstname" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.formats">
+<span class="sig-name descname"><span class="pre">formats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowercase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.Collector.formats" title="Link to this definition">¶</a></dt>
+<dd><p>Write the name in the desired format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>format</strong> (<em>str</em>) – <p>Fields to be replaced by corresponding values in
+specific formats.</p>
+<p>Format specification:
+{f}     first letter(s) of the first name(s)
+{q}     first letter(s) of the first name(s), with dots
+{F}     full first name
+{N}     full last name</p>
+</p></li>
+<li><p><strong>lowercase</strong> (<em>bool</em>) – Convert the values in lowercases. Default = False.</p></li>
+<li><p><strong>simplified_str</strong> (<em>bool</em>) – Simplifies the output character string (remove accents,
+convert to lowercase and replace consecutive white
+spaces by single space characters). Default = False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#elieclustering.name.Collector.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.simple_firstname">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">simple_firstname</span></span><a class="headerlink" href="#elieclustering.name.Collector.simple_firstname" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.simple_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">simple_name</span></span><a class="headerlink" href="#elieclustering.name.Collector.simple_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.text">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">text</span></span><a class="headerlink" href="#elieclustering.name.Collector.text" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elieclustering.name.Collector.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.Collector.to_json" title="Link to this definition">¶</a></dt>
+<dd><p>Dump object data in JSON format</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.abbreviate_name">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">abbreviate_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.abbreviate_name" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the first letter of each element of the input name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>dots</strong> (<em>bool</em>) – If set True, adds a dot after each abbreviation letter.
+Default = False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.abbreviation_search">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">abbreviation_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_span</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.abbreviation_search" title="Link to this definition">¶</a></dt>
+<dd><p>Search abbreviation in the target string that could correspond to
+the query text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fullname</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>get_span</strong> (<em>bool</em>) – Returns the span of the match in the fullname text.
+Default = False.</p></li>
+<li><p><strong>ignore_case</strong> (<em>bool</em>) – Sets the search method to ignore case. Default = False.</p></li>
+<li><p><strong>simplify_str</strong> (<em>bool</em>) – Discard case and accents from the queries and the subject.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.default_search_method_selector">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">default_search_method_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.default_search_method_selector" title="Link to this definition">¶</a></dt>
+<dd><p>Assign the default search method to a collector object according to
+the metadata entry “entity_type”. This instructs to use pattern
+search if the entity is a person and abbreviation search otherwise.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.find_collectors">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">find_collectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_rule=&lt;function</span> <span class="pre">default_search_method_selector&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.find_collectors" title="Link to this definition">¶</a></dt>
+<dd><p>Search collector names in the input string and return the highest scoring
+and non-overlapping matches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>collectors</strong> (<em>list</em>) – A list of Collector objects.</p></li>
+<li><p><strong>search_rule</strong> (<em>function</em>) – A function that takes a collector object as argument and
+return the search method to use.
+Default = default_search_method_selector (uses pattern
+search for people and abbreviation search for any other
+kinds of entity).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.fullname_match">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">fullname_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">abbreviation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.fullname_match" title="Link to this definition">¶</a></dt>
+<dd><p>Return True if the provided string is an abbreviation of the
+target, namely, having matching first letters with optional dots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>abbreviation</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>ignore_case</strong> (<em>bool</em>) – Sets the search method to ignore case. Default = False.</p></li>
+<li><p><strong>simplify_str</strong> (<em>bool</em>) – Discard case and accents from the queries and the subject.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.fullname_search">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">fullname_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">abbreviation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_span</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.fullname_search" title="Link to this definition">¶</a></dt>
+<dd><p>Tokenize the abbreviation and the target, then try to match a
+similar token sequence with the same starts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>abbreviation</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>get_span</strong> (<em>bool</em>) – Returns the span of the match in the abbreviation text.
+Default = False.</p></li>
+<li><p><strong>ignore_case</strong> (<em>bool</em>) – Sets the search method to ignore case. Default = False.</p></li>
+<li><p><strong>simplify_str</strong> (<em>bool</em>) – Discard case and accents from the queries and the subject.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.load_collectors">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">load_collectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.load_collectors" title="Link to this definition">¶</a></dt>
+<dd><p>Import a list of collector from a collector database in JSON format.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.read_metadata">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">read_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.read_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Interpret a metada string, returns a dictionnary object. Metadata
+string are formatted as such:</p>
+<p>key1=”value”[; key2=”value”…]</p>
+<ul class="simple">
+<li><p>key1[, key2…] must be compatible with python variable syntax.</p></li>
+<li><p>“value” will be interpreted as str, by stripping the double
+quotes.</p></li>
+<li><p>key-value pairs must separated by “;”.</p></li>
+<li><p>keys and values must be linked by an “=”.</p></li>
+<li><p>keys must be unique.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.search_collectors">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">search_collectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_rule=&lt;function</span> <span class="pre">default_search_method_selector&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.search_collectors" title="Link to this definition">¶</a></dt>
+<dd><p>Searches individual occurences of collector’s name in the input
+text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>collectors</strong> (<em>list</em>) – A list of Collector objects.</p></li>
+<li><p><strong>search_rule</strong> (<em>function</em>) – A function that takes a collector object as argument and
+return the search method to use.
+Default = default_search_method_selector (uses pattern
+search for people and abbreviation search for any other
+kinds of entity).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.search_collectors_abbr">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">search_collectors_abbr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.search_collectors_abbr" title="Link to this definition">¶</a></dt>
+<dd><p>Search the input text for abbreviations that match collector names
+from the provided list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>Any text.</em>)</p></li>
+<li><p><strong>collectors</strong> (<em>list</em>) – A list of Collector objects.</p></li>
+<li><p><strong>ignore_case</strong> (<em>bool</em>) – Sets the search method to ignore case. Default = False.</p></li>
+<li><p><strong>simplify_str</strong> (<em>bool</em>) – Discard case and accents from the queries and the subject.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.name.search_collectors_regex">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.name.</span></span><span class="sig-name descname"><span class="pre">search_collectors_regex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mismatch_rule=&lt;function</span> <span class="pre">mismatch_rule&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_str=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.name.search_collectors_regex" title="Link to this definition">¶</a></dt>
+<dd><p>Parse the input string s to identify any name from the provided
+list of Collector object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>collectors</strong> (<em>list</em>) – A list of Collector objects.</p></li>
+<li><p><strong>mismatch_rule</strong> (<em>function</em>) – A function that takes the query value as unique argument
+and returns the regular expression part parametring a fuzzy
+match. Default = elieclustering.utils.mismatch_rule (see module doc).</p></li>
+<li><p><strong>ignore_case</strong> (<em>bool</em>) – Sets the search method to ignore case. Default = False.</p></li>
+<li><p><strong>simplify_str</strong> (<em>bool</em>) – Discard case and accents from the queries and the subject.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-elieclustering.utils">
+<span id="elieclustering-utils-module"></span><h2>elieclustering.utils module<a class="headerlink" href="#module-elieclustering.utils" title="Link to this heading">¶</a></h2>
+<p>This module gathers generic functions for text data handling,
+manipulation and formatting.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.clean_str">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">clean_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.clean_str" title="Link to this definition">¶</a></dt>
+<dd><p>Stip quotes, convert n to newline characters and t to
+tabulations.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.clear_text">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">clear_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.clear_text" title="Link to this definition">¶</a></dt>
+<dd><p>Replace interval of text by a given character.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ranges</strong> (<em>list</em>) – Either a single range, defined by a list of two integer
+values (indexes) defining the text interval to be replaced.</p></li>
+<li><p><strong>sub</strong> (<em>str</em>) – The replacement character.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.find_levenKMedoids">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">find_levenKMedoids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cluster</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elbow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12345</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.find_levenKMedoids" title="Link to this definition">¶</a></dt>
+<dd><p>Optimize clustering of strings given their similarity (expressed as
+Levenshtein distance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lines</strong> (<em>list</em>) – A list of str that will be compared by pair.</p></li>
+<li><p><strong>max_cluster</strong> (<em>int</em>) – Attempt clustering up to this number of clusters.
+Default=8, minimum=2.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – <dl class="simple">
+<dt>Specify the selection method.</dt><dd><dl class="simple">
+<dt>elbow       Select the cluster number corresponding to</dt><dd><p>the elbow of the SSE curve.</p>
+</dd>
+<dt>silhouette  Select the cluster number corresponding to</dt><dd><p>the maximum silhouette coefficient.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>simplify</strong> (<em>bool</em>) – If set True, convert any consecutive white spaces into
+single space characters, convert to lowercase and strip
+accents.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – A random seed</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.find_pattern">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">find_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.find_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Search a pattern in the provided text. In case of a match, returns
+the matching string and its coordinates in the input text.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.get_id_formatter">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">get_id_formatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.get_id_formatter" title="Link to this definition">¶</a></dt>
+<dd><p>Return a function that generate and identifier with a given format,
+from a provided number.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.get_levenKMedoids">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">get_levenKMedoids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12345</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.get_levenKMedoids" title="Link to this definition">¶</a></dt>
+<dd><p>Attempt to cluster strings given their similarity (expressed as
+Levenshtein distance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>list</em><em>|</em><em>ndarray</em>) – Can be either a list of str that will be compared by pair
+or a pairwise distance matrix embedded in an 2D array.</p></li>
+<li><p><strong>n_clusters</strong> (<em>int</em>) – The number of clusters to define. Default=8.</p></li>
+<li><p><strong>simplify</strong> (<em>bool</em>) – If set True, convert any consecutive white spaces into
+single space characters, convert to lowercase and strip
+accents.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – A random seed</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.get_median_dists">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">get_median_dists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.get_median_dists" title="Link to this definition">¶</a></dt>
+<dd><p>Extract the median values for each row of the input matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dist</strong> (<em>ndarray</em>) – A pairwise distance matrix embedded in a 2D array. The
+diagonal of this matrix is supposed to go from top left to
+bottom right and is ignored during median extraction.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.get_ngrams">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">get_ngrams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenize_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'words'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.get_ngrams" title="Link to this definition">¶</a></dt>
+<dd><p>Returns all possible sequences of a given number of contiguous
+tokens (i.e. n-grams) from the input text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – Number of contiguous tokens in the n-gram.</p></li>
+<li><p><strong>tokenize_method</strong> (<em>str</em>) – Tokenization method. One of
+- “words”: Split with white space characters and special
+characters, ignore numbers.
+- “standard”:  Use the word_tokenize method from the NLTK
+package.
+- “all”: Split with white spaces, keep every character
+string.</p></li>
+<li><p><strong>ordered</strong> (<em>bool</em>) – If True, returns all sequences found in the text.
+Otherwise, returns the unique n-grams, regardless of the
+token order.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.get_norm_leven_dist">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">get_norm_leven_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.get_norm_leven_dist" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the Levenshtein distance between two character strings,
+then normalize this score by the length of the longest string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>str</em>) – A character string.</p></li>
+<li><p><strong>b</strong> (<em>str</em>) – Another character string.</p></li>
+<li><p><strong>simplify</strong> (<em>bool</em>) – If set True, convert any consecutive white spaces into
+single space characters, convert to lowercase and strip
+accents.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.get_pairwise_leven_dist">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">get_pairwise_leven_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.get_pairwise_leven_dist" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate Levenshtein distances between all possible pairs of lines
+provided in input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lines</strong> (<em>list</em>) – A list of str that will be compared by pair.</p></li>
+<li><p><strong>simplify</strong> (<em>bool</em>) – If set True, convert any consecutive white spaces into
+single space characters, convert to lowercase and strip
+accents.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.get_text_segments">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">get_text_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.get_text_segments" title="Link to this definition">¶</a></dt>
+<dd><p>Split the input text in several text segments provided with the
+split indexes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>segments</strong> (<em>list</em>) – A list of split indexes, which should be integer values.</p></li>
+<li><p><strong>get_intervals</strong> (<em>bool</em>) – Returns the ranges corresponding to each segment along with
+their corresponding text segments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.get_word_tokenize_pattern">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">get_word_tokenize_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.get_word_tokenize_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a regular expression pattern matching alphanumeric tokens
+of a minimum length.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.is_float">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">is_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.is_float" title="Link to this definition">¶</a></dt>
+<dd><p>Check if value can be converted into a float.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.is_range">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">is_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.is_range" title="Link to this definition">¶</a></dt>
+<dd><p>Return True if the provided value is either an single integer or an
+array containing two integers.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.mask_special_char">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">mask_special_char</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.mask_special_char" title="Link to this definition">¶</a></dt>
+<dd><p>Masks and indexes the special character found in the input text.
+Returns a the masked text along with a list of the substituted
+characters, in the order they were found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.mismatch_rule">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">mismatch_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.mismatch_rule" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the regular expression part parametring a fuzzy match
+according to length of the input string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.ngram_dist">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">ngram_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.ngram_dist" title="Link to this definition">¶</a></dt>
+<dd><p>Compute a Levenshtein distance between two n-grams.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.ngram_search">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">ngram_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngrams</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mismatch_rule=&lt;function</span> <span class="pre">mismatch_rule&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.ngram_search" title="Link to this definition">¶</a></dt>
+<dd><p>Search matching n-gram in a provided token list. Mismatch is
+permited and a scoring scheme allows to select the best match.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>list</em>) – A list of tokens.</p></li>
+<li><p><strong>ngrams</strong> (<em>list</em>) – A list of n-grams.</p></li>
+<li><p><strong>mismatch_rule</strong> (<em>function</em>) – If defined as a function, this function will take a
+single argument, the token, and return a fuzzy regular
+expression. If defined as None, it will look for exact
+matches.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.overlap">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.overlap" title="Link to this definition">¶</a></dt>
+<dd><p>Return True if interval a overlap with interval b.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>list</em><em>|</em><em>tuple</em><em> of </em><em>int</em>) – Intervals, defined by int bounds.</p></li>
+<li><p><strong>b</strong> (<em>list</em><em>|</em><em>tuple</em><em> of </em><em>int</em>) – Intervals, defined by int bounds.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.range_reader">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">range_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.range_reader" title="Link to this definition">¶</a></dt>
+<dd><p>Extract a list of 0-based index from a 1-based range expression.
+Keep the provided order.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.roman_to_int">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">roman_to_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.roman_to_int" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a Roman number into an integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>str</em>) – A roman number.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.simplify_str">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">simplify_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.simplify_str" title="Link to this definition">¶</a></dt>
+<dd><p>Strip the input string, convert any remaining consecutive white
+spaces into single space characters, convert to lowercase and
+strip accents.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.smoothen_white_spaces">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">smoothen_white_spaces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">regex.Regex('\\s+',</span> <span class="pre">flags=regex.M</span> <span class="pre">|</span> <span class="pre">regex.V0)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.smoothen_white_spaces" title="Link to this definition">¶</a></dt>
+<dd><p>Strip white spaces from the input string and convert other
+consecutive white spaces into single space characters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – Any text.</p></li>
+<li><p><strong>pattern</strong> (<em>regex.Pattern</em>) – A regular expression pattern that matches white spaces.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.strip_accents">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">strip_accents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.strip_accents" title="Link to this definition">¶</a></dt>
+<dd><p>Strip accent from a unicode character string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.table_to_dicts">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">table_to_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\t'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">',</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.table_to_dicts" title="Link to this definition">¶</a></dt>
+<dd><p>Convert data from a tabular format to a list of dict. Data is only
+interpreted as character strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skip_first</strong> (<em>bool</em>) – If set True, skip the first line of the input file.
+Default = False</p></li>
+<li><p><strong>sep</strong> (<em>str</em>) – Character string that is used as field separators in the
+input table. Default = “    “.</p></li>
+<li><p><strong>data_sep</strong> (<em>str</em>) – Character string that is used as data separators in the
+ouput values. Default = “, “.</p></li>
+<li><p><strong>identifier</strong> (<em>None</em><em>|</em><em>function</em>) – Use the provided function to generate an identifier from a
+positive integer representing the row number in the input
+table. It is added to the data with the key “ID”.</p></li>
+<li><p><strong>clean</strong> (<em>list</em>) – Quotes will be stripped from the string at the provided
+column indexes and newline character notation “n” will be
+converted to actual newline characters.</p></li>
+<li><p><strong>*</strong> (<em>int</em><em>|</em><em>list</em>) – Any keyword argument is interpreted as a field name. If the
+parameter value is an int, data from the corresponding
+column will be retrieved as the field value. If the
+parameter is a list of int, data from the corresponding
+columns will be retrieved and concatenated with the value
+of data_sep as separators.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.text_alignment">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">text_alignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.text_alignment" title="Link to this definition">¶</a></dt>
+<dd><p>Align multiple text lines with MAFFT aligner.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.text_alignment_consensus">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">text_alignment_consensus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_gaps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.text_alignment_consensus" title="Link to this definition">¶</a></dt>
+<dd><p>Simplifies the input strings, align with MAFFT, then returns a
+single string corresponding to the most frequent character finds
+at each position of the alignment. Gaps created by the alignement
+are removed when they are consensus at a given position.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.text_pick_consensus">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">text_pick_consensus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.text_pick_consensus" title="Link to this definition">¶</a></dt>
+<dd><p>Simplifies the input strings, calculate the Levenshtein pairwise
+distance and pick the string that have the lowest median distance
+with other strings.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.tokenize">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">tokenize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'words'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.tokenize" title="Link to this definition">¶</a></dt>
+<dd><p>Extract lowercase tokens.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>str</em>) – input string</p></li>
+<li><p><strong>min_len</strong> (<em>int</em>) – Discards tokens with less than the provided character
+number.</p></li>
+<li><p><strong>tokenize_method</strong> (<em>str</em>) – Tokenization method. One of
+- “words”: Split with white space characters and special
+characters, ignore numbers.
+- “standard”:  Use the word_tokenize method from the NLTK
+package.
+- “all”: Split with white spaces, keep every character
+string.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.unmask_special_char">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">unmask_special_char</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masked_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masked_chars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.unmask_special_char" title="Link to this definition">¶</a></dt>
+<dd><p>Recovers the original text from the return values of the function
+mask_special_char.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elieclustering.utils.write_ranges">
+<span class="sig-prename descclassname"><span class="pre">elieclustering.utils.</span></span><span class="sig-name descname"><span class="pre">write_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranges</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elieclustering.utils.write_ranges" title="Link to this definition">¶</a></dt>
+<dd><p>Convert ranges (start and stop indexes in a list) in a text
+representing the interval.</p>
+</dd></dl>
+
+</section>
+<section id="module-elieclustering">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-elieclustering" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">elieclustering package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-elieclustering.date">elieclustering.date module</a><ul>
+<li><a class="reference internal" href="#elieclustering.date.Date"><code class="docutils literal notranslate"><span class="pre">Date</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.date.Date.century"><code class="docutils literal notranslate"><span class="pre">Date.century</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.century_known"><code class="docutils literal notranslate"><span class="pre">Date.century_known</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.day"><code class="docutils literal notranslate"><span class="pre">Date.day</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.ddp"><code class="docutils literal notranslate"><span class="pre">Date.ddp</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.get_isoformat"><code class="docutils literal notranslate"><span class="pre">Date.get_isoformat()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.get_json_data"><code class="docutils literal notranslate"><span class="pre">Date.get_json_data()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.is_empty"><code class="docutils literal notranslate"><span class="pre">Date.is_empty()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.is_in"><code class="docutils literal notranslate"><span class="pre">Date.is_in()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.month"><code class="docutils literal notranslate"><span class="pre">Date.month</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.overlap_with"><code class="docutils literal notranslate"><span class="pre">Date.overlap_with()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.precision"><code class="docutils literal notranslate"><span class="pre">Date.precision</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.precision_level"><code class="docutils literal notranslate"><span class="pre">Date.precision_level</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.set_century"><code class="docutils literal notranslate"><span class="pre">Date.set_century()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.year"><code class="docutils literal notranslate"><span class="pre">Date.year</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.Date.year_pattern"><code class="docutils literal notranslate"><span class="pre">Date.year_pattern</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.date.DateMatch"><code class="docutils literal notranslate"><span class="pre">DateMatch</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.date.DateMatch.get_dates"><code class="docutils literal notranslate"><span class="pre">DateMatch.get_dates()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateMatch.get_scores"><code class="docutils literal notranslate"><span class="pre">DateMatch.get_scores()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateMatch.get_value"><code class="docutils literal notranslate"><span class="pre">DateMatch.get_value()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateMatch.update"><code class="docutils literal notranslate"><span class="pre">DateMatch.update()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTag"><code class="docutils literal notranslate"><span class="pre">DatePatternTag</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTag.match"><code class="docutils literal notranslate"><span class="pre">DatePatternTag.match()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTag.name"><code class="docutils literal notranslate"><span class="pre">DatePatternTag.name</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTag.value"><code class="docutils literal notranslate"><span class="pre">DatePatternTag.value</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTags"><code class="docutils literal notranslate"><span class="pre">DatePatternTags</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTags.add"><code class="docutils literal notranslate"><span class="pre">DatePatternTags.add()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTags.contains"><code class="docutils literal notranslate"><span class="pre">DatePatternTags.contains()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTags.get"><code class="docutils literal notranslate"><span class="pre">DatePatternTags.get()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTags.get_value"><code class="docutils literal notranslate"><span class="pre">DatePatternTags.get_value()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatternTags.match"><code class="docutils literal notranslate"><span class="pre">DatePatternTags.match()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns"><code class="docutils literal notranslate"><span class="pre">DatePatterns</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns.day_patterns"><code class="docutils literal notranslate"><span class="pre">DatePatterns.day_patterns</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns.find_date"><code class="docutils literal notranslate"><span class="pre">DatePatterns.find_date()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns.get_patterns"><code class="docutils literal notranslate"><span class="pre">DatePatterns.get_patterns()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns.month_patterns"><code class="docutils literal notranslate"><span class="pre">DatePatterns.month_patterns</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns.possible_formats"><code class="docutils literal notranslate"><span class="pre">DatePatterns.possible_formats</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns.search"><code class="docutils literal notranslate"><span class="pre">DatePatterns.search()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns.separator_patterns"><code class="docutils literal notranslate"><span class="pre">DatePatterns.separator_patterns</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DatePatterns.year_patterns"><code class="docutils literal notranslate"><span class="pre">DatePatterns.year_patterns</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.date.DateRange"><code class="docutils literal notranslate"><span class="pre">DateRange</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.date.DateRange.century_known"><code class="docutils literal notranslate"><span class="pre">DateRange.century_known</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateRange.end"><code class="docutils literal notranslate"><span class="pre">DateRange.end</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateRange.get_isoformat"><code class="docutils literal notranslate"><span class="pre">DateRange.get_isoformat()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateRange.is_one_date"><code class="docutils literal notranslate"><span class="pre">DateRange.is_one_date()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateRange.overlap_with"><code class="docutils literal notranslate"><span class="pre">DateRange.overlap_with()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateRange.precision"><code class="docutils literal notranslate"><span class="pre">DateRange.precision</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateRange.precision_level"><code class="docutils literal notranslate"><span class="pre">DateRange.precision_level</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.DateRange.start"><code class="docutils literal notranslate"><span class="pre">DateRange.start</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.date.find_date"><code class="docutils literal notranslate"><span class="pre">find_date()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.date.tag_date_pattern"><code class="docutils literal notranslate"><span class="pre">tag_date_pattern()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-elieclustering.geo">elieclustering.geo module</a><ul>
+<li><a class="reference internal" href="#elieclustering.geo.Degree"><code class="docutils literal notranslate"><span class="pre">Degree</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.geo.Degree.degrees"><code class="docutils literal notranslate"><span class="pre">Degree.degrees</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.Degree.minutes"><code class="docutils literal notranslate"><span class="pre">Degree.minutes</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.Degree.seconds"><code class="docutils literal notranslate"><span class="pre">Degree.seconds</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.Degree.value"><code class="docutils literal notranslate"><span class="pre">Degree.value</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.geo.Distance"><code class="docutils literal notranslate"><span class="pre">Distance</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.geo.Distance.feet"><code class="docutils literal notranslate"><span class="pre">Distance.feet</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.Distance.meters"><code class="docutils literal notranslate"><span class="pre">Distance.meters</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.Distance.pattern"><code class="docutils literal notranslate"><span class="pre">Distance.pattern</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.geo.GeoNames_feature_rank"><code class="docutils literal notranslate"><span class="pre">GeoNames_feature_rank()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.GeoNames_group_by_country"><code class="docutils literal notranslate"><span class="pre">GeoNames_group_by_country()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.GeoNames_hierarchy"><code class="docutils literal notranslate"><span class="pre">GeoNames_hierarchy()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.GeoNames_iscountry"><code class="docutils literal notranslate"><span class="pre">GeoNames_iscountry()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.LatLng"><code class="docutils literal notranslate"><span class="pre">LatLng</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.geo.LatLng.lat"><code class="docutils literal notranslate"><span class="pre">LatLng.lat</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.LatLng.latlng"><code class="docutils literal notranslate"><span class="pre">LatLng.latlng</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.LatLng.lng"><code class="docutils literal notranslate"><span class="pre">LatLng.lng</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.LatLng.pattern"><code class="docutils literal notranslate"><span class="pre">LatLng.pattern</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.geo.degree_decomp"><code class="docutils literal notranslate"><span class="pre">degree_decomp()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.find_distance"><code class="docutils literal notranslate"><span class="pre">find_distance()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.find_lat_lng"><code class="docutils literal notranslate"><span class="pre">find_lat_lng()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.guess_cardinal"><code class="docutils literal notranslate"><span class="pre">guess_cardinal()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.parse_geo"><code class="docutils literal notranslate"><span class="pre">parse_geo()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.parse_geo_from_ngrams"><code class="docutils literal notranslate"><span class="pre">parse_geo_from_ngrams()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.geo.read_latlng"><code class="docutils literal notranslate"><span class="pre">read_latlng()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-elieclustering.labeldata">elieclustering.labeldata module</a><ul>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEvent"><code class="docutils literal notranslate"><span class="pre">CollectingEvent</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEvent.collector"><code class="docutils literal notranslate"><span class="pre">CollectingEvent.collector</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEvent.date"><code class="docutils literal notranslate"><span class="pre">CollectingEvent.date</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEvent.keys"><code class="docutils literal notranslate"><span class="pre">CollectingEvent.keys</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEvent.location"><code class="docutils literal notranslate"><span class="pre">CollectingEvent.location</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEventDB"><code class="docutils literal notranslate"><span class="pre">CollectingEventDB</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEventDB.dump_date_index"><code class="docutils literal notranslate"><span class="pre">CollectingEventDB.dump_date_index()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEventDB.has_date_index"><code class="docutils literal notranslate"><span class="pre">CollectingEventDB.has_date_index()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEventDB.load_date_index"><code class="docutils literal notranslate"><span class="pre">CollectingEventDB.load_date_index()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEventDB.make_date_index"><code class="docutils literal notranslate"><span class="pre">CollectingEventDB.make_date_index()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.CollectingEventDB.search_by_date"><code class="docutils literal notranslate"><span class="pre">CollectingEventDB.search_by_date()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB"><code class="docutils literal notranslate"><span class="pre">DB</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.dump_db"><code class="docutils literal notranslate"><span class="pre">DB.dump_db()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.dump_index"><code class="docutils literal notranslate"><span class="pre">DB.dump_index()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.element_type"><code class="docutils literal notranslate"><span class="pre">DB.element_type</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.get"><code class="docutils literal notranslate"><span class="pre">DB.get()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.get_corpus"><code class="docutils literal notranslate"><span class="pre">DB.get_corpus()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.get_item_tokens"><code class="docutils literal notranslate"><span class="pre">DB.get_item_tokens()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.get_token_matches"><code class="docutils literal notranslate"><span class="pre">DB.get_token_matches()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.is_indexed"><code class="docutils literal notranslate"><span class="pre">DB.is_indexed()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.load_index"><code class="docutils literal notranslate"><span class="pre">DB.load_index()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.make_index"><code class="docutils literal notranslate"><span class="pre">DB.make_index()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.search"><code class="docutils literal notranslate"><span class="pre">DB.search()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.DB.subset"><code class="docutils literal notranslate"><span class="pre">DB.subset()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.labeldata.Label"><code class="docutils literal notranslate"><span class="pre">Label</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.labeldata.Label.ID"><code class="docutils literal notranslate"><span class="pre">Label.ID</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.Label.export"><code class="docutils literal notranslate"><span class="pre">Label.export()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.Label.get_tuple"><code class="docutils literal notranslate"><span class="pre">Label.get_tuple()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.Label.keys"><code class="docutils literal notranslate"><span class="pre">Label.keys</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.Label.text"><code class="docutils literal notranslate"><span class="pre">Label.text</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.labeldata.LabelDB"><code class="docutils literal notranslate"><span class="pre">LabelDB</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.Mask"><code class="docutils literal notranslate"><span class="pre">Mask</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.labeldata.Mask.get_masked_str"><code class="docutils literal notranslate"><span class="pre">Mask.get_masked_str()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.Mask.mask"><code class="docutils literal notranslate"><span class="pre">Mask.mask()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.labeldata.data_from_googlevision"><code class="docutils literal notranslate"><span class="pre">data_from_googlevision()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.load_collecting_events"><code class="docutils literal notranslate"><span class="pre">load_collecting_events()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.load_labels"><code class="docutils literal notranslate"><span class="pre">load_labels()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.parse_collecting_events"><code class="docutils literal notranslate"><span class="pre">parse_collecting_events()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.parse_json_db"><code class="docutils literal notranslate"><span class="pre">parse_json_db()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.parse_labels"><code class="docutils literal notranslate"><span class="pre">parse_labels()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.labeldata.read_googlevision_output"><code class="docutils literal notranslate"><span class="pre">read_googlevision_output()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-elieclustering.name">elieclustering.name module</a><ul>
+<li><a class="reference internal" href="#elieclustering.name.Collector"><code class="docutils literal notranslate"><span class="pre">Collector</span></code></a><ul>
+<li><a class="reference internal" href="#elieclustering.name.Collector.ID"><code class="docutils literal notranslate"><span class="pre">Collector.ID</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.all_formats"><code class="docutils literal notranslate"><span class="pre">Collector.all_formats()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.export"><code class="docutils literal notranslate"><span class="pre">Collector.export()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.firstname"><code class="docutils literal notranslate"><span class="pre">Collector.firstname</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.formats"><code class="docutils literal notranslate"><span class="pre">Collector.formats()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.name"><code class="docutils literal notranslate"><span class="pre">Collector.name</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.simple_firstname"><code class="docutils literal notranslate"><span class="pre">Collector.simple_firstname</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.simple_name"><code class="docutils literal notranslate"><span class="pre">Collector.simple_name</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.text"><code class="docutils literal notranslate"><span class="pre">Collector.text</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.Collector.to_json"><code class="docutils literal notranslate"><span class="pre">Collector.to_json()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elieclustering.name.abbreviate_name"><code class="docutils literal notranslate"><span class="pre">abbreviate_name()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.abbreviation_search"><code class="docutils literal notranslate"><span class="pre">abbreviation_search()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.default_search_method_selector"><code class="docutils literal notranslate"><span class="pre">default_search_method_selector()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.find_collectors"><code class="docutils literal notranslate"><span class="pre">find_collectors()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.fullname_match"><code class="docutils literal notranslate"><span class="pre">fullname_match()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.fullname_search"><code class="docutils literal notranslate"><span class="pre">fullname_search()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.load_collectors"><code class="docutils literal notranslate"><span class="pre">load_collectors()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.read_metadata"><code class="docutils literal notranslate"><span class="pre">read_metadata()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.search_collectors"><code class="docutils literal notranslate"><span class="pre">search_collectors()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.search_collectors_abbr"><code class="docutils literal notranslate"><span class="pre">search_collectors_abbr()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.name.search_collectors_regex"><code class="docutils literal notranslate"><span class="pre">search_collectors_regex()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-elieclustering.utils">elieclustering.utils module</a><ul>
+<li><a class="reference internal" href="#elieclustering.utils.clean_str"><code class="docutils literal notranslate"><span class="pre">clean_str()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.clear_text"><code class="docutils literal notranslate"><span class="pre">clear_text()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.find_levenKMedoids"><code class="docutils literal notranslate"><span class="pre">find_levenKMedoids()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.find_pattern"><code class="docutils literal notranslate"><span class="pre">find_pattern()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.get_id_formatter"><code class="docutils literal notranslate"><span class="pre">get_id_formatter()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.get_levenKMedoids"><code class="docutils literal notranslate"><span class="pre">get_levenKMedoids()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.get_median_dists"><code class="docutils literal notranslate"><span class="pre">get_median_dists()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.get_ngrams"><code class="docutils literal notranslate"><span class="pre">get_ngrams()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.get_norm_leven_dist"><code class="docutils literal notranslate"><span class="pre">get_norm_leven_dist()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.get_pairwise_leven_dist"><code class="docutils literal notranslate"><span class="pre">get_pairwise_leven_dist()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.get_text_segments"><code class="docutils literal notranslate"><span class="pre">get_text_segments()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.get_word_tokenize_pattern"><code class="docutils literal notranslate"><span class="pre">get_word_tokenize_pattern()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.is_float"><code class="docutils literal notranslate"><span class="pre">is_float()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.is_range"><code class="docutils literal notranslate"><span class="pre">is_range()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.mask_special_char"><code class="docutils literal notranslate"><span class="pre">mask_special_char()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.mismatch_rule"><code class="docutils literal notranslate"><span class="pre">mismatch_rule()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.ngram_dist"><code class="docutils literal notranslate"><span class="pre">ngram_dist()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.ngram_search"><code class="docutils literal notranslate"><span class="pre">ngram_search()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.overlap"><code class="docutils literal notranslate"><span class="pre">overlap()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.range_reader"><code class="docutils literal notranslate"><span class="pre">range_reader()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.roman_to_int"><code class="docutils literal notranslate"><span class="pre">roman_to_int()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.simplify_str"><code class="docutils literal notranslate"><span class="pre">simplify_str()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.smoothen_white_spaces"><code class="docutils literal notranslate"><span class="pre">smoothen_white_spaces()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.strip_accents"><code class="docutils literal notranslate"><span class="pre">strip_accents()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.table_to_dicts"><code class="docutils literal notranslate"><span class="pre">table_to_dicts()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.text_alignment"><code class="docutils literal notranslate"><span class="pre">text_alignment()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.text_alignment_consensus"><code class="docutils literal notranslate"><span class="pre">text_alignment_consensus()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.text_pick_consensus"><code class="docutils literal notranslate"><span class="pre">text_pick_consensus()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.tokenize"><code class="docutils literal notranslate"><span class="pre">tokenize()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.unmask_special_char"><code class="docutils literal notranslate"><span class="pre">unmask_special_char()</span></code></a></li>
+<li><a class="reference internal" href="#elieclustering.utils.write_ranges"><code class="docutils literal notranslate"><span class="pre">write_ranges()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-elieclustering">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="modules.html"
+                          title="previous chapter">elieclustering</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/elieclustering.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="elieclustering"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">elieclustering 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >elieclustering</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">elieclustering package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2022, Joël Tuberosa, Théo Léger.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

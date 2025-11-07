@@ -282,14 +282,13 @@ def tokenize(value, min_len=1, method="words"):
             number.
         
         tokenize_method : str
-            Set the method for tokenization. Can take one of the 
-            following values:
-                "words"     Split with white space characters and special
-                            characters, ignore numbers.
-                "standard"  Use the word_tokenize method from the NLTK 
-                            package.
-                "all"       Split with white spaces, keep every character
-                            string.
+            Tokenization method. One of 
+            - "words": Split with white space characters and special
+            characters, ignore numbers.
+            - "standard":  Use the word_tokenize method from the NLTK 
+            package.
+            - "all": Split with white spaces, keep every character
+            string.
 
     '''
     
@@ -321,14 +320,13 @@ def get_ngrams(text, n, tokenize_method="words", ordered=True):
             Number of contiguous tokens in the n-gram.
         
         tokenize_method : str
-            Set the method for tokenization. Can take one of the 
-            following values:
-                "words"     Split with white space characters and special
-                            characters, ignore numbers.
-                "standard"  Use the word_tokenize method from the NLTK 
-                            package.
-                "all"       Split with white spaces, keep every character
-                            string.
+            Tokenization method. One of 
+            - "words": Split with white space characters and special
+            characters, ignore numbers.
+            - "standard":  Use the word_tokenize method from the NLTK 
+            package.
+            - "all": Split with white spaces, keep every character
+            string.
 
         ordered : bool
             If True, returns all sequences found in the text. 

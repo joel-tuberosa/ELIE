@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-mfnb/__pycache__/
+elieclustering/__pycache__/
 *.py[cod]
 *$py.class
 
