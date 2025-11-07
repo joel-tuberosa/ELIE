@@ -79,7 +79,7 @@ OPTIONS
     
     -s, --min-score=FLOAT
         Minimum similarity score for two label to be put in the same 
-        group.
+        group. Default = 0.8
     
     -v, --consensus=METHOD
         Instead of parsing each label, build a consensus from the label
